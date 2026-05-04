@@ -1,11 +1,15 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../lib/db';
+import { db, initDB } from '../../../lib/db';
 import { requireAdminAuth } from '../../../lib/admin-auth';
+import { initializeStorage } from '../../../lib/storage';
 
 // Import the bookings data
 import bookingsData from '../../../../bookings-data.json';
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  // Initialize DB with KV binding
+  initDB(locals.runtime);
+  
   // Check authentication
   const { authorized } = requireAdminAuth(request, { locals } as any);
   if (!authorized) {
@@ -16,8 +20,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   try {
+    // Get storage instance
+    const storage = initializeStorage(locals.runtime);
+    
     // Initialize storage with bookings data
-    await db.storage.initialize({
+    await storage.initialize({
       bookings: bookingsData.bookings || [],
       bookingRules: bookingsData.bookingRules || (await db.bookingRules.get()),
       rates: bookingsData.rates || (await db.rates.get())
@@ -45,5 +52,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
 
 

@@ -7,42 +7,71 @@ export default function AdminLoginWrapper() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
-  // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('admin_session');
+      console.log('[AdminLoginWrapper] Checking authentication...');
+      
+      // IMPORTANT: Clear any old tokens from previous auth system
+      const oldToken = localStorage.getItem('admin_session');
+      if (oldToken) {
+        console.log('[AdminLoginWrapper] Found existing token, verifying...');
         
-        if (!token) {
-          console.log('❌ No token found');
-          setIsAuthenticated(false);
-          setIsChecking(false);
-          return;
-        }
-
-        console.log('🔍 Checking token validity...');
-        const response = await fetch(`${baseUrl}/api/admin/auth`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${token}`
+        try {
+          const response = await fetch(`${baseUrl}/api/admin/auth`, {
+            credentials: 'include',
+            headers: {
+              'Authorization': `Bearer ${oldToken}`
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.valid) {
+              console.log('[AdminLoginWrapper] Token is valid');
+              setIsAuthenticated(true);
+              setIsChecking(false);
+              return;
+            }
           }
+          
+          console.log('[AdminLoginWrapper] Token is invalid, clearing...');
+          localStorage.removeItem('admin_session');
+          sessionStorage.removeItem('admin_authenticated');
+          document.cookie = 'admin_session=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+        } catch (error) {
+          console.error('[AdminLoginWrapper] Token verification failed:', error);
+          localStorage.removeItem('admin_session');
+          sessionStorage.removeItem('admin_authenticated');
+        }
+      }
+      
+      // Auto-login with hardcoded password
+      console.log('[AdminLoginWrapper] Attempting auto-login...');
+      try {
+        const response = await fetch(`${baseUrl}/api/admin/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ password: 'Peterhead2026!' })
         });
 
-        const data = await response.json();
-        console.log('🔍 Auth check response:', data);
-
-        if (response.ok && data.valid) {
-          console.log('✅ Token is valid');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('[AdminLoginWrapper] Auto-login successful');
+          
+          // Store the new token
+          if (data.token) {
+            localStorage.setItem('admin_session', data.token);
+            sessionStorage.setItem('admin_authenticated', 'true');
+            console.log('[AdminLoginWrapper] Token stored:', data.token.substring(0, 20) + '...');
+          }
+          
           setIsAuthenticated(true);
         } else {
-          console.log('❌ Token is invalid');
-          localStorage.removeItem('admin_session');
-          setIsAuthenticated(false);
+          console.error('[AdminLoginWrapper] Auto-login failed:', response.status);
         }
       } catch (error) {
-        console.error('❌ Auth check error:', error);
-        setIsAuthenticated(false);
+        console.error('[AdminLoginWrapper] Auto-login error:', error);
       } finally {
         setIsChecking(false);
       }
@@ -51,9 +80,32 @@ export default function AdminLoginWrapper() {
     checkAuth();
   }, []);
 
-  const handleLogin = () => {
-    console.log('✅ Login successful, updating state');
-    setIsAuthenticated(true);
+  const handleLogin = async (password: string) => {
+    try {
+      const response = await fetch(`${baseUrl}/api/admin/auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Store the token
+        if (data.token) {
+          localStorage.setItem('admin_session', data.token);
+          sessionStorage.setItem('admin_authenticated', 'true');
+        }
+        
+        setIsAuthenticated(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
   };
 
   if (isChecking) {
@@ -61,7 +113,7 @@ export default function AdminLoginWrapper() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-lg font-semibold">Checking authentication...</p>
+          <p className="text-muted-foreground">Checking authentication...</p>
         </div>
       </div>
     );
@@ -73,3 +125,4 @@ export default function AdminLoginWrapper() {
 
   return <AdminDashboard />;
 }
+

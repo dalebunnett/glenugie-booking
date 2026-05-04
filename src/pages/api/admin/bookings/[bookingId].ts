@@ -1,11 +1,11 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../../lib/db';
+import { db, initDB } from '../../../../lib/db';
 import { requireAdminAuth } from '../../../../lib/admin-auth';
 
-// Import cache variables from parent route (we'll need to handle this differently)
-// For now, we'll just clear local cache reference
-
 export const GET: APIRoute = async ({ params, request, locals }) => {
+  // Initialize DB with KV binding
+  initDB(locals.runtime);
+  
   // Check authentication
   const { authorized } = requireAdminAuth(request, { locals } as any);
   if (!authorized) {
@@ -17,7 +17,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
 
   try {
     const { bookingId } = params;
-    const booking = db.bookings.getById(bookingId!);
+    const booking = await db.bookings.getById(bookingId!);
     
     if (!booking) {
       return new Response(JSON.stringify({ error: 'Booking not found' }), {
@@ -40,6 +40,9 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
 };
 
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
+  // Initialize DB with KV binding
+  initDB(locals.runtime);
+  
   // Check authentication
   const { authorized } = requireAdminAuth(request, { locals } as any);
   if (!authorized) {
@@ -76,6 +79,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 };
 
 export const DELETE: APIRoute = async ({ params, request, locals }) => {
+  // Initialize DB with KV binding
+  initDB(locals.runtime);
+  
   // Check authentication
   const { authorized } = requireAdminAuth(request, { locals } as any);
   if (!authorized) {
@@ -108,6 +114,7 @@ export const DELETE: APIRoute = async ({ params, request, locals }) => {
     });
   }
 };
+
 
 
 

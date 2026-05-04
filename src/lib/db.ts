@@ -1,9 +1,9 @@
 import type { Booking } from './booking-types';
 import { sessions } from './sessions';
-import { getStorage, initializeStorage } from './storage';
+import { getStorage, initializeStorage, Storage } from './storage';
 
-// Get storage instance (will be initialized with KV in API routes)
-const storage = getStorage();
+// Storage instance that will be initialized with KV
+let storageInstance: Storage;
 
 // Cache invalidation callbacks
 const cacheInvalidationCallbacks: Array<() => void> = [];
@@ -63,35 +63,40 @@ const allocateKennelNumber = (booking: Booking, allBookings: Booking[]): number 
 export const db = {
   bookings: {
     getAll: async (): Promise<Booking[]> => {
-      return await storage.getBookings();
+      if (!storageInstance) storageInstance = getStorage();
+      return await storageInstance.getBookings();
     },
 
     getById: async (id: string): Promise<Booking | undefined> => {
-      const bookings = await storage.getBookings();
+      if (!storageInstance) storageInstance = getStorage();
+      const bookings = await storageInstance.getBookings();
       return bookings.find(b => b.id === id);
     },
 
     getByEmail: async (email: string): Promise<Booking[]> => {
-      const bookings = await storage.getBookings();
+      if (!storageInstance) storageInstance = getStorage();
+      const bookings = await storageInstance.getBookings();
       return bookings.filter(b => b.customerEmail === email);
     },
 
     create: async (booking: Booking): Promise<Booking> => {
-      const bookings = await storage.getBookings();
+      if (!storageInstance) storageInstance = getStorage();
+      const bookings = await storageInstance.getBookings();
       
       // Auto-allocate kennel number for village and ruffs-retreat
       const kennelNumber = allocateKennelNumber(booking, bookings);
       const bookingWithKennel = { ...booking, kennelNumber };
       
       bookings.push(bookingWithKennel);
-      await storage.saveBookings(bookings);
+      await storageInstance.saveBookings(bookings);
       invalidateCaches();
       
       return bookingWithKennel;
     },
 
     update: async (id: string, updates: Partial<Booking>): Promise<Booking | undefined> => {
-      const bookings = await storage.getBookings();
+      if (!storageInstance) storageInstance = getStorage();
+      const bookings = await storageInstance.getBookings();
       const index = bookings.findIndex(b => b.id === id);
       
       if (index === -1) return undefined;
@@ -109,19 +114,20 @@ export const db = {
       }
       
       bookings[index] = updated;
-      await storage.saveBookings(bookings);
+      await storageInstance.saveBookings(bookings);
       invalidateCaches();
       
       return updated;
     },
 
     delete: async (id: string): Promise<boolean> => {
-      const bookings = await storage.getBookings();
+      if (!storageInstance) storageInstance = getStorage();
+      const bookings = await storageInstance.getBookings();
       const filtered = bookings.filter(b => b.id !== id);
       
       if (filtered.length === bookings.length) return false;
       
-      await storage.saveBookings(filtered);
+      await storageInstance.saveBookings(filtered);
       invalidateCaches();
       return true;
     }
@@ -131,24 +137,28 @@ export const db = {
 
   bookingRules: {
     get: async () => {
-      return await storage.getBookingRules();
+      if (!storageInstance) storageInstance = getStorage();
+      return await storageInstance.getBookingRules();
     },
 
     update: async (updates: any) => {
-      const current = await storage.getBookingRules();
+      if (!storageInstance) storageInstance = getStorage();
+      const current = await storageInstance.getBookingRules();
       const updated = { ...current, ...updates };
-      await storage.saveBookingRules(updated);
+      await storageInstance.saveBookingRules(updated);
       return updated;
     }
   },
 
   rates: {
     get: async () => {
-      return await storage.getRates();
+      if (!storageInstance) storageInstance = getStorage();
+      return await storageInstance.getRates();
     },
 
     update: async (updates: any) => {
-      const current = await storage.getRates();
+      if (!storageInstance) storageInstance = getStorage();
+      const current = await storageInstance.getRates();
       const updated = {
         ...current,
         ...updates,
@@ -158,7 +168,7 @@ export const db = {
         theVillage: updates.theVillage ? { ...current.theVillage, ...updates.theVillage } : current.theVillage,
         paymentSettings: updates.paymentSettings ? { ...current.paymentSettings, ...updates.paymentSettings } : current.paymentSettings
       };
-      await storage.saveRates(updated);
+      await storageInstance.saveRates(updated);
       return updated;
     }
   },
@@ -177,21 +187,18 @@ export const db = {
     get: (sessionId: string) => sessions.getCustomerSession(sessionId),
     delete: (sessionId: string) => sessions.deleteCustomerSession(sessionId),
     cleanup: () => sessions.cleanupCustomerSessions()
-  },
-  
-  storage
+  }
 };
 
 /**
  * Initialize database with runtime environment (for KV binding)
- * Call this in API routes: db.init(locals.runtime)
+ * Call this in API routes: initDB(locals.runtime)
  */
 export const initDB = (runtime?: any) => {
-  const newStorage = initializeStorage(runtime);
-  // Update the storage reference used by db
-  Object.defineProperty(db, 'storage', { value: newStorage, writable: false });
+  storageInstance = initializeStorage(runtime);
+  console.log('[DB] Initialized with runtime, KV available:', !!runtime?.env?.KV);
   return db;
 };
 
-console.log('[DB] Database module loaded with global storage');
+console.log('[DB] Database module loaded');
 

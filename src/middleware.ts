@@ -1,68 +1,35 @@
-import type {MiddlewareHandler} from 'astro';
-
-// Token verification function (matches the one in auth.ts)
-const verifySessionToken = (token: string): boolean => {
-  try {
-    const [tokenString, signature] = token.split('.');
-    
-    // Verify signature
-    const expectedSignature = btoa(`${tokenString}-Peterhead2026!-secret-key`).substring(0, 16);
-    if (signature !== expectedSignature) {
-      return false;
-    }
-    
-    // Parse token
-    const tokenData = JSON.parse(atob(tokenString));
-    
-    // Check expiry
-    const now = Date.now();
-    if (now > tokenData.exp) {
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
+import type { MiddlewareHandler } from 'astro';
+import { getTokenFromRequest, isValidAdminToken, getAdminSecret } from './lib/admin-auth';
 
 export const onRequest: MiddlewareHandler = async (ctx, next) => {
-  const {request} = ctx;
+  const { request, locals } = ctx;
   const url = new URL(request.url);
 
-  // Check if this is an admin API endpoint (except auth endpoint)
+  // Check if this is an admin API endpoint (except auth and debug endpoints)
   const isAdminApi = url.pathname.includes('/api/admin');
   const isAuthEndpoint = url.pathname.includes('/api/admin/auth');
+  const isDebugEndpoint = url.pathname.includes('/api/admin/debug-auth');
   
-  if (isAdminApi && !isAuthEndpoint) {
-    // Get session token from Authorization header first, then cookie
-    const authHeader = request.headers.get('authorization') || '';
-    const headerSessionToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  if (isAdminApi && !isAuthEndpoint && !isDebugEndpoint) {
+    // Get token from request (checks Authorization header and cookie)
+    const token = getTokenFromRequest(request);
     
-    const cookies = request.headers.get('cookie') || '';
-    const sessionMatch = cookies.match(/admin_session=([^;]+)/);
-    const cookieSessionToken = sessionMatch ? sessionMatch[1] : null;
+    // Get secret consistently
+    const secret = getAdminSecret({ locals } as any);
     
-    const sessionToken = headerSessionToken || cookieSessionToken;
-
     // Verify the token
-    if (!sessionToken || !verifySessionToken(sessionToken)) {
+    if (!token || !isValidAdminToken(token, secret)) {
+      console.log('[middleware] Token validation failed for:', url.pathname);
+      console.log('[middleware] Token:', token ? token.substring(0, 20) + '...' : 'missing');
+      
       return new Response(JSON.stringify({ error: 'Unauthorized - Please log in again' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' }
       });
     }
+    
+    console.log('[middleware] Token validated successfully for:', url.pathname);
   }
 
   return next();
 };
-
-
-
-
-
-
-
-
-
-

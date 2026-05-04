@@ -6,23 +6,27 @@ export const GET: APIRoute = async ({ request, locals }) => {
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
-  // Check authentication
+  // Check authentication - pass mock Astro object with locals
   const { authorized } = requireAdminAuth(request, { locals } as any);
   if (!authorized) {
+    console.error('[booking-rules] Unauthorized access attempt');
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
     });
   }
-
+  
+  console.log('[booking-rules] Auth successful, fetching rules');
+  
   try {
-    const rules = db.bookingRules.get();
+    const rules = await db.bookingRules.get();
+    console.log('[booking-rules] Rules fetched successfully');
     return new Response(JSON.stringify(rules), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error fetching booking rules:', error);
+    console.error('[booking-rules] Error fetching rules:', error);
     return new Response(JSON.stringify({ error: 'Failed to fetch booking rules' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -34,7 +38,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
-  // Check authentication
+  // Check authentication for updates
   const { authorized } = requireAdminAuth(request, { locals } as any);
   if (!authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -59,6 +63,9 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
+
+
 
 
 

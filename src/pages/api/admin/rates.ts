@@ -14,9 +14,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
       headers: { 'Content-Type': 'application/json' }
     });
   }
-
+  
   try {
-    const rates = db.rates.get();
+    const rates = await db.rates.get();
     return new Response(JSON.stringify(rates), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -34,7 +34,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
-  // Check authentication
+  // Check authentication for updates
   const { authorized } = requireAdminAuth(request, { locals } as any);
   if (!authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -59,6 +59,8 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
+
 
 
 

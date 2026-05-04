@@ -1,4 +1,5 @@
 
+
 /**
  * Storage adapter for Cloudflare Workers
  * Uses KV when available, falls back to global in-memory storage
@@ -192,8 +193,8 @@ let storageInstance: Storage | null = null;
 export const getStorage = (kv?: any): Storage => {
   if (!storageInstance) {
     storageInstance = new Storage(kv);
-  } else if (kv && !storageInstance['kv']) {
-    // Update existing instance with KV if it wasn't set before
+  } else if (kv) {
+    // Always update KV binding when provided (important for Cloudflare Workers)
     storageInstance['kv'] = kv;
   }
   return storageInstance;
@@ -212,4 +213,5 @@ export const initializeStorage = (runtime?: any): Storage => {
   }
   return getStorage(kv);
 };
+
 

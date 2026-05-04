@@ -119,10 +119,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     const initializeData = async () => {
       try {
+        const sessionId = localStorage.getItem('admin_session');
         const response = await fetch(`${baseUrl}/api/admin/init-data`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${sessionId || ''}`
           }
         });
         
@@ -315,6 +317,7 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
 
 
 

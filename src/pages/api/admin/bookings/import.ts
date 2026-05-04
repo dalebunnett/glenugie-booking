@@ -1,8 +1,11 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../../lib/db';
+import { db, initDB } from '../../../../lib/db';
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
+    // Initialize storage with KV binding
+    initDB(locals.runtime);
+    
     const { bookings } = await request.json();
     
     if (!Array.isArray(bookings)) {
@@ -57,12 +60,16 @@ export const POST: APIRoute = async ({ request }) => {
     });
   } catch (error) {
     console.error('Error importing bookings:', error);
-    return new Response(JSON.stringify({ error: 'Failed to import bookings' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Failed to import bookings',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
   }
 };
+
 
 
 

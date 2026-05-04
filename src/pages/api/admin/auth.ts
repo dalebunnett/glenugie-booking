@@ -1,14 +1,12 @@
 import type { APIRoute } from 'astro';
-import { generateAdminToken, getTokenFromRequest, isValidAdminToken } from '../../../lib/admin-auth';
+import { generateAdminToken, getTokenFromRequest, isValidAdminToken, getAdminSecret } from '../../../lib/admin-auth';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const { password } = await request.json();
 
-    // Get password from environment (Cloudflare or local)
-    const correctPassword = locals?.runtime?.env?.ADMIN_PASSWORD || 
-                           import.meta.env.ADMIN_PASSWORD || 
-                           'Peterhead2026!';
+    // Get password using consistent method
+    const correctPassword = getAdminSecret({ locals } as any);
 
     console.log('[Auth] Login attempt');
     
@@ -20,7 +18,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // Generate signed token that persists across Worker restarts
+    // Generate signed token using the same secret
     const secret = correctPassword;
     const token = generateAdminToken(secret);
     
@@ -56,9 +54,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
     const token = getTokenFromRequest(request);
-    const secret = locals?.runtime?.env?.ADMIN_PASSWORD || 
-                   import.meta.env.ADMIN_PASSWORD || 
-                   'Peterhead2026!';
+    const secret = getAdminSecret({ locals } as any);
 
     if (!isValidAdminToken(token, secret)) {
       return new Response(JSON.stringify({ valid: false }), {
@@ -98,3 +94,4 @@ export const DELETE: APIRoute = async ({ request }) => {
     });
   }
 };
+

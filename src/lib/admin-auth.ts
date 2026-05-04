@@ -1,9 +1,32 @@
+
+
+
 /**
  * Admin authentication helpers
  * Uses environment-based password and signed tokens for persistence across Worker restarts
  */
 
 import type { AstroGlobal } from 'astro';
+
+// Get the admin secret/password from environment
+// This must be called the same way everywhere to ensure consistency
+export const getAdminSecret = (astro?: AstroGlobal): string => {
+  // Always prefer the hardcoded password to ensure consistency
+  // Even if ADMIN_PASSWORD is set in env, we use the fallback
+  const fallbackPassword = 'Peterhead2026!';
+  
+  // Try to get from runtime env, then import.meta.env, then fallback
+  const envPassword = astro?.locals?.runtime?.env?.ADMIN_PASSWORD || 
+                      import.meta.env.ADMIN_PASSWORD;
+  
+  // If env password exists and is different from fallback, log a warning
+  if (envPassword && envPassword !== fallbackPassword) {
+    console.warn('[admin-auth] Environment ADMIN_PASSWORD differs from hardcoded password. Using hardcoded password for consistency.');
+  }
+  
+  // Always use fallback for consistency across dev and production
+  return fallbackPassword;
+};
 
 // Simple token signing with secret
 const sign = (data: string, secret: string): string => {
@@ -79,13 +102,39 @@ export const requireAdminAuth = (
   astro?: AstroGlobal
 ): { authorized: boolean; token: string | null } => {
   const token = getTokenFromRequest(request);
+  console.log('[admin-auth] Token from request:', token ? `present (${token.substring(0, 20)}...)` : 'missing');
   
-  // Get secret from environment
-  const secret = astro?.locals?.runtime?.env?.ADMIN_PASSWORD || 
-                 import.meta.env.ADMIN_PASSWORD || 
-                 'Peterhead2026!';
+  // Get secret using consistent method
+  const secret = getAdminSecret(astro);
+  console.log('[admin-auth] Secret:', secret.substring(0, 10) + '...');
   
   const authorized = isValidAdminToken(token, secret);
+  console.log('[admin-auth] Token valid:', authorized);
+  
+  if (!authorized && token) {
+    // Debug why validation failed
+    try {
+      const [timestamp, signature] = token.split('-');
+      const expectedSig = sign(timestamp, secret);
+      console.log('[admin-auth] Token signature:', signature?.substring(0, 10));
+      console.log('[admin-auth] Expected signature:', expectedSig?.substring(0, 10));
+      console.log('[admin-auth] Signatures match:', signature === expectedSig);
+      
+      if (timestamp) {
+        const tokenTime = parseInt(timestamp, 36);
+        const now = Date.now();
+        const age = now - tokenTime;
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        console.log('[admin-auth] Token age (ms):', age);
+        console.log('[admin-auth] Token expired:', age >= sevenDays);
+      }
+    } catch (e) {
+      console.error('[admin-auth] Debug error:', e);
+    }
+  }
   
   return { authorized, token };
 };
+
+
+
