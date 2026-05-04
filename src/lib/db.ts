@@ -195,10 +195,18 @@ export const db = {
  * Call this in API routes: initDB(locals.runtime)
  */
 export const initDB = (runtime?: any) => {
+  console.log('[DB] initDB called');
+  console.log('[DB] Runtime provided:', !!runtime);
+  console.log('[DB] Runtime.env:', !!runtime?.env);
+  console.log('[DB] Runtime.env.KV:', !!runtime?.env?.KV);
+  
   storageInstance = initializeStorage(runtime);
   console.log('[DB] Initialized with runtime, KV available:', !!runtime?.env?.KV);
+  console.log('[DB] Storage instance created:', !!storageInstance);
+  
   return db;
 };
 
 console.log('[DB] Database module loaded');
+
 

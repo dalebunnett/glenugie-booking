@@ -1,5 +1,6 @@
 
 
+
 /**
  * Storage adapter for Cloudflare Workers
  * Uses KV when available, falls back to global in-memory storage
@@ -88,30 +89,41 @@ export class Storage {
   }
 
   async getBookings(): Promise<Booking[]> {
+    console.log('[Storage] getBookings called, KV available:', !!this.kv);
     if (this.kv) {
       try {
+        console.log('[Storage] Attempting to read from KV...');
         const data = await this.kv.get('bookings', 'json');
+        console.log('[Storage] KV read result:', data ? `${data.length} bookings` : 'null/empty');
         if (data) return data;
       } catch (error) {
         console.error('[Storage] KV read error:', error);
       }
     }
     
-    return getGlobalStorage().bookings;
+    const globalBookings = getGlobalStorage().bookings;
+    console.log('[Storage] Returning from global storage:', globalBookings.length, 'bookings');
+    return globalBookings;
   }
 
   async saveBookings(bookings: Booking[]): Promise<void> {
+    console.log('[Storage] saveBookings called with', bookings.length, 'bookings, KV available:', !!this.kv);
+    
     // Always update global storage
     getGlobalStorage().bookings = bookings;
+    console.log('[Storage] Updated global storage');
 
     // Try to persist to KV
     if (this.kv) {
       try {
+        console.log('[Storage] Attempting to write to KV...');
         await this.kv.put('bookings', JSON.stringify(bookings));
-        console.log(`[Storage] Saved ${bookings.length} bookings to KV`);
+        console.log(`[Storage] Successfully saved ${bookings.length} bookings to KV`);
       } catch (error) {
         console.error('[Storage] KV write error:', error);
       }
+    } else {
+      console.warn('[Storage] No KV binding available, only saved to global storage');
     }
   }
 
@@ -213,5 +225,6 @@ export const initializeStorage = (runtime?: any): Storage => {
   }
   return getStorage(kv);
 };
+
 
 

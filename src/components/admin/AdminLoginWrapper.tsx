@@ -11,38 +11,23 @@ export default function AdminLoginWrapper() {
     const checkAuth = async () => {
       console.log('[AdminLoginWrapper] Checking authentication...');
       
-      // IMPORTANT: Clear any old tokens from previous auth system
-      const oldToken = localStorage.getItem('admin_session');
-      if (oldToken) {
-        console.log('[AdminLoginWrapper] Found existing token, verifying...');
+      try {
+        // First, check if we have a valid session cookie
+        const response = await fetch(`${baseUrl}/api/admin/auth`, {
+          credentials: 'include',
+        });
         
-        try {
-          const response = await fetch(`${baseUrl}/api/admin/auth`, {
-            credentials: 'include',
-            headers: {
-              'Authorization': `Bearer ${oldToken}`
-            }
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.valid) {
-              console.log('[AdminLoginWrapper] Token is valid');
-              setIsAuthenticated(true);
-              setIsChecking(false);
-              return;
-            }
+        if (response.ok) {
+          const data = await response.json();
+          if (data.valid) {
+            console.log('[AdminLoginWrapper] Already authenticated via cookie');
+            setIsAuthenticated(true);
+            setIsChecking(false);
+            return;
           }
-          
-          console.log('[AdminLoginWrapper] Token is invalid, clearing...');
-          localStorage.removeItem('admin_session');
-          sessionStorage.removeItem('admin_authenticated');
-          document.cookie = 'admin_session=; Path=/; Max-Age=0; SameSite=Lax; Secure';
-        } catch (error) {
-          console.error('[AdminLoginWrapper] Token verification failed:', error);
-          localStorage.removeItem('admin_session');
-          sessionStorage.removeItem('admin_authenticated');
         }
+      } catch (error) {
+        console.error('[AdminLoginWrapper] Auth check failed:', error);
       }
       
       // Auto-login with hardcoded password
@@ -58,17 +43,13 @@ export default function AdminLoginWrapper() {
         if (response.ok) {
           const data = await response.json();
           console.log('[AdminLoginWrapper] Auto-login successful');
-          
-          // Store the new token
-          if (data.token) {
-            localStorage.setItem('admin_session', data.token);
-            sessionStorage.setItem('admin_authenticated', 'true');
-            console.log('[AdminLoginWrapper] Token stored:', data.token.substring(0, 20) + '...');
-          }
+          console.log('[AdminLoginWrapper] Auth response:', data);
           
           setIsAuthenticated(true);
         } else {
           console.error('[AdminLoginWrapper] Auto-login failed:', response.status);
+          const errorText = await response.text();
+          console.error('[AdminLoginWrapper] Error response:', errorText);
         }
       } catch (error) {
         console.error('[AdminLoginWrapper] Auto-login error:', error);
@@ -125,4 +106,5 @@ export default function AdminLoginWrapper() {
 
   return <AdminDashboard />;
 }
+
 

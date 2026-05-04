@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
+import { toast } from 'sonner';
 import MonthlyAvailabilityCalendar from './MonthlyAvailabilityCalendar';
 import BookingsCalendar from './BookingsCalendar';
 import CreateBookingForm from './CreateBookingForm';
@@ -54,50 +55,43 @@ export default function AdminDashboard() {
     }
   };
 
-  const loadBookings = async (force = false) => {
-    // Only reload if forced or if cache is old (30 seconds)
-    const now = Date.now();
-    if (!force && bookings.length > 0 && (now - lastFetchTime) < 30000) {
-      return;
-    }
-
-    if (isLoadingBookings) {
-      return; // Prevent multiple simultaneous requests
-    }
-    
-    setIsLoadingBookings(true);
+  const loadBookings = async () => {
     try {
-      // Get session from localStorage
-      const sessionId = localStorage.getItem('admin_session');
-      
+      console.log('[AdminDashboard] Loading bookings from:', `${baseUrl}/api/admin/bookings`);
       const response = await fetch(`${baseUrl}/api/admin/bookings`, {
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${sessionId || ''}`
-        }
+        credentials: 'include', // Include cookies for authentication
       });
+      console.log('[AdminDashboard] Response status:', response.status);
+      console.log('[AdminDashboard] Response ok:', response.ok);
       
-      if (!response.ok) {
-        console.error('Failed to load bookings:', response.status, response.statusText);
+      if (response.status === 403) {
+        // Unauthorized - redirect to login
+        console.error('[AdminDashboard] Unauthorized - redirecting to login');
+        toast.error('Session expired. Please log in again.');
+        window.location.href = `${baseUrl}/admin`;
         return;
       }
       
-      const data = await response.json();
-      setBookings(data.bookings || []);
-      setLastFetchTime(now);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[AdminDashboard] Error response:', errorText);
+        throw new Error('Failed to load bookings');
+      }
       
-      // Debug logging
-      const villageBookings = (data.bookings || []).filter((b: any) => b.accommodationType === 'village');
-      const ruffsRetreatBookings = (data.bookings || []).filter((b: any) => b.accommodationType === 'ruffs-retreat');
-      console.log('[AdminDashboard] Loaded bookings:', data.bookings?.length || 0);
-      console.log('[AdminDashboard] Village bookings:', villageBookings.length);
-      console.log('[AdminDashboard] Village with kennelNumber:', villageBookings.filter((b: any) => b.kennelNumber).length);
-      console.log('[AdminDashboard] Sample village:', villageBookings[0]);
-      console.log('[AdminDashboard] Ruffs Retreat bookings:', ruffsRetreatBookings.length);
+      const data = await response.json();
+      console.log('[AdminDashboard] Received data:', data);
+      console.log('[AdminDashboard] Data type:', Array.isArray(data) ? 'array' : typeof data);
+      console.log('[AdminDashboard] Data length:', data?.length);
+      
+      setBookings(data);
+      console.log('[AdminDashboard] Loaded bookings:', data.length);
+      console.log('[AdminDashboard] Village bookings:', data.filter((b: any) => b.accommodation === 'The Village').length);
+      console.log('[AdminDashboard] Village with kennelNumber:', data.filter((b: any) => b.accommodation === 'The Village' && b.kennelNumber).length);
+      console.log('[AdminDashboard] Sample village:', data.find((b: any) => b.accommodation === 'The Village'));
+      console.log('[AdminDashboard] Ruffs Retreat bookings:', data.filter((b: any) => b.accommodation === "Ruff's Retreat").length);
     } catch (error) {
-      console.error('Failed to load bookings:', error);
-    } finally {
-      setIsLoadingBookings(false);
+      console.error('[AdminDashboard] Error loading bookings:', error);
+      toast.error('Failed to load bookings');
     }
   };
 
@@ -317,6 +311,9 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+
+
 
 
 

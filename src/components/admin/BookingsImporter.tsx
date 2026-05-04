@@ -409,6 +409,61 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
     }
   };
 
+  const handleImport = async () => {
+    if (parsedBookings.length === 0) {
+      toast.error('No bookings to import');
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      console.log('[Import] Starting import of', parsedBookings.length, 'bookings');
+      console.log('[Import] Sending POST to:', `${baseUrl}/api/admin/bookings/import`);
+      
+      const response = await fetch(`${baseUrl}/api/admin/bookings/import`, {
+        method: 'POST',
+        credentials: 'include', // Include cookies for authentication
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bookings: parsedBookings }),
+      });
+
+      console.log('[Import] Response status:', response.status);
+      console.log('[Import] Response ok:', response.ok);
+      
+      const result = await response.json();
+      console.log('[Import] Response data:', result);
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to import bookings');
+      }
+
+      toast.success(`Successfully imported ${result.imported} bookings!`);
+      if (result.errors > 0) {
+        toast.error(`${result.errors} bookings failed to import`);
+        console.error('[Import] Failed bookings:', result.details?.errors);
+      }
+      
+      console.log('[Import] Total bookings in DB after import:', result.totalBookingsInDB);
+      
+      // Refresh the bookings list
+      onImportComplete();
+      
+      // Reset the importer
+      setParsedBookings([]);
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('[Import] Import error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to import bookings');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Info Banner */}
@@ -512,6 +567,8 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
     </div>
   );
 }
+
+
 
 
 

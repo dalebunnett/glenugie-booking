@@ -27,8 +27,13 @@ let lastCacheTime = 0;
 const CACHE_DURATION = 30000; // 30 seconds
 
 export const GET: APIRoute = async ({ request, locals }) => {
+  console.log('[Bookings GET] Starting request');
+  console.log('[Bookings GET] Locals available:', !!locals);
+  console.log('[Bookings GET] Locals.runtime:', !!locals?.runtime);
+  
   // Initialize DB with KV binding
   initDB(locals.runtime);
+  console.log('[Bookings GET] DB initialized');
   
   // Check authentication
   const { authorized } = requireAdminAuth(request, { locals } as any);
@@ -40,13 +45,16 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
 
   try {
+    console.log('[Bookings GET] Fetching all bookings...');
     const bookings = await db.bookings.getAll();
+    console.log('[Bookings GET] Retrieved', bookings.length, 'bookings');
+    
     return new Response(JSON.stringify(bookings), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error fetching bookings:', error);
+    console.error('[Bookings GET] Error fetching bookings:', error);
     return new Response(JSON.stringify({ error: 'Failed to fetch bookings' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -93,6 +101,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
 
 
 
