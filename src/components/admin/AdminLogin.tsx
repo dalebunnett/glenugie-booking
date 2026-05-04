@@ -38,14 +38,13 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
 
       if (response.ok) {
         console.log('✅ Login successful!');
-        // Store session ID in localStorage instead of relying on cookies
-        if (data.sessionId) {
-          localStorage.setItem('admin_session', data.sessionId);
-          console.log('✅ Session stored in localStorage:', data.sessionId);
+        // Store token in localStorage (using 'token' from response, not 'sessionId')
+        if (data.token) {
+          localStorage.setItem('admin_session', data.token);
+          console.log('✅ Session stored in localStorage:', data.token);
           
-          // Also set cookie as fallback
-          document.cookie = `admin_session=${data.sessionId}; path=/; max-age=86400; samesite=lax`;
-          console.log('✅ Cookie also set:', document.cookie);
+          // Cookie is already set by the server via Set-Cookie header
+          console.log('✅ Cookie set by server');
         }
         onLogin();
       } else {
@@ -102,6 +101,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     </div>
   );
 }
+
 
 
 

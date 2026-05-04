@@ -45,16 +45,12 @@ export default function AdminDashboard() {
       // Clear localStorage and sessionStorage
       localStorage.removeItem('admin_session');
       sessionStorage.removeItem('admin_authenticated');
-      setBookings([]);
-      setStats({
-        total: 0,
-        confirmed: 0,
-        pending: 0,
-        cancelled: 0,
-        upcoming: 0,
-        totalRevenue: 0,
-        pendingRevenue: 0
-      });
+      
+      // Clear all cookies
+      document.cookie = 'admin_session=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+      
+      // Reload the page to force re-authentication
+      window.location.reload();
     }
   };
 
@@ -319,6 +315,7 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
 
 
 

@@ -1,14 +1,12 @@
 ---
 import MainLayout from '../../layouts/main.astro';
-import AdminDashboard from '../../components/admin/AdminDashboard';
+import AdminLoginWrapper from '../../components/admin/AdminLoginWrapper';
 import { Toaster } from '../../components/ui/sonner';
 ---
 
 <MainLayout pageClass="">
   <main class="min-h-screen">
-    <AdminDashboard client:only="react" />
+    <AdminLoginWrapper client:only="react" />
     <Toaster client:only="react" />
   </main>
 </MainLayout>
-
-
