@@ -1,0 +1,159 @@
+
+
+
+
+
+---
+import MainLayout from '../layouts/main.astro';
+import ContactForm from '../components/ContactForm';
+---
+
+<MainLayout 
+  pageClass=""
+  title="Contact Us | Get in Touch - Glenugie Kennels, Peterhead"
+  description="Contact Glenugie Kennels in Peterhead, Aberdeenshire. Call 01779 841393, email, or visit us. Opening hours: 2pm-5pm daily. Get directions, ask questions, or schedule a viewing."
+  keywords="contact Glenugie Kennels, kennels Peterhead contact, pet boarding enquiry, visit kennels Aberdeen, kennels phone number, Peterhead pet boarding address"
+  ogImage="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg"
+>
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <section class="bg-primary text-primary-foreground py-16">
+      <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-normal text-center mb-4">Contact Us</h1>
+        <p class="text-center text-lg font-light opacity-90 max-w-2xl mx-auto">
+          Get in touch with our team - we're here to help
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-16">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="grid md:grid-cols-2 gap-12">
+          
+          <!-- Contact Information -->
+          <div>
+            <h2 class="text-3xl font-bold mb-6">Get In Touch</h2>
+            <p class="text-muted-foreground mb-8">
+              Have questions about our services or facilities? We'd love to hear from you. 
+              Fill out the form or use the contact details below.
+            </p>
+
+            <div class="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Phone</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p class="text-muted-foreground">Call us during business hours</p>
+                  <a href="tel:+447359427817" class="text-primary font-semibold hover:underline">
+                    07359 427817
+                  </a>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Email</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p class="text-muted-foreground">Send us an email anytime</p>
+                  <a href="mailto:info@glenugiekennels.co.uk" class="text-primary font-semibold hover:underline">
+                    info@glenugiekennels.co.uk
+                  </a>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Opening Hours</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-muted-foreground">Daily:</span>
+                      <span class="font-semibold">10:00 AM - 5:00 PM</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Drop Off & Pick Up Times</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div class="space-y-3 text-sm">
+                    <div>
+                      <p class="font-semibold text-foreground">Drop Off Times</p>
+                      <p class="text-muted-foreground">2:00 PM - 5:00 PM</p>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-foreground">Pick Up Times</p>
+                      <p class="text-muted-foreground">10:00 AM - 12:00 PM</p>
+                      <p class="text-xs text-destructive mt-1">After 12PM additional day's boarding charges will be added</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Address</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p class="text-muted-foreground">
+                    Glenugie Boarding Kennels<br/>
+                    Mains of Springhill<br/>
+                    Boddam<br/>
+                    Aberdeenshire<br/>
+                    AB42 3BH
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <!-- Contact Form -->
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Send Us A Message</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ContactForm client:load />
+              </CardContent>
+            </Card>
+
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Location</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div class="w-full h-64 rounded-lg overflow-hidden">
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2164.8!2d-1.7824!3d57.4682!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0xc39d9038c391c652!2sGlenugie%20Kennels!5e0!3m2!1sen!2suk!4v1234567890"
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade"
+                    title="Glenugie Kennels Location">
+                  </iframe>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</MainLayout>
+
+
+
+
+
+
+

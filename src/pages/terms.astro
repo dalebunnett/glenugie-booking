@@ -1,0 +1,140 @@
+
+
+
+---
+import MainLayout from '../layouts/main.astro';
+---
+
+<MainLayout 
+  pageClass=""
+  title="Terms & Conditions | Booking Policies - Glenugie Kennels"
+  description="Read Glenugie Kennels' terms and conditions, booking policies, cancellation policy, and pet care requirements. Important information for all boarding guests."
+  keywords="kennels terms and conditions, pet boarding policy, booking terms Peterhead, cancellation policy, kennel requirements"
+  ogImage="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg"
+>
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <section class="bg-primary text-primary-foreground py-16">
+      <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-bold text-center">Terms & Conditions</h1>
+      </div>
+    </section>
+
+    <!-- Content -->
+    <section class="py-16">
+      <div class="container mx-auto px-4 max-w-4xl">
+        <Card>
+          <CardContent className="prose prose-sm max-w-none p-8">
+            <h2>Booking Terms and Conditions</h2>
+            <p class="text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+
+            <h3>1. Bookings and Reservations</h3>
+            <p>
+              All bookings are subject to availability and must be confirmed by Glenugie Kennels. 
+              A deposit or full payment (as specified during booking) is required to secure your reservation.
+            </p>
+
+            <h3>2. Payment Terms</h3>
+            <ul>
+              <li>A £20 deposit is required to secure your booking</li>
+              <li>The remaining balance must be paid upon drop-off or in advance</li>
+              <li>We accept payment via credit/debit card through our secure Stripe payment system</li>
+            </ul>
+
+            <h3>3. Cancellation Policy</h3>
+            <ul>
+              <li>Cancellations made more than 14 days before check-in: Deposit is non-refundable but you will not be liable for the full payment</li>
+              <li>Cancellations made less than 14 days before check-in: Deposit is non-refundable and you may be held liable for the full payment depending on circumstances</li>
+              <li>No-shows: Full payment may be charged</li>
+            </ul>
+
+            <h3>4. Check-in and Check-out</h3>
+            <ul>
+              <li>Opening Hours: 10:00 AM - 5:00 PM Daily</li>
+              <li>Drop Off Times: 2:00 PM - 5:00 PM Daily</li>
+              <li>Pick Up Times: 10:00 AM - 12:00 PM</li>
+              <li>Pick ups after 12:00 PM will incur additional charges</li>
+              <li>Early or late arrivals must be arranged in advance</li>
+            </ul>
+
+            <h3>5. Pet Requirements</h3>
+            <ul>
+              <li>All pets must be up to date with vaccinations (proof required)</li>
+              <li>Dogs must be vaccinated against: Distemper, Hepatitis, Parvovirus, and Leptospirosis</li>
+              <li>Kennel Cough vaccination is recommended but optional</li>
+              <li>Cats must be vaccinated against: Cat Flu and Enteritis</li>
+              <li>Pets must be treated for fleas and worms</li>
+              <li>Aggressive or unsafe animals may be refused boarding</li>
+            </ul>
+
+            <h3>6. Health and Medical Care</h3>
+            <ul>
+              <li>Pet owners must disclose any medical conditions or special requirements</li>
+              <li>Medications must be provided in original containers with clear instructions</li>
+              <li>In case of emergency, we will contact your designated veterinarian</li>
+              <li>Owners are responsible for any veterinary costs incurred during the stay</li>
+            </ul>
+
+            <h3>7. Food and Special Diets</h3>
+            <ul>
+              <li>Please provide your pet's regular food to avoid digestive upset</li>
+              <li>Special dietary requirements must be clearly communicated</li>
+              <li>Food should be labeled with your pet's name and feeding instructions</li>
+            </ul>
+
+            <h3>8. Personal Belongings</h3>
+            <ul>
+              <li>You may bring your pet's bedding, toys, and comfort items</li>
+              <li>Please label all items with your pet's name</li>
+              <li>We cannot be held responsible for lost or damaged personal items</li>
+            </ul>
+
+            <h3>9. Liability</h3>
+            <ul>
+              <li>Glenugie Kennels takes every care with your pet, but cannot be held liable for illness, injury, or death of pets except where caused by our negligence</li>
+              <li>Owners are liable for any damage caused by their pet to our facilities or other animals</li>
+            </ul>
+
+            <h3>10. Collection</h3>
+            <ul>
+              <li>Pets must be collected by the agreed check-out date</li>
+              <li>Additional boarding fees will apply for each day beyond the booked period</li>
+              <li>Pets not collected within 7 days may be rehomed at our discretion</li>
+            </ul>
+
+            <h3>11. Privacy</h3>
+            <p>
+              We collect and store personal information solely for booking purposes and to provide 
+              the best care for your pet. Your information will not be shared with third parties 
+              except as required by law.
+            </p>
+
+            <h3>12. Changes to Terms</h3>
+            <p>
+              Glenugie Kennels reserves the right to modify these terms and conditions at any time. 
+              Changes will be posted on our website and apply to future bookings.
+            </p>
+
+            <h3>13. Contact Information</h3>
+            <p>
+              For questions about these terms or your booking, please contact us:<br>
+              Email: info@glenugiekennels.co.uk<br>
+              Phone: +44 (0) 1234 567890
+            </p>
+
+            <div class="bg-muted p-6 rounded-lg mt-8">
+              <p class="font-semibold mb-2">Acceptance of Terms</p>
+              <p class="text-sm">
+                By making a booking with Glenugie Kennels, you acknowledge that you have read, 
+                understood, and agree to be bound by these terms and conditions.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  </div>
+</MainLayout>
+
+
+

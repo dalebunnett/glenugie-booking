@@ -1,0 +1,619 @@
+
+
+
+
+
+---
+import MainLayout from '../layouts/main.astro';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { baseUrl } from '../lib/base-url';
+
+const luxurySuites = [
+  'Sniffany Suite',
+  'Woofdorf',
+  'Barkingham Palace',
+  'Nasherville',
+  'Lapdog Land Suite',
+  'Huntington Manor Suite',
+  'Pawduree',
+  'Furrari',
+  'Tail Away',
+  'The Fairy Dogmother'
+];
+
+const suitesSlugs = {
+  'Sniffany Suite': 'sniffany-suite',
+  'Woofdorf': 'woofdorf',
+  'Barkingham Palace': 'barkingham-palace',
+  'Nasherville': 'nasherville',
+  'Lapdog Land Suite': 'lapdog-land-suite',
+  'Huntington Manor Suite': 'huntington-manor-suite',
+  'Pawduree': 'pawduree',
+  'Furrari': 'furrari',
+  'Tail Away': 'tail-away',
+  'The Fairy Dogmother': 'the-fairy-dogmother'
+};
+
+const suiteImages = {
+  'Sniffany Suite': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304ec4047ede426b4f427_SNiffany__and__Co_1500.jpg',
+  'Woofdorf': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3057351db53461c4bffe5_woodorf-1500.jpg',
+  'Barkingham Palace': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3c6a02f13649f861c6761_barkinghamlogo.png',
+  'Nasherville': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3ce4e19aacf555e462077_nasherville-1500.jpg',
+  'Lapdog Land Suite': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30469e4f0809f89137c68_lapdoglogo.png',
+  'Huntington Manor Suite': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3ce95c128d742fa7049ff_HUNTINGTONMANOR-1500.jpg',
+  'Pawduree': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304a429888bb40d5461ba_pawduree1500.jpg',
+  'Furrari': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304037cfb7d4dc9c79526_furarri.jpg',
+  'Tail Away': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30519810f9135fa184375_tailaway.jpg',
+  'The Fairy Dogmother': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30520c76ac76f61c109e1_thefairydogmother.jpg'
+};
+
+const catImages = {
+  'Clawrence House': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245db54b6caba546c28_IMG_7069.JPG',
+  'Twitcher': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bd007a7a8c294f4c_IMG_7055.JPG',
+  'Pussy Porchens': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bff4767a262bbd75_IMG_7056.JPG',
+  'Ragdoll Ranch': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245708da24cbd9cde29_IMG_7067.JPG',
+  'Bengal Bay': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f302458a63101248b59d39_IMG_7066.JPG',
+  'Paws Palace': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245111d063a18d5708f_IMG_7065.JPG',
+  'Octopussy': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245b6ef9caacebf2285_3807d0d5-db40-4794-826f-bf78d931e4ac.JPG',
+  'Catsby': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024503359d0a39d84bd2_IMG_7063.JPG',
+  'Whiskers Lounge': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245e4f0809f89133201_IMG_7062.JPG',
+  'Hairy Potter': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024521171a2950743573_IMG_7061.JPG',
+  'Chalet Cat': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245c2059af19d9d11f9_IMG_7058.JPG',
+  'Cleocatara': 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245263414e93d6d5b5b_IMG_7060.JPG'
+};
+
+const catterySlugs = {
+  'Clawrence House': 'clawrence-house',
+  'Twitcher': 'twitcher',
+  'Pussy Porchens': 'pussy-porchens',
+  'Ragdoll Ranch': 'ragdoll-ranch',
+  'Bengal Bay': 'bengal-bay',
+  'Paws Palace': 'paws-palace',
+  'Octopussy': 'octopussy',
+  'Catsby': 'catsby',
+  'Whiskers Lounge': 'whiskers-lounge',
+  'Hairy Potter': 'hairy-potter',
+  'Chalet Cat': 'chalet-cat',
+  'Cleocatara': 'cleocatara'
+};
+
+const catteryImages = {
+  'Clawrence House': '',
+  'Twitcher': '',
+  'Pussy Porchens': '',
+  'Ragdoll Ranch': '',
+  'Bengal Bay': '',
+  'Paws Palace': '',
+  'Octopussy': '',
+  'Catsby': '',
+  'Whiskers Lounge': '',
+  'Hairy Potter': '',
+  'Chalet Cat': '',
+  'Cleocatara': ''
+};
+
+const catterySuites = [
+  'Clawrence House',
+  'Twitcher',
+  'Pussy Porchens',
+  'Ragdoll Ranch',
+  'Bengal Bay',
+  'Paws Palace',
+  'Octopussy',
+  'Catsby',
+  'Whiskers Lounge',
+  'Hairy Potter',
+  'Chalet Cat',
+  'Cleocatara'
+];
+---
+
+<MainLayout 
+  pageClass=""
+  title="Our Kennels & Suites | Luxury Dog & Cat Accommodation - Glenugie Kennels"
+  description="Explore our luxury dog suites, standard kennels, and cattery suites in Peterhead. Themed rooms with premium bedding, spa access, and personalized care. From £15-£25 per night. View all 23 suites!"
+  keywords="luxury dog suites, cat boarding suites, themed kennels Peterhead, pet accommodation Scotland, premium dog boarding, cattery Aberdeenshire, dog hotel rooms"
+  ogImage="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d8500acddf4e56b37574_WhatsApp%20Image%202026-05-02%20at%2011.54.39.jpeg"
+>
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <section style="background-color: #83C8E8;" class="text-primary-foreground py-16">
+      <div class="container mx-auto px-4">
+        <h1 class="text-5xl font-normal text-center mb-4">Our Kennels and Suites</h1>
+        <p class="text-center text-lg font-light opacity-90 max-w-2xl mx-auto">
+          Choose from our range of luxury and standard boarding options tailored to your pet's needs
+        </p>
+      </div>
+    </section>
+
+    <!-- Total Capacity Banner -->
+    <section class="bg-muted/50 py-6">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-wrap justify-center gap-8 text-center">
+          <div>
+            <p class="text-3xl font-bold text-primary">28</p>
+            <p class="text-sm text-muted-foreground">Dog Spaces</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-primary">12</p>
+            <p class="text-sm text-muted-foreground">Cat Suites</p>
+          </div>
+          <div>
+            <p class="text-3xl font-bold text-primary">10</p>
+            <p class="text-sm text-muted-foreground">Luxury Dog Suites</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Kennels and Suites -->
+    <section class="py-16">
+      <div class="container mx-auto px-4 max-w-6xl">
+        
+        <!-- Luxury Dog Suites -->
+        <div class="mb-16">
+          <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold mb-3">Luxury Dog Suites</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">
+              Our ten individually themed luxury suites offer the finest accommodation for your beloved companions. 
+              Each suite features premium amenities, spacious interiors, and individual attention from our dedicated staff.
+            </p>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {luxurySuites.map((suite) => (
+              <Card className="overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <a href={`${baseUrl}/kennels/${suitesSlugs[suite]}`} class="block">
+                  <div class="relative overflow-hidden">
+                    {suiteImages[suite] ? (
+                      <img 
+                        src={suiteImages[suite]} 
+                        alt={suite}
+                        class="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div class="w-full h-40 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <div class="text-5xl">🐕</div>
+                      </div>
+                    )}
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  </div>
+                  <CardHeader class="pb-3">
+                    <CardTitle className="text-base md:text-lg line-clamp-2">{suite}</CardTitle>
+                    <CardDescription class="text-sm">Luxury Suite</CardDescription>
+                  </CardHeader>
+                  <CardContent class="pb-3">
+                    <ul class="space-y-1 text-xs md:text-sm">
+                      <li>• Spacious private suite</li>
+                      <li>• Premium bedding</li>
+                      <li>• Individual care</li>
+                    </ul>
+                  </CardContent>
+                </a>
+                <CardFooter className="flex-col items-start gap-2 mt-auto pt-3">
+                  <Badge variant="secondary" class="text-xs">Premium</Badge>
+                  <p class="text-sm font-semibold text-primary">£25/night</p>
+                  <p class="text-xs text-muted-foreground">+£10 per extra pet</p>
+                  <div class="w-full flex flex-col gap-2 mt-2">
+                    <a href={`${baseUrl}/kennels/${suitesSlugs[suite]}`} class="w-full">
+                      <Button size="sm" variant="outline" className="w-full text-xs md:text-sm">View Details</Button>
+                    </a>
+                    <a href={`${baseUrl}/booking?suite=${suitesSlugs[suite]}&type=dog&accommodation=luxury-suite`} class="w-full">
+                      <Button size="sm" className="w-full text-xs md:text-sm">Book Now</Button>
+                    </a>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+          <div class="mt-4 text-center">
+            <p class="text-sm text-muted-foreground">Max 3 pets per suite (same family only) • Sharing: £10/night per additional pet</p>
+          </div>
+        </div>
+
+        <!-- Ruff's Retreat -->
+        <div class="mb-16">
+          <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold mb-3">Ruff's Retreat</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">
+              12 comfortable kennels (auto-allocated) ideal for small dogs (up to 3 from same family), 2 medium dogs, or 1 large dog per kennel. 
+              Quality care at an affordable price with all the essentials for a happy stay.
+            </p>
+          </div>
+          <div class="max-w-4xl mx-auto">
+            <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer">
+              <div class="grid md:grid-cols-2 gap-0">
+                <div class="relative overflow-hidden">
+                  <img 
+                    src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304bf14825dca175389ff_Ruffs%20retreat%20logo.png" 
+                    alt="Ruff's Retreat"
+                    class="w-full h-64 md:h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                </div>
+                <div class="p-4 md:p-6 flex flex-col justify-between">
+                  <div>
+                    <CardHeader class="p-0 mb-3 md:mb-4">
+                      <CardTitle className="text-xl md:text-2xl">Ruff's Retreat (Kennels 1-12)</CardTitle>
+                      <CardDescription class="text-sm">Standard Kennels - Auto-allocated</CardDescription>
+                    </CardHeader>
+                    <CardContent class="p-0 mb-3 md:mb-4">
+                      <ul class="space-y-1.5 md:space-y-2 text-xs md:text-sm">
+                        <li>• Ideal for small dogs (up to 3 from same family)</li>
+                        <li>• Or 2 medium dogs</li>
+                        <li>• Or 1 large dog per kennel</li>
+                        <li>• State of the art raised beds</li>
+                        <li>• Anti-stress bedding</li>
+                        <li>• Temperature controlled</li>
+                        <li>• Private runs (partially covered)</li>
+                        <li>• Professional daily care</li>
+                      </ul>
+                    </CardContent>
+                  </div>
+                  <CardFooter class="p-0 flex-col items-start gap-2">
+                    <div class="space-y-1">
+                      <Badge class="text-xs">Standard</Badge>
+                      <p class="text-lg font-semibold text-primary">£20/night</p>
+                      <p class="text-xs text-muted-foreground">+£10 per additional pet (max 3)</p>
+                    </div>
+                    <div class="w-full flex flex-col gap-2 mt-2">
+                      <a href={`${baseUrl}/kennels/ruffs-retreat`} class="w-full">
+                        <Button size="sm" variant="outline" className="w-full text-xs md:text-sm">View Details</Button>
+                      </a>
+                      <a href={`${baseUrl}/booking?suite=ruffs-retreat&type=dog&accommodation=ruffs-retreat`} class="w-full">
+                        <Button size="sm" className="w-full text-xs md:text-sm">Book Now</Button>
+                      </a>
+                    </div>
+                  </CardFooter>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <!-- The Village -->
+        <div class="mb-16">
+          <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold mb-3">The Village</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">
+              6 kennels (auto-allocated, numbered 13-18) suitable for all sizes with sharing available. 
+              Perfect for families with multiple dogs of varying sizes.
+            </p>
+          </div>
+          <div class="max-w-4xl mx-auto">
+            <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer">
+              <div class="grid md:grid-cols-2 gap-0">
+                <div class="relative overflow-hidden">
+                  <img 
+                    src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3053d3aaf6e2f463c7a78_thevillagelogo.png" 
+                    alt="The Village"
+                    class="w-full h-64 md:h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                </div>
+                <div class="p-4 md:p-6 flex flex-col justify-between">
+                  <div>
+                    <CardHeader class="p-0 mb-3 md:mb-4">
+                      <CardTitle className="text-xl md:text-2xl">The Village (Kennels 13-18)</CardTitle>
+                      <CardDescription class="text-sm">Standard Kennels - All Sizes</CardDescription>
+                    </CardHeader>
+                    <CardContent class="p-0 mb-3 md:mb-4">
+                      <ul class="space-y-1.5 md:space-y-2 text-xs md:text-sm">
+                        <li>• Suitable for all dog sizes</li>
+                        <li>• Perfect for larger VIPs or families</li>
+                        <li>• State of the art raised beds</li>
+                        <li>• Anti-stress bedding</li>
+                        <li>• Temperature controlled</li>
+                        <li>• Private runs (partially covered)</li>
+                        <li>• Sharing available</li>
+                      </ul>
+                    </CardContent>
+                  </div>
+                  <CardFooter class="p-0 flex-col items-start gap-2">
+                    <div class="space-y-1">
+                      <Badge class="text-xs">Standard - All Sizes</Badge>
+                      <p class="text-lg font-semibold text-primary">£20/night</p>
+                      <p class="text-xs text-muted-foreground">+£10 per additional pet (max 3)</p>
+                    </div>
+                    <div class="w-full flex flex-col gap-2 mt-2">
+                      <a href={`${baseUrl}/kennels/the-village`} class="w-full">
+                        <Button size="sm" variant="outline" className="w-full text-xs md:text-sm">View Details</Button>
+                      </a>
+                      <a href={`${baseUrl}/booking?suite=the-village&type=dog&accommodation=village`} class="w-full">
+                        <Button size="sm" className="w-full text-xs md:text-sm">Book Now</Button>
+                      </a>
+                    </div>
+                  </CardFooter>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <!-- Glenugie Whiskers Cattery -->
+        <div class="mb-16">
+          <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold mb-3">Glenugie Whiskers</h2>
+            <p class="text-xl text-muted-foreground mb-2">Luxury Cattery</p>
+            <p class="text-muted-foreground max-w-2xl mx-auto">
+              12 individually themed luxury suites designed specifically for our feline friends. 
+              Each suite provides the same world-class care and attention with specialized amenities for cats.
+            </p>
+          </div>
+
+          <!-- Cattery Hero Image -->
+          <div class="max-w-3xl mx-auto mb-8">
+            <div class="relative group overflow-hidden rounded-2xl shadow-xl">
+              <img 
+                src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5e79676aa5f9511c72188_WhatsApp%20Image%202026-05-02%20at%2012.41.12.jpeg" 
+                alt="Glenugie Whiskers Cattery"
+                class="w-full h-64 md:h-80 object-cover transform group-hover:scale-105 transition-transform duration-700"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <h3 class="text-2xl font-bold mb-1">Welcome to Glenugie Whiskers</h3>
+                <p class="text-sm opacity-90">Where every cat is treated like royalty</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            {[
+              'Clawrence House',
+              'Twitcher',
+              'Pussy Porchens',
+              'Ragdoll Ranch',
+              'Bengal Bay',
+              'Paws Palace',
+              'Octopussy',
+              'Catsby',
+              'Whiskers Lounge',
+              'Hairy Potter',
+              'Chalet Cat',
+              'Cleocatara'
+            ].map((suite) => (
+              <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col">
+                <a href={`${baseUrl}/kennels/${catterySlugs[suite]}`} class="block">
+                  <div class="relative overflow-hidden">
+                    {catImages[suite] ? (
+                      <div class="w-full h-40 md:h-48 bg-muted flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={catImages[suite]} 
+                          alt={suite}
+                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                    ) : (
+                      <div class="w-full h-40 md:h-48 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <div class="text-5xl">🐱</div>
+                      </div>
+                    )}
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                  </div>
+                  <CardHeader class="pb-3">
+                    <CardTitle className="text-sm md:text-base line-clamp-2">{suite}</CardTitle>
+                    <CardDescription class="text-xs md:text-sm">Luxury Cat Suite</CardDescription>
+                  </CardHeader>
+                </a>
+                <CardFooter className="flex-col items-start gap-2 mt-auto pt-3">
+                  <Badge variant="secondary" class="text-xs">Cattery</Badge>
+                  <p class="text-sm font-semibold text-primary">£15/night</p>
+                  <p class="text-xs text-muted-foreground">+£7.50 shared (max 3)</p>
+                  <div class="w-full flex flex-col gap-2 mt-2">
+                    <a href={`${baseUrl}/kennels/${catterySlugs[suite]}`} class="w-full">
+                      <Button size="sm" variant="outline" className="w-full text-xs">View Details</Button>
+                    </a>
+                    <a href={`${baseUrl}/booking?suite=${catterySlugs[suite]}&type=cat&accommodation=cattery`} class="w-full">
+                      <Button size="sm" className="w-full text-xs">Book Now</Button>
+                    </a>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <!-- What's Included Section -->
+        <div class="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-8 mb-12">
+          <h3 class="text-3xl font-bold mb-6 text-center">What's Included in Every Stay</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">🍽️</div>
+              <h4 class="font-semibold mb-2">Premium Cuisine</h4>
+              <p class="text-sm text-muted-foreground">
+                Premium Eukanuba food with various other brands available. Special dietary requirements accommodated. 
+                Individual tastes considered - cooked steak or chicken available at extra cost.
+              </p>
+            </div>
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">💧</div>
+              <h4 class="font-semibold mb-2">Fresh Water</h4>
+              <p class="text-sm text-muted-foreground">
+                Finest fresh Northeast water. Bottled water, puppy milk, Woof & Brew, Posh Pooch wine, 
+                and Pawsecco available at extra cost.
+              </p>
+            </div>
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">💊</div>
+              <h4 class="font-semibold mb-2">Medication Care</h4>
+              <p class="text-sm text-muted-foreground">
+                All medications stored safely and distributed according to your instructions. 
+                Full medical care attention.
+              </p>
+            </div>
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">🏥</div>
+              <h4 class="font-semibold mb-2">Health Monitoring</h4>
+              <p class="text-sm text-muted-foreground">
+                Professional care with attention to dietary needs. We'll do our utmost to replenish appetites 
+                if your pet refuses normal diets.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add-On Services -->
+        <div class="bg-muted/30 rounded-lg p-8 mb-12">
+          <h3 class="text-3xl font-bold mb-6 text-center">Optional Add-On Services</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="flex gap-4">
+              <div class="text-3xl">🥩</div>
+              <div>
+                <h4 class="font-semibold mb-1">Premium Dining</h4>
+                <p class="text-sm text-muted-foreground">
+                  Cooked steak or chicken for discerning palates (additional cost)
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="text-3xl">💧</div>
+              <div>
+                <h4 class="font-semibold mb-1">Premium Beverages</h4>
+                <p class="text-sm text-muted-foreground">
+                  Bottled water, puppy milk, Woof & Brew Beer, Posh Pooch wine, Pawsecco (additional cost)
+                </p>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <div class="text-3xl">✂️</div>
+              <div>
+                <h4 class="font-semibold mb-1">Fairytails Spa & Grooming (Dogs Only)</h4>
+                <p class="text-sm text-muted-foreground">
+                  Full grooming services for dogs available (additional cost)
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requirements Section -->
+        <div class="bg-primary/5 border border-primary/20 rounded-lg p-8 mb-12">
+          <h3 class="text-3xl font-bold mb-4">Before You Book</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 class="font-semibold mb-3">Required Vaccinations</h4>
+              <div class="space-y-2 text-sm">
+                <p><strong>Dogs must be vaccinated against:</strong></p>
+                <ul class="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li>Distemper, Hepatitis, Parvovirus</li>
+                  <li>Leptospirosis</li>
+                  <li>Kennel Cough (Bordetella)</li>
+                </ul>
+                <p class="mt-3"><strong>Cats must be vaccinated against:</strong></p>
+                <ul class="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li>Cat Flu (Feline Herpesvirus & Calicivirus)</li>
+                  <li>Feline Enteritis (Panleucopenia)</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-3">What to Bring</h4>
+              <ul class="space-y-2 text-sm text-muted-foreground">
+                <li>✓ Vaccination records (must be up to date)</li>
+                <li>✓ Your pet's specific food (optional)</li>
+                <li>✓ Feeding instructions & dietary requirements</li>
+                <li>✓ Any medications with clear instructions</li>
+                <li>✓ Allergy information</li>
+                <li>✓ Emergency contact information</li>
+                <li>✓ Vet contact details</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="text-center">
+          <h3 class="text-3xl font-bold mb-4">Ready to Book?</h3>
+          <p class="text-muted-foreground mb-6 max-w-2xl mx-auto">
+            Reserve your preferred accommodation today. Our friendly team is here to help 
+            with any questions about which option is best for your pet.
+          </p>
+          <div class="flex gap-4 justify-center">
+            <a href={`${baseUrl}/booking`}>
+              <Button size="lg">Book Now</Button>
+            </a>
+            <a href={`${baseUrl}/contact`}>
+              <Button size="lg" variant="outline">Contact Us</Button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</MainLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

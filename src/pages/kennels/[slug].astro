@@ -1,0 +1,1041 @@
+---
+import MainLayout from '../../layouts/main.astro';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import KennelAvailabilityCalendar from '../../components/KennelAvailabilityCalendar';
+import { baseUrl } from '../../lib/base-url';
+
+const { slug } = Astro.params;
+
+// Define all accommodations
+const accommodations = [
+  // Luxury Dog Suites
+  {
+    slug: 'sniffany-suite',
+    name: 'Sniffany Suite',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d8500acddf4e56b37574_WhatsApp%20Image%202026-05-02%20at%2011.54.39.jpeg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d8500acddf4e56b37574_WhatsApp%20Image%202026-05-02%20at%2011.54.39.jpeg'
+    ],
+    description: 'The Sniffany suite is situated in the Village. Appointed with a toddler sized bed and surrounded in soothing Tiffany tones, chandeliers, a tiny touch of elegance and a few home comforts, it is an enviable pad for any dog deserving of this room. The kennel has its own private run with shade and shelter and, as with all our kennels comes with daily housekeeping, regular outings and a nightly turndown and tuck in service. We also offer a complimentary bath and blow dry if your stay is over 7 days.',
+    features: [
+      'Toddler sized bed',
+      'Soothing Tiffany tones',
+      'Chandeliers',
+      'Tiny touch of elegance',
+      'Home comforts throughout',
+      'Private run with shade & shelter',
+      'Daily housekeeping service',
+      'Regular outings',
+      'Nightly turndown & tuck in service',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  {
+    slug: 'woofdorf',
+    name: 'Woofdorf',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d84a2ce8a5cd52ff5d6c_WhatsApp%20Image%202026-05-02%20at%2011.55.08.jpeg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d84a2ce8a5cd52ff5d6c_WhatsApp%20Image%202026-05-02%20at%2011.55.08.jpeg'
+    ],
+    description: 'Situated in the Village, Woofdorf has everything you would expect for the refined rascal in your life. Toddler bed, bedside table, rugs, pictures, and chandelier add but a few home comforts to this room. Each pup has access to its own run with shade and shelter; and all kennels have daily housekeeping services, meals and refreshments as required, a nightly turndown service with belly rubs and treats. All guests staying 7 nights or more receive a complimentary bath and blow-dry at Fairytails Spa.',
+    features: [
+      'Toddler bed with luxury bedding',
+      'Bedside table',
+      'Rugs for added comfort',
+      'Pictures & chandelier',
+      'Home comforts throughout',
+      'Private run with shade & shelter',
+      'Daily housekeeping service',
+      'Meals & refreshments as required',
+      'Nightly turndown service',
+      'Belly rubs and treats',
+      'Regular outings',
+      '24/7 supervision',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  {
+    slug: 'barkingham-palace',
+    name: 'Barkingham Palace',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3c6a02f13649f861c6761_barkinghamlogo.png',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3c6a02f13649f861c6761_barkinghamlogo.png',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305618da45a8f3bbf008c_WhatsApp%20Image%202022-07-10%20at%208.03.44%20PM.jpeg'
+    ],
+    description: 'This is one of our larger suites with raised beds and soft, plush bedding fit for any prince or princess (or both) in your life. Chandeliers, gilt framed pictures, and luxurious rugs, this is the epitome of stately rooms for any VIP! Designed in classic jewel tones, the suite is well appointed with luxurious bedding and crown décor. Webcams are situated throughout Glenugie Boarding kennels so we can keep an eye on all our guests. This sumptuous suite has access to a huge run which is partially covered for shade. An outdoor lounger is available for those who want to relax and drink in the Scottish sunshine. Daily housekeeping, refreshments as and when required, meals served accordingly or some gourmet cuisine if so desired, regular outings, nightly turn down service and belly rub with a sweet treat and access to Fairytails spa and grooming parlour consisting of a wash and blow-dry at the end of their stay are all part of the package we offer at Glenugie Kennels. All guests staying 7 nights or more receive a complimentary bath and blow-dry at Fairytails Spa.',
+    features: [
+      'One of our larger suites',
+      'Raised beds with soft, plush bedding',
+      'Chandeliers & gilt framed pictures',
+      'Luxurious rugs',
+      'Classic jewel tone design',
+      'Crown décor',
+      '24/7 webcam monitoring',
+      'Huge partially covered run',
+      'Outdoor lounger',
+      'Daily housekeeping service',
+      'Refreshments on request',
+      'Meals or gourmet cuisine options',
+      'Regular outings',
+      'Nightly turndown with belly rub & treat',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  {
+    slug: 'nasherville',
+    name: 'Nasherville',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30498cdb560b574ea2f0d_nashervillelogo.png',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30498cdb560b574ea2f0d_nashervillelogo.png',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304987c6a35d5060abf2f_nashervilleroom.jpg',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3047810bc9e79a9733842_nasherbvillrevised.png'
+    ],
+    description: 'This pawsome suite was designed for the guest with a little more bounce in his step. Large enough to accommodate a family or the guest who is accustomed to sleeping with their owner, we decided on a single bed with mattress specifically made for hygiene purposes, the soft luxury of a duvet and cushions were perfect for this hot dawg. Themed accordingly, this space has the ultimate country star at heart with wall canvas, guitar, star lights and cowhide rug. Outside your little star has the advantage of a huge space in which he can play with a shaded roof, and outside lounger in which he can relax. All guests staying 7 nights or more receive a complimentary bath and blow-dry at Fairytails Spa.',
+    features: [
+      'Single bed with hygienic mattress',
+      'Soft luxury duvet & cushions',
+      'Country music theme with wall canvas',
+      'Guitar & star lights decor',
+      'Cowhide rug',
+      'Huge outdoor space with shaded roof',
+      'Outside lounger',
+      '24/7 webcam monitoring',
+      'Daily housekeeping service',
+      'Dedicated menus for each individual',
+      'Fresh water on demand',
+      'Regular outings & private playtimes',
+      'Nightly turndown service with belly rub & treats',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  {
+    slug: 'lapdog-land-suite',
+    name: 'Lapdog Land Suite',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f6608051001f8b9e96a2fe_WhatsApp%20Image%202026-05-02%20at%2021.23.14.jpeg',
+    gallery: [],
+    description: 'Because it\'s only fair that your pup enjoys his holiday as much as you, we designed this suite for the guest who requires a little more comfort than most kennels have to offer. Based on the Arctic theme, this suite boasts of plush rugs, a Husky canvas and icicle lights but of course, it\'s not all cold in this room. We also have heating to keep your pet snug as a bug in his own little Lapland. Outside your pet has access to a large area partially shaded. An outside lounger is available so they can relax and our webcams keep an eye on all our guests 24/7. All guests staying 7 nights or more receive a complimentary bath and blow-dry at Fairytails Spa.',
+    features: [
+      'Premium comfortable bedding',
+      'Arctic themed decor with plush rugs',
+      'Husky canvas & icicle lights',
+      'Climate controlled heating',
+      'Large partially shaded outdoor area',
+      'Outside lounger',
+      '24/7 webcam monitoring',
+      'Daily housekeeping service',
+      'Fresh water as and when required',
+      'Meals served accordingly',
+      'Regular outings in exercise areas',
+      'Nightly turndown service with free belly rub & treat',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  {
+    slug: 'huntington-manor-suite',
+    name: 'Huntington Manor Suite',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5facb63eab02b5a463e06_WhatsApp%20Image%202026-05-02%20at%2013.55.50.jpeg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5facb63eab02b5a463e06_WhatsApp%20Image%202026-05-02%20at%2013.55.50.jpeg'
+    ],
+    description: 'This suite is definitely designed for a dapper dog. A single bed dressed accordingly, it\'s pawfect for those looking for more K9 country accommodation. From deerskin rugs, antlers quirky wall art and cosy stoves, you can relax knowing your pet is living the best life without you. Outside, they have access to a large run partially covered for shade or shelter, somewhere they can lounge in the Scottish sunshine or sniff in some sweet salty air. Daily housekeeping, fresh-water tipples as and when required, meals per instructed, regular outings in our exercise areas, a nightly turndown service with free belly rub and treat if so desired are all part of the experience at Glenugie Kennels along with a complimentary wash and blow-dry in Fairytails Spa and Grooming Parlour. *Complimentary bath and blow-dry are subject to guests staying a minimum of 7 nights.',
+    features: [
+      'Single bed dressed accordingly',
+      'Deerskin rugs',
+      'Antlers & quirky wall art',
+      'Cosy stoves',
+      'K9 country accommodation theme',
+      'Large run partially covered for shade/shelter',
+      'Scottish sunshine lounging area',
+      'Daily housekeeping service',
+      'Fresh-water tipples as and when required',
+      'Meals per instructed',
+      'Regular outings in exercise areas',
+      'Nightly turndown service with free belly rub & treat',
+      'Complimentary wash & blow-dry in Fairytails Spa (7+ nights)'
+    ]
+  },
+  {
+    slug: 'pawduree',
+    name: 'Pawduree',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304a429888bb40d5461ba_pawduree1500.jpg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304a429888bb40d5461ba_pawduree1500.jpg',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305bfb5243979e4708b0d_E9BB0592-00DE-459F-8A73-575AE4EBC325.jpeg'
+    ],
+    description: 'This room was designed for the sweet-heart in your life. Here they can lie back in a cot sized bed and drool under a roof of macarons and cake. And although these delicacies might not be the best for your buddies, we can provide a more apt menu for those who choose to dine at Glenugie Kennels. Fresh water or Pawsecco is on demand, numerous outings to the exercise fields, daily housekeeping, afternoon treats and a nightly turndown service with free belly rub is all part of the norm. This room boasts of a large run with shade or shelter and as with all our guests who have stayed longer than seven days, a complimentary bath and blow-dry in Fairytails is guaranteed to end their stay on a sweet note.',
+    features: [
+      'Cot sized bed perfect for lounging',
+      'Macaron and cake themed décor',
+      'Sweet-themed room design',
+      'Fresh water or Pawsecco on demand',
+      'Numerous outings to exercise fields',
+      'Daily housekeeping service',
+      'Afternoon treats',
+      'Nightly turndown service with free belly rub',
+      'Large run with shade or shelter',
+      'Complimentary bath & blow-dry in Fairytails (7+ nights)'
+    ]
+  },
+  {
+    slug: 'furrari',
+    name: 'Furrari',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304037cfb7d4dc9c79526_furarri.jpg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f304037cfb7d4dc9c79526_furarri.jpg',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305934be8099772b30199_3A9212FE-A910-4313-8391-D42E5B6081F5.jpeg'
+    ],
+    description: 'For those who love a zoomie this is the perfect kennel. A little power in their paws, or air in their hair, Furrari is composed of a toddler sized car bed, a plush rug with chequered bunting and pictures to complement the room. With a large run with shelter for sun or shade, it is large enough to accommodate any size of dog. As with all our kennels, we provide daily housekeeping, fresh water on demand, the finest cuisine of your choice and numerous outings to the exercise areas where they can zoom around; and a complimentary bath and blow-dry can be arranged at the end of their stay if they\'ve been with us for seven days or more.',
+    features: [
+      'Toddler sized car bed',
+      'Racing theme with plush rug',
+      'Chequered bunting décor',
+      'Racing themed pictures',
+      'Large run with shelter for sun or shade',
+      'Suitable for any size of dog',
+      'Daily housekeeping service',
+      'Fresh water on demand',
+      'Finest cuisine of your choice',
+      'Numerous outings to exercise areas',
+      'Perfect for dogs who love to zoom',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  {
+    slug: 'tail-away',
+    name: 'Tail Away',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5fac542c8245c27bb45c5_WhatsApp%20Image%202026-05-02%20at%2013.56.07.jpeg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5fac542c8245c27bb45c5_WhatsApp%20Image%202026-05-02%20at%2013.56.07.jpeg'
+    ],
+    description: 'Just so your salty sea dawg doesn\'t feel abandoned, we have created the perfect oasis in Tail Away. A nautical designed space will allow them to lie back in a soft plush bed surrounded by nets and fish and dream of dipping their paws in the ocean. A large run supported by a shelter can accommodate dogs of any size. As with all our kennels, we provide a daily housekeeping service where you can relax knowing your pooch is being treated to a bottle of Bottom sniffer beer or just plain water, meals of its choice, regular outings to the fields and a nightly turndown service with free belly rubs and a treat. And after all that exertion, a trip to Fairytails will fluff them up nicely before they return home. *Complimentary bath and blow-dry are subject to guests staying a minimum of 7 nights.',
+    features: [
+      'Nautical themed design',
+      'Soft plush bed',
+      'Nets and fish décor',
+      'Ocean-inspired atmosphere',
+      'Large run with shelter',
+      'Suitable for any size dog',
+      'Daily housekeeping service',
+      'Bottom sniffer beer or plain water',
+      'Meals of your pet\'s choice',
+      'Regular outings to the fields',
+      'Nightly turndown service with free belly rubs & treat',
+      'Complimentary bath & blow-dry in Fairytails (7+ nights)'
+    ]
+  },
+  {
+    slug: 'the-fairy-dogmother',
+    name: 'The Fairy Dogmother',
+    type: 'Luxury Dog Suite',
+    category: 'luxury',
+    price: 25,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30520c76ac76f61c109e1_thefairydogmother.jpg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30520c76ac76f61c109e1_thefairydogmother.jpg',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3059b4a3b32f235874814_08C4E244-C516-4115-8D68-63E4AE4B97CD.jpeg'
+    ],
+    description: 'Pawfectly pink this little oasis is designed for the princess in your life – or prince! Boasting a toddler sized bed, a leather kid\'s recliner and decorated with magical wings and wands your pups dreams really can come true. Little birds and mice, hearts and pictures all complement this luxury suite at Glenugie Kennels. With a large run, overhead shelter, this kennel is ideal for any size of dog. Daily housekeeping, fresh water on demand, food of your choice, treats and regular outings are all part of the service we provide; along with a nightly turn down service and a complimentary bath and blow dry if you\'ve stayed seven days or more.',
+    features: [
+      'Pawfectly pink princess theme',
+      'Toddler sized bed',
+      'Leather kid\'s recliner',
+      'Magical wings and wands décor',
+      'Little birds, mice, hearts & pictures',
+      'Large run with overhead shelter',
+      'Suitable for any size dog',
+      'Daily housekeeping service',
+      'Fresh water on demand',
+      'Food of your choice',
+      'Treats included',
+      'Regular outings to exercise areas',
+      'Nightly turndown service',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  // Cattery
+  {
+    slug: 'clawrence-house',
+    name: 'Clawrence House',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245db54b6caba546c28_IMG_7069.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245db54b6caba546c28_IMG_7069.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'twitcher',
+    name: 'Twitcher',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bd007a7a8c294f4c_IMG_7055.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bd007a7a8c294f4c_IMG_7055.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'pussy-porchens',
+    name: 'Pussy Porchens',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bff4767a262bbd75_IMG_7056.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bff4767a262bbd75_IMG_7056.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'ragdoll-ranch',
+    name: 'Ragdoll Ranch',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245708da24cbd9cde29_IMG_7067.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245708da24cbd9cde29_IMG_7067.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'bengal-bay',
+    name: 'Bengal Bay',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f302458a63101248b59d39_IMG_7066.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f302458a63101248b59d39_IMG_7066.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'paws-palace',
+    name: 'Paws Palace',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245111d063a18d5708f_IMG_7065.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245111d063a18d5708f_IMG_7065.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'octopussy',
+    name: 'Octopussy',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245b6ef9caacebf2285_3807d0d5-db40-4794-826f-bf78d931e4ac.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245b6ef9caacebf2285_3807d0d5-db40-4794-826f-bf78d931e4ac.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'catsby',
+    name: 'Catsby',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024503359d0a39d84bd2_IMG_7063.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024503359d0a39d84bd2_IMG_7063.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'whiskers-lounge',
+    name: 'Whiskers Lounge',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245e4f0809f89133201_IMG_7062.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245e4f0809f89133201_IMG_7062.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'hairy-potter',
+    name: 'Hairy Potter',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024521171a2950743573_IMG_7061.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024521171a2950743573_IMG_7061.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'chalet-cat',
+    name: 'Chalet Cat',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245c2059af19d9d11f9_IMG_7058.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245c2059af19d9d11f9_IMG_7058.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  {
+    slug: 'cleocatara',
+    name: 'Cleocatara',
+    type: 'Luxury Cat Suite',
+    category: 'cattery',
+    price: 15,
+    sharingPrice: 7.50,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245263414e93d6d5b5b_IMG_7060.JPG',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245263414e93d6d5b5b_IMG_7060.JPG'
+    ],
+    description: 'A luxurious themed suite designed specifically for feline guests at Glenugie Whiskers. This individually designed room provides world-class care and attention with specialized amenities for cats, ensuring your feline friend enjoys a comfortable and stress-free stay.',
+    features: [
+      'Individually themed luxury suite',
+      'Temperature controlled environment',
+      'Comfortable bedding & resting areas',
+      'Private space for each cat',
+      'Premium cat food included',
+      'Fresh water on demand',
+      'Daily cleaning & maintenance',
+      'Medication distribution if required',
+      'Toys & enrichment activities',
+      '24/7 supervision',
+      'Professional feline care',
+      'Quiet, stress-free environment'
+    ]
+  },
+  // Standard Kennels
+  {
+    slug: 'ruffs-retreat',
+    name: 'Ruff\'s Retreat',
+    type: 'Standard Kennels (1-12)',
+    category: 'standard',
+    price: 20,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5e34e669e297f65061e73_WhatsApp%20Image%202026-05-02%20at%2012.41.45.jpeg',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5e34e669e297f65061e73_WhatsApp%20Image%202026-05-02%20at%2012.41.45.jpeg',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305083f67202120dc06a5_standrad%20kennel%20beds.jpg'
+    ],
+    description: 'Here at Glenugie Kennels we aim to keep as much creature comforts as possible in all our kennels, but we understand that not everyone wants added luxuries which is why we designed our "regular" rooms with less pomp and fuss yet equal comfort and care. The small kennel block is equipped for small dogs only and kennels are spacious, light and temperature controlled. Each kennel can accommodate up to 3 small dogs from the same family for just £10 per additional dog. We have state of the art raised beds and plush soft anti stress bedding designed specifically for our guests to sink into providing them with a comforting, relaxed and calming feeling whilst away from home. Each kennel has its own private run which is partially covered for shade or shelter.',
+    features: [
+      'Kennels 1-12 (auto-allocated on booking)',
+      'Ideal for smaller dogs',
+      'Up to 3 small dogs from same family in 1 kennel',
+      'Only £10 per additional small dog (same family)',
+      'Spacious, light & temperature controlled',
+      'State of the art raised beds',
+      'Plush soft anti-stress bedding',
+      'Private run per kennel (partially covered)',
+      'Shade or shelter available',
+      'Premium Eukanuba food included',
+      'Fresh Northeast water on demand',
+      'Daily exercise & playtime',
+      'Medication distribution',
+      '24/7 supervision',
+      'Professional daily care',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  },
+  {
+    slug: 'the-village',
+    name: 'The Village',
+    type: 'Standard Kennels (Individual)',
+    category: 'standard',
+    price: 20,
+    sharingPrice: 10,
+    maxOccupancy: 3,
+    image: 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305352f2578b06c574b35_thevillage.png',
+    gallery: [
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305352f2578b06c574b35_thevillage.png',
+      'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305471ddb78532676f031_village%20bed_.png'
+    ],
+    description: 'Here at Glenugie Kennels we aim to keep as much creature comforts as possible in all our kennels, but we understand that not everyone wants added luxuries which is why we designed our "regular" rooms with less pomp and fuss yet equal comfort and care. The individual kennels in The Village are perfect for dogs of any size, though particularly ideal for our larger guests. Each kennel can accommodate up to 3 dogs from the same family for just £10 per additional dog. We have state of the art raised beds and plush soft anti stress bedding designed specifically for our guests to sink into providing them with a comforting, relaxed and calming feeling whilst away from home. Each kennel has its own private run which is partially covered for shade or shelter.',
+    features: [
+      'Individual Village kennels (auto-allocated on booking)',
+      'Suitable for any size dog - ideal for larger dogs',
+      'Can accommodate up to 3 dogs from same family',
+      'Only £10 per additional dog (same family)',
+      'Spacious, light & temperature controlled',
+      'State of the art raised beds',
+      'Plush soft anti-stress bedding',
+      'Private run per kennel (partially covered)',
+      'Shade or shelter available',
+      'Premium Eukanuba food included',
+      'Fresh Northeast water on demand',
+      'Daily exercise & playtime',
+      'Medication distribution',
+      '24/7 supervision',
+      'Professional daily care',
+      'Complimentary bath & blow-dry (7+ nights)'
+    ]
+  }
+];
+
+// Find the accommodation by slug
+const accommodation = accommodations.find(acc => acc.slug === slug);
+
+// Redirect if not found
+if (!accommodation) {
+  return Astro.redirect(`${baseUrl}/accommodations`);
+}
+
+// SEO content based on accommodation type
+const seoTitle = `${accommodation.name} - ${accommodation.type} | Glenugie Kennels`;
+const seoDescription = accommodation.description 
+  ? `${accommodation.description.substring(0, 150)}... Book from £${accommodation.price}/night. Professional care, premium amenities. View availability and book online.`
+  : `Book ${accommodation.name} - ${accommodation.type} at Glenugie Kennels from £${accommodation.price}/night. Professional care, luxury accommodation, and premium amenities in Peterhead.`;
+const seoKeywords = accommodation.category === 'luxury'
+  ? `${accommodation.name}, luxury dog suite Peterhead, themed dog kennel, premium dog boarding, ${accommodation.name} book online`
+  : accommodation.category === 'cattery'
+  ? `${accommodation.name}, luxury cat suite Peterhead, cat boarding Aberdeen, cattery Aberdeenshire, ${accommodation.name} availability`
+  : `${accommodation.name}, standard kennels Peterhead, dog boarding, affordable kennels Aberdeen`;
+
+const kennelSchema = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": `${accommodation.name} - ${accommodation.type}`,
+  "description": accommodation.description,
+  "image": accommodation.image,
+  "brand": {
+    "@type": "Brand",
+    "name": "Glenugie Kennels"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": accommodation.price.toString(),
+    "priceCurrency": "GBP",
+    "availability": "https://schema.org/InStock",
+    "priceValidUntil": "2027-12-31",
+    "url": `https://glenugiekennels.co.uk/kennels/${accommodation.slug}`
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "150"
+  }
+};
+
+// Breadcrumb schema
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://glenugiekennels.co.uk"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Kennels & Suites",
+      "item": "https://glenugiekennels.co.uk/accommodations"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": accommodation.name,
+      "item": `https://glenugiekennels.co.uk/kennels/${accommodation.slug}`
+    }
+  ]
+};
+
+// Combine schemas
+const combinedSchema = {
+  "@context": "https://schema.org",
+  "@graph": [kennelSchema, breadcrumbSchema]
+};
+
+const categoryFeatures = {
+  luxury: [
+    { icon: '🏠', text: 'Luxury Suite Accommodation' },
+    { icon: '🛏️', text: 'Premium Bedding' },
+    { icon: '🍽️', text: 'Gourmet Meals Included' },
+    { icon: '🎾', text: 'Daily Exercise & Play' },
+    { icon: '🛁', text: 'Free Bath & Blow-Dry' },
+    { icon: '💆', text: 'Access to Fairytails Spa' },
+    { icon: '❤️', text: 'Individual Attention' },
+  ],
+  standard: [
+    { icon: '🏠', text: 'Comfortable Kennel' },
+    { icon: '🛏️', text: 'Cozy Bedding' },
+    { icon: '🍽️', text: 'Quality Meals Included' },
+    { icon: '🎾', text: 'Daily Exercise & Play' },
+    { icon: '🛁', text: 'Free Bath & Blow-Dry' },
+    { icon: '💆', text: 'Access to Fairytails Spa' },
+    { icon: '❤️', text: 'Caring Staff' },
+  ],
+  cattery: [
+    { icon: '🏠', text: 'Spacious Cat Suite' },
+    { icon: '🛏️', text: 'Comfortable Bedding' },
+    { icon: '🍽️', text: 'Premium Cat Meals' },
+    { icon: '🪟', text: 'Window Views' },
+    { icon: '🧸', text: 'Toys & Entertainment' },
+    { icon: '❤️', text: 'Individual Care' },
+  ],
+};
+---
+<MainLayout 
+  pageClass=""
+  title={seoTitle}
+  description={seoDescription}
+  keywords={seoKeywords}
+  ogImage={accommodation.image}
+  schema={combinedSchema}
+>
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <section class="bg-primary text-primary-foreground py-12">
+      <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+          <a href={`${baseUrl}/accommodations`} class="text-primary-foreground/80 hover:text-primary-foreground inline-flex items-center gap-2 mb-4">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Kennels and Suites
+          </a>
+          <h1 class="text-4xl md:text-5xl font-bold mb-2">{accommodation.name}</h1>
+          <p class="text-xl opacity-90">{accommodation.type}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="py-16">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="grid md:grid-cols-2 gap-12">
+          <!-- Image Gallery -->
+          <div>
+            <div class="space-y-4">
+              <!-- Main Image -->
+              {accommodation.image ? (
+                <img 
+                  src={accommodation.image} 
+                  alt={accommodation.name}
+                  class="w-full h-auto rounded-lg shadow-lg"
+                />
+              ) : (
+                <div class="w-full aspect-video bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg shadow-lg flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="text-6xl mb-4">
+                      {accommodation.category === 'cattery' ? '🐱' : '🐕'}
+                    </div>
+                    <p class="text-muted-foreground">Image coming soon</p>
+                  </div>
+                </div>
+              )}
+              
+              <!-- Additional Gallery Images -->
+              {accommodation.gallery && accommodation.gallery.length > 1 && (
+                <div class="grid grid-cols-1 gap-4">
+                  {accommodation.gallery.slice(1).map((img: string) => (
+                    <img 
+                      src={img} 
+                      alt={`${accommodation.name} - Gallery`}
+                      class="w-full h-auto rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <!-- Details -->
+          <div>
+            <div class="mb-6">
+              <Badge variant={accommodation.category === 'luxury' ? 'secondary' : 'outline'} className="mb-4">
+                {accommodation.category === 'luxury' ? 'Premium' : accommodation.category === 'cattery' ? 'Cattery' : 'Standard'}
+              </Badge>
+              
+              <!-- Prominent Book Now Button -->
+              <div class="mb-6">
+                <a 
+                  href={`${baseUrl}/booking?suite=${accommodation.slug}&type=${accommodation.category === 'cattery' ? 'cat' : 'dog'}&accommodation=${accommodation.category === 'luxury' ? 'luxury-suite' : accommodation.category === 'cattery' ? 'cattery' : accommodation.slug}`} 
+                  class="block"
+                >
+                  <Button size="lg" className="w-full text-xl py-7 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
+                    🐾 Book {accommodation.name} Now
+                  </Button>
+                </a>
+              </div>
+
+              <h2 class="text-3xl font-bold mb-4">About This Suite</h2>
+              {accommodation.description ? (
+                <p class="text-lg text-muted-foreground leading-relaxed mb-6">
+                  {accommodation.description}
+                </p>
+              ) : (
+                <p class="text-lg text-muted-foreground leading-relaxed mb-6">
+                  Experience luxury accommodation at its finest. This beautifully themed suite provides 
+                  the perfect home away from home for your beloved companion, with premium amenities 
+                  and personalized care from our dedicated staff.
+                </p>
+              )}
+            </div>
+
+            <!-- Pricing -->
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Pricing</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-muted-foreground">Per Night</span>
+                    <span class="text-2xl font-bold text-primary">£{accommodation.price}</span>
+                  </div>
+                  <div class="flex justify-between items-center text-sm">
+                    <span class="text-muted-foreground">Additional Pet (same family)</span>
+                    <span class="font-semibold">+£{accommodation.sharingPrice}/night</span>
+                  </div>
+                  <div class="pt-3 border-t">
+                    <p class="text-sm text-muted-foreground">
+                      Maximum {accommodation.maxOccupancy} pets per suite (same family only)
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Availability Calendar -->
+            <div class="mb-6">
+              <KennelAvailabilityCalendar 
+                client:load
+                kennelSlug={accommodation.slug}
+                kennelName={accommodation.name}
+                accommodationType={accommodation.category === 'luxury' ? 'luxury-suite' : accommodation.category === 'cattery' ? 'cattery' : accommodation.slug === 'ruffs-retreat' ? 'ruffs-retreat' : 'village'}
+              />
+            </div>
+
+            <!-- Features -->
+            <div class="mb-12">
+              <h2 class="text-3xl font-normal mb-6 text-primary">What's Included</h2>
+              <div class="grid md:grid-cols-2 gap-4">
+                {accommodation.features.map((feature: string) => (
+                  <div class="flex items-start gap-3 bg-card p-4 rounded-xl border border-border">
+                    <svg class="w-5 h-5 text-primary mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-foreground">{feature}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <!-- Disclaimer Notice -->
+              <div class="mt-6 bg-primary/5 border border-primary/20 rounded-xl p-4">
+                <p class="text-sm text-muted-foreground text-center">
+                  <strong>Please note:</strong> Some decorative items shown in photos are purely for display purposes and may be removed or changed. Room layouts and décor are subject to change to ensure the safety and comfort of all our guests.
+                </p>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="flex gap-4">
+              <a 
+                href={`${baseUrl}/booking?suite=${accommodation.slug}&type=${accommodation.category === 'cattery' ? 'cat' : 'dog'}&accommodation=${accommodation.category === 'luxury' ? 'luxury-suite' : accommodation.category === 'cattery' ? 'cattery' : accommodation.slug}`} 
+                class="flex-1"
+              >
+                <Button size="lg" className="w-full text-lg py-6">
+                  🐾 Book {accommodation.name} Now
+                </Button>
+              </a>
+              <a href={`${baseUrl}/contact`}>
+                <Button size="lg" variant="outline" className="py-6">Ask a Question</Button>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- What's Included -->
+        <div class="mt-16 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-8">
+          <h3 class="text-3xl font-bold mb-6 text-center">What's Included in Every Stay</h3>
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">🍽️</div>
+              <h4 class="font-semibold mb-2">Premium Cuisine</h4>
+              <p class="text-sm text-muted-foreground">
+                Premium Eukanuba food with special dietary requirements accommodated
+              </p>
+            </div>
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">💧</div>
+              <h4 class="font-semibold mb-2">Fresh Water</h4>
+              <p class="text-sm text-muted-foreground">
+                Finest fresh Northeast water, always available
+              </p>
+            </div>
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">💊</div>
+              <h4 class="font-semibold mb-2">Medication Care</h4>
+              <p class="text-sm text-muted-foreground">
+                All medications distributed according to your instructions
+              </p>
+            </div>
+            {accommodation.category !== 'cattery' && (
+              <div class="bg-white rounded-lg p-4">
+                <div class="text-4xl mb-2">🛁</div>
+                <h4 class="font-semibold mb-2">Free Bath & Blow-Dry</h4>
+                <p class="text-sm text-muted-foreground">
+                  Complimentary bath and blow-dry for stays of 7+ nights
+                </p>
+              </div>
+            )}
+            <div class="bg-white rounded-lg p-4">
+              <div class="text-4xl mb-2">🏥</div>
+              <h4 class="font-semibold mb-2">Health Monitoring</h4>
+              <p class="text-sm text-muted-foreground">
+                Professional care with attention to dietary needs
+              </p>
+            </div>
+            {accommodation.category !== 'cattery' && (
+              <div class="bg-white rounded-lg p-4">
+                <div class="text-4xl mb-2">🎾</div>
+                <h4 class="font-semibold mb-2">Exercise & Play</h4>
+                <p class="text-sm text-muted-foreground">
+                  Daily exercise sessions and supervised playtime
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</MainLayout>

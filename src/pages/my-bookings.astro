@@ -1,0 +1,8 @@
+---
+import MainLayout from '../layouts/main.astro';
+import CustomerPortal from '../components/customer/CustomerPortal';
+---
+
+<MainLayout>
+  <CustomerPortal client:only="react" />
+</MainLayout>

@@ -1,0 +1,995 @@
+---
+import MainLayout from '../layouts/main.astro';
+import { Button } from '../components/ui/button';
+import { baseUrl } from '../lib/base-url';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "PetStore",
+  "name": "Glenugie Kennels",
+  "description": "Premium dog and cat boarding with luxury themed suites in Peterhead, Aberdeenshire. Featuring 10 luxury dog suites, 13 cattery suites, and standard kennels with professional care.",
+  "image": "https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Glenugie",
+    "addressLocality": "Peterhead",
+    "addressRegion": "Aberdeenshire",
+    "postalCode": "AB42 3EQ",
+    "addressCountry": "GB"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "57.5089",
+    "longitude": "-1.7845"
+  },
+  "url": "https://glenugiekennels.co.uk",
+  "telephone": "+44-1779-841393",
+  "email": "info@glenugiekennels.co.uk",
+  "priceRange": "££",
+  "openingHours": "Mo-Su 14:00-17:00",
+  "areaServed": ["Peterhead", "Aberdeen", "Fraserburgh", "Ellon", "Aberdeenshire", "Scotland"],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "150",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "hasMap": "https://maps.google.com/?cid=8993054838066790595"
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What types of pet boarding do you offer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We offer luxury dog suites, standard kennels, and luxury cattery suites. Our facility includes 10 themed luxury dog suites, standard kennels, and 13 individually designed cattery suites, all with professional care and premium amenities."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where is Glenugie Kennels located?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Glenugie Kennels is located in Glenugie, Peterhead, Aberdeenshire, AB42 3EQ. We serve Peterhead, Aberdeen, Fraserburgh, Ellon, and the wider Aberdeenshire area."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is included in the boarding price?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "All stays include premium Eukanuba food, fresh water, daily exercise and play, professional care, medication distribution, 24/7 supervision, and a complimentary bath and blow-dry for stays of 7+ nights. Luxury suites also include themed décor, raised beds with premium bedding, and access to Fairytails Spa."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does pet boarding cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Luxury dog suites are £25 per night, standard kennels are £20 per night, and cattery suites are £15 per night. Additional pets from the same family cost £7.50-£10 per night depending on the accommodation type."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I book online?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! You can check real-time availability and book your pet's stay online through our website. You'll receive instant confirmation and can manage your booking through our customer portal."
+      }
+    }
+  ]
+};
+
+const combinedSchema = {
+  "@context": "https://schema.org",
+  "@graph": [schema, faqSchema]
+};
+---
+
+<MainLayout 
+  pageClass=""
+  title="Glenugie Kennels | Luxury Dog & Cat Boarding in Peterhead, Aberdeenshire"
+  description="Premium pet boarding with themed luxury suites, professional care, and spa services. 10 dog suites, 13 cattery suites, and standard kennels. Serving Peterhead, Aberdeen & Aberdeenshire. Book online today!"
+  keywords="dog kennels Peterhead, cat boarding Aberdeenshire, luxury pet boarding Scotland, dog hotel Aberdeen, cattery near me, pet boarding Peterhead, luxury dog suites, cat kennels Aberdeen"
+  ogImage="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg"
+  schema={combinedSchema}
+>
+<script src="//unpkg.com/alpinejs" defer></script>
+
+<main class="min-h-screen bg-background">
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-primary/5 via-white to-primary/10 overflow-hidden" aria-label="Welcome and hero section">
+<!-- Decorative Paw Prints -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden">
+<!-- Top left paws -->
+<svg class="absolute top-10 left-10 w-12 h-12 text-primary/20 transform rotate-12" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-32 left-24 w-8 h-8 text-primary/15 transform -rotate-25" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-5 left-32 w-10 h-10 text-primary/18 transform rotate-45" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-16 left-48 w-7 h-7 text-primary/22 transform -rotate-15" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-24 left-64 w-9 h-9 text-primary/17 transform rotate-60" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-8 left-80 w-6 h-6 text-primary/25 transform -rotate-35" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-28 left-96 w-11 h-11 text-primary/19 transform rotate-25" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-12 left-1/4 w-8 h-8 text-primary/21 transform -rotate-50" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-4 left-1/3 w-13 h-13 text-primary/16 transform rotate-80" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-20 left-2/5 w-7 h-7 text-primary/23 transform -rotate-10" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+        
+<!-- Top right paws -->
+<svg class="absolute top-20 right-16 w-10 h-10 text-primary/25 transform -rotate-30" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-48 right-32 w-14 h-14 text-primary/20 transform rotate-45" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-6 right-24 w-9 h-9 text-primary/18 transform rotate-70" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-32 right-48 w-8 h-8 text-primary/22 transform -rotate-55" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-12 right-64 w-11 h-11 text-primary/17 transform rotate-15" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-8 right-80 w-6 h-6 text-primary/24 transform -rotate-40" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-28 right-96 w-10 h-10 text-primary/19 transform rotate-50" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-4 right-1/4 w-7 h-7 text-primary/21 transform -rotate-20" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-16 right-1/3 w-12 h-12 text-primary/16 transform rotate-65" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-36 right-2/5 w-8 h-8 text-primary/23 transform -rotate-8" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+        
+<!-- Top center paws -->
+<svg class="absolute top-8 left-1/2 w-9 h-9 text-primary/20 transform rotate-35" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-24 left-1/2 -translate-x-32 w-7 h-7 text-primary/18 transform -rotate-45" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-16 left-1/2 translate-x-32 w-10 h-10 text-primary/22 transform rotate-55" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-2 left-1/2 -translate-x-16 w-6 h-6 text-primary/19 transform -rotate-25" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-32 left-1/2 translate-x-16 w-8 h-8 text-primary/21 transform rotate-85" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+        
+<!-- Middle section paws -->
+<svg class="absolute top-1/3 left-1/4 w-16 h-16 text-primary/15 transform -rotate-12" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-1/2 right-1/4 w-12 h-12 text-primary/20 transform rotate-20" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+        
+<!-- Bottom section paws -->
+<svg class="absolute bottom-32 left-16 w-10 h-10 text-primary/25 transform rotate-60" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-24 right-20 w-14 h-14 text-primary/15 transform -rotate-40" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-64 left-1/3 w-8 h-8 text-primary/20 transform rotate-15" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-6 left-1/4 w-6 h-6 text-primary/18 transform rotate-35" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-12 right-1/3 w-7 h-7 text-primary/22 transform -rotate-18" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-2 right-12 w-9 h-9 text-primary/17 transform rotate-55" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-1/3 left-12 w-10 h-10 text-primary/16 transform rotate-75" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-1/2 right-12 w-8 h-8 text-primary/19 transform -rotate-50" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-2/5 left-1/2 w-11 h-11 text-primary/14 transform rotate-28" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute top-1/3 right-1/3 w-6 h-6 text-primary/21 transform -rotate-42" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-32 left-16 w-10 h-10 text-primary/25 transform rotate-60" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-24 right-20 w-14 h-14 text-primary/15 transform -rotate-40" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-64 left-1/3 w-8 h-8 text-primary/20 transform rotate-15" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-16 left-1/4 w-7 h-7 text-primary/18 transform -rotate-65" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-40 right-1/3 w-13 h-13 text-primary/17 transform rotate-82" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-8 right-16 w-9 h-9 text-primary/22 transform -rotate-33" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-52 left-8 w-6 h-6 text-primary/16 transform rotate-48" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-72 right-8 w-11 h-11 text-primary/19 transform -rotate-22" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-20 left-1/2 w-8 h-8 text-primary/21 transform rotate-90" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-28 left-24 w-12 h-12 transform rotate-25" viewBox="0 0 24 24" fill="#D3AF37" opacity="0.24">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-48 right-24 w-8 h-8 transform -rotate-55" viewBox="0 0 24 24" fill="#4A90A4" opacity="0.29">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-36 left-1/3 w-10 h-10 transform rotate-110" viewBox="0 0 24 24" fill="#D3AF37" opacity="0.21">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-60 right-1/4 w-14 h-14 transform -rotate-20" viewBox="0 0 24 24" fill="#4A90A4" opacity="0.27">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-12 right-1/3 w-6 h-6 transform rotate-45" viewBox="0 0 24 24" fill="#D3AF37" opacity="0.19">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-44 left-12 w-9 h-9 transform -rotate-72" viewBox="0 0 24 24" fill="#4A90A4" opacity="0.31">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+<svg class="absolute bottom-4 left-40 w-7 h-7 transform rotate-63" viewBox="0 0 24 24" fill="#D3AF37" opacity="0.23">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+</div>
+<div class="container mx-auto px-4 py-16 md:py-24 relative z-10">
+<div class="max-w-7xl mx-auto">
+<!-- Main Heading -->
+<div class="text-center mb-12">
+<h1 class="mb-6 leading-tight">
+<span style="font-family: 'Great Vibes', cursive; font-size: 3rem; display: block; color: #83C8E8; margin-bottom: 0.5rem;">Welcome to</span>
+<span style="font-family: 'Great Vibes', cursive; font-size: 5rem; display: block; color: #83C8E8;">
+Unleashed Luxury
+</span>
+</h1>
+<p class="text-xl md:text-2xl max-w-3xl mx-auto" style="font-family: 'Fira Sans', sans-serif; color: #83C8E8;">
+Premium pet boarding where every guest receives world-class service and meticulous care
+</p>
+</div>
+
+<!-- Large Hero Image -->
+<div class="max-w-6xl mx-auto mb-12">
+<div class="relative group">
+<div class="overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-500">
+<img 
+src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg" 
+alt="Glenugie Kennels" 
+class="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
+style="transform: scale(1.1);"
+/>
+</div>
+</div>
+</div>
+
+<!-- Description -->
+<div class="max-w-5xl mx-auto mb-12">
+<div class="relative bg-white/80 backdrop-blur-md p-8 md:p-12 rounded-3xl shadow-xl border border-primary/10">
+<div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+<div class="bg-primary/10 rounded-full p-4">
+<svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+<ellipse cx="12" cy="15" rx="3.5" ry="4"/>
+<ellipse cx="7" cy="9" rx="2" ry="2.5" transform="rotate(-15 7 9)"/>
+<ellipse cx="9.5" cy="6" rx="2" ry="2.5" transform="rotate(-5 9.5 6)"/>
+<ellipse cx="14.5" cy="6" rx="2" ry="2.5" transform="rotate(5 14.5 6)"/>
+<ellipse cx="17" cy="9" rx="2" ry="2.5" transform="rotate(15 17 9)"/>
+</svg>
+</div>
+</div>
+
+<p class="text-xl leading-relaxed text-foreground/80 text-center pt-4">
+Here at Glenugie Boarding Kennels, we strive to provide an exquisite experience of world class service for all our guests. You can leave here with peace of mind, knowing your animals will be entertained, pampered, and indulged with meticulous care and personal attention. Every aspect of attending to our guests' uniquely discerning and sometimes exuberant tastes is perfectly orchestrated to assure happy and satisfied pets, no matter how long or short the stay. We can offer sumptuous suites along with regular boarding, brilliant amenities, a la carte dining and Fairytails spa and grooming parlour for your dog. So step into a dog's world, like no other.
+</p>
+</div>
+</div>
+
+<!-- Features -->
+<div class="flex flex-wrap justify-center gap-4 mb-12">
+<div class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-full px-6 py-3 shadow-md hover:shadow-lg transition-all border border-primary/10">
+<svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="currentColor">
+<path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 2.7l6 5.4V18h-3v-4H9v4H6v-6.9l6-5.4z"/>
+</svg>
+<span class="text-foreground font-medium" style="font-family: 'Fira Sans', sans-serif;">Luxury Suites</span>
+</div>
+<div class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-full px-6 py-3 shadow-md hover:shadow-lg transition-all border border-primary/10">
+<svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="currentColor">
+<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+</svg>
+<span class="text-foreground font-medium" style="font-family: 'Fira Sans', sans-serif;">Pampered Pets</span>
+</div>
+<div class="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-full px-6 py-3 shadow-md hover:shadow-lg transition-all border border-primary/10">
+<svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="currentColor">
+<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+</svg>
+<span class="text-foreground font-medium" style="font-family: 'Fira Sans', sans-serif;">Premium Care</span>
+</div>
+</div>
+
+<!-- CTA Buttons -->
+<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+<a href={`${baseUrl}/booking`} class="w-full sm:w-auto">
+<Button size="lg" className="w-full sm:w-auto text-lg px-10 py-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+🐾 Book Your Stay
+</Button>
+</a>
+<a href={`${baseUrl}/my-bookings`} class="w-full sm:w-auto">
+<Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg px-10 py-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+📋 My Bookings
+</Button>
+</a>
+<a href={`${baseUrl}/accommodations`} class="w-full sm:w-auto">
+<Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-10 py-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all bg-white/80 backdrop-blur-sm border-2 border-primary/20 hover:bg-primary/5">
+✨ Explore Kennels and Suites
+</Button>
+</a>
+</div>
+</div>
+</section>
+
+<!-- Image Gallery Carousel Section -->
+<section class="py-16 bg-white" aria-label="Photo gallery of our luxury kennels and cattery suites">
+  <div class="container mx-auto px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="mb-4 leading-tight">
+          <span style="font-family: 'Great Vibes', cursive; font-size: 3rem; display: block; color: #83C8E8;">
+            Gallery
+          </span>
+        </h2>
+        <p class="text-lg text-foreground/70" style="font-family: 'Fira Sans', sans-serif;">
+          Take a peek at our luxury kennels and cattery suites
+        </p>
+      </div>
+
+      <!-- Carousel -->
+      <div class="relative" x-data="{ currentSlide: 0, slides: 8, lightboxOpen: false, lightboxImage: '', lightboxTitle: '' }" x-init="setInterval(() => { currentSlide = (currentSlide + 1) % slides }, 5000)" aria-label="Image carousel">
+        <div class="overflow-hidden rounded-2xl">
+          <div class="relative">
+            <!-- Slide 1 - Luxury Dog Suites Part 1 -->
+            <div x-show="currentSlide === 0" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d8500acddf4e56b37574_WhatsApp%20Image%202026-05-02%20at%2011.54.39.jpeg'; lightboxTitle = 'Sniffany Suite'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d8500acddf4e56b37574_WhatsApp%20Image%202026-05-02%20at%2011.54.39.jpeg" alt="Sniffany Suite" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Sniffany Suite</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d84a2ce8a5cd52ff5d6c_WhatsApp%20Image%202026-05-02%20at%2011.55.08.jpeg'; lightboxTitle = 'Woofdorf'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d84a2ce8a5cd52ff5d6c_WhatsApp%20Image%202026-05-02%20at%2011.55.08.jpeg" alt="Woofdorf Suite" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Woofdorf</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305618da45a8f3bbf008c_WhatsApp%20Image%202022-07-10%20at%208.03.44%20PM.jpeg'; lightboxTitle = 'Barkingham Palace'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305618da45a8f3bbf008c_WhatsApp%20Image%202022-07-10%20at%208.03.44%20PM.jpeg" alt="Barkingham Palace" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Barkingham Palace</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 2 - Luxury Dog Suites Part 2 -->
+            <div x-show="currentSlide === 1" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3047810bc9e79a9733842_nasherbvillrevised.png'; lightboxTitle = 'Nasherville'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3047810bc9e79a9733842_nasherbvillrevised.png" alt="Nasherville" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Nasherville</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f6608051001f8b9e96a2fe_WhatsApp%20Image%202026-05-02%20at%2021.23.14.jpeg'; lightboxTitle = 'Lapdog Land'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f6608051001f8b9e96a2fe_WhatsApp%20Image%202026-05-02%20at%2021.23.14.jpeg" alt="Lapdog Land" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Lapdog Land</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5facb63eab02b5a463e06_WhatsApp%20Image%202026-05-02%20at%2013.55.50.jpeg'; lightboxTitle = 'Huntington Manor'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5facb63eab02b5a463e06_WhatsApp%20Image%202026-05-02%20at%2013.55.50.jpeg" alt="Huntington Manor" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Huntington Manor</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 3 - Luxury Dog Suites Part 3 -->
+            <div x-show="currentSlide === 2" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305bfb5243979e4708b0d_E9BB0592-00DE-459F-8A73-575AE4EBC325.jpeg'; lightboxTitle = 'Pawduree'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305bfb5243979e4708b0d_E9BB0592-00DE-459F-8A73-575AE4EBC325.jpeg" alt="Pawduree" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Pawduree</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305934be8099772b30199_3A9212FE-A910-4313-8391-D42E5B6081F5.jpeg'; lightboxTitle = 'Furrari'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f305934be8099772b30199_3A9212FE-A910-4313-8391-D42E5B6081F5.jpeg" alt="Furrari" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Furrari</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5fac542c8245c27bb45c5_WhatsApp%20Image%202026-05-02%20at%2013.56.07.jpeg'; lightboxTitle = 'Tail Away'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5fac542c8245c27bb45c5_WhatsApp%20Image%202026-05-02%20at%2013.56.07.jpeg" alt="Tail Away" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Tail Away</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 4 - Luxury Dog Suite + Standard Kennels -->
+            <div x-show="currentSlide === 3" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3059b4a3b32f235874814_08C4E244-C516-4115-8D68-63E4AE4B97CD.jpeg'; lightboxTitle = 'The Fairy Dogmother'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3059b4a3b32f235874814_08C4E244-C516-4115-8D68-63E4AE4B97CD.jpeg" alt="The Fairy Dogmother" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">The Fairy Dogmother</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5e34e669e297f65061e73_WhatsApp%20Image%202026-05-02%20at%2012.41.45.jpeg'; lightboxTitle = 'Ruff\'s Retreat'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5e34e669e297f65061e73_WhatsApp%20Image%202026-05-02%20at%2012.41.45.jpeg" alt="Ruff's Retreat" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Ruff's Retreat</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245649b8aeb377b9197_IMG_1659.JPG'; lightboxTitle = 'The Village'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245649b8aeb377b9197_IMG_1659.JPG" alt="The Village" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">The Village</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 5 - Cattery Suites Part 1 -->
+            <div x-show="currentSlide === 4" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245db54b6caba546c28_IMG_7069.JPG'; lightboxTitle = 'Clawrence House'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245db54b6caba546c28_IMG_7069.JPG" alt="Clawrence House" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Clawrence House</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bd007a7a8c294f4c_IMG_7055.JPG'; lightboxTitle = 'Twitcher'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bd007a7a8c294f4c_IMG_7055.JPG" alt="Twitcher" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Twitcher</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bff4767a262bbd75_IMG_7056.JPG'; lightboxTitle = 'Pussy Porchens'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245bff4767a262bbd75_IMG_7056.JPG" alt="Pussy Porchens" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Pussy Porchens</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 6 - Cattery Suites Part 2 -->
+            <div x-show="currentSlide === 5" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245708da24cbd9cde29_IMG_7067.JPG'; lightboxTitle = 'Ragdoll Ranch'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245708da24cbd9cde29_IMG_7067.JPG" alt="Ragdoll Ranch" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Ragdoll Ranch</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f302458a63101248b59d39_IMG_7066.JPG'; lightboxTitle = 'Bengal Bay'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f302458a63101248b59d39_IMG_7066.JPG" alt="Bengal Bay" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Bengal Bay</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245111d063a18d5708f_IMG_7065.JPG'; lightboxTitle = 'Paws Palace'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245111d063a18d5708f_IMG_7065.JPG" alt="Paws Palace" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Paws Palace</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 7 - Cattery Suites Part 3 -->
+            <div x-show="currentSlide === 6" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245b6ef9caacebf2285_3807d0d5-db40-4794-826f-bf78d931e4ac.JPG'; lightboxTitle = 'Octopussy'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245b6ef9caacebf2285_3807d0d5-db40-4794-826f-bf78d931e4ac.JPG" alt="Octopussy" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Octopussy</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024503359d0a39d84bd2_IMG_7063.JPG'; lightboxTitle = 'Catsby'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024503359d0a39d84bd2_IMG_7063.JPG" alt="Catsby" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Catsby</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245e4f0809f89133201_IMG_7062.JPG'; lightboxTitle = 'Whiskers Lounge'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245e4f0809f89133201_IMG_7062.JPG" alt="Whiskers Lounge" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Whiskers Lounge</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 8 - Cattery Suites Part 4 -->
+            <div x-show="currentSlide === 7" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024521171a2950743573_IMG_7061.JPG'; lightboxTitle = 'Hairy Potter'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f3024521171a2950743573_IMG_7061.JPG" alt="Hairy Potter" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Hairy Potter</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245c2059af19d9d11f9_IMG_7058.JPG'; lightboxTitle = 'Chalet Cat'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245c2059af19d9d11f9_IMG_7058.JPG" alt="Chalet Cat" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Chalet Cat</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="relative group overflow-hidden rounded-xl shadow-lg cursor-pointer" @click="lightboxImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245263414e93d6d5b5b_IMG_7060.JPG'; lightboxTitle = 'Cleocatara'; lightboxOpen = true">
+                  <img src="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f30245263414e93d6d5b5b_IMG_7060.JPG" alt="Cleocatara" class="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <p class="text-white text-lg font-semibold" style="font-family: 'Great Vibes', cursive;">Cleocatara</p>
+                  </div>
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button 
+          @click="currentSlide = currentSlide === 0 ? slides - 1 : currentSlide - 1"
+          class="absolute left-0 md:-left-12 top-1/2 -translate-y-1/2 bg-white hover:bg-primary/10 text-primary rounded-full p-3 shadow-lg transition-all hover:scale-110"
+          aria-label="Previous slide"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button 
+          @click="currentSlide = (currentSlide + 1) % slides"
+          class="absolute right-0 md:-right-12 top-1/2 -translate-y-1/2 bg-white hover:bg-primary/10 text-primary rounded-full p-3 shadow-lg transition-all hover:scale-110"
+          aria-label="Next slide"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <!-- Dots Indicator -->
+        <div class="flex justify-center gap-2 mt-8">
+          <template x-for="i in slides" :key="i">
+            <button 
+              @click="currentSlide = i - 1"
+              :class="currentSlide === i - 1 ? 'bg-primary w-8' : 'bg-primary/30 w-2'"
+              class="h-2 rounded-full transition-all duration-300"
+              :aria-label="'Go to slide ' + i"
+            ></button>
+          </template>
+        </div>
+
+        <!-- Lightbox Modal -->
+        <div 
+          x-show="lightboxOpen" 
+          x-cloak
+          @click.self="lightboxOpen = false"
+          @keydown.escape.window="lightboxOpen = false"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0"
+          x-transition:enter-end="opacity-100"
+          x-transition:leave="transition ease-in duration-200"
+          x-transition:leave-start="opacity-100"
+          x-transition:leave-end="opacity-0"
+        >
+          <div class="relative max-w-7xl max-h-[90vh] w-full">
+            <!-- Close Button -->
+            <button 
+              @click="lightboxOpen = false"
+              class="absolute -top-12 right-0 text-white hover:text-primary transition-colors p-2 rounded-full bg-white/10 hover:bg-white/20"
+              aria-label="Close lightbox"
+            >
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+            
+            <!-- Image -->
+            <div class="flex flex-col items-center gap-4">
+              <img 
+                :src="lightboxImage" 
+                :alt="lightboxTitle"
+                class="max-h-[80vh] w-auto object-contain rounded-lg shadow-2xl"
+              />
+              <h3 
+                x-text="lightboxTitle"
+                class="text-white text-2xl md:text-3xl font-semibold"
+                style="font-family: 'Great Vibes', cursive;"
+              ></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+</MainLayout>
+

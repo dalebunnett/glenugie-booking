@@ -1,0 +1,35 @@
+
+
+---
+import MainLayout from '../layouts/main.astro';
+import BookingForm from '../components/BookingForm';
+---
+
+<MainLayout 
+  pageClass=""
+  title="Book Your Stay | Online Pet Boarding Booking - Glenugie Kennels"
+  description="Book luxury pet boarding online at Glenugie Kennels. Check real-time availability, choose your suite, and secure your booking with instant confirmation. Easy online payment. Book now!"
+  keywords="book dog kennels online, pet boarding booking, online kennel reservation, instant booking Peterhead, dog boarding availability, book cat boarding"
+  ogImage="https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg"
+>
+  <div class="min-h-screen bg-background">
+    <!-- Header -->
+    <section class="bg-primary text-primary-foreground py-16">
+      <div class="container mx-auto px-4">
+        <h1 class="text-4xl font-normal text-center mb-4">Book Your Pet's Stay</h1>
+        <p class="text-center text-lg opacity-90 max-w-2xl mx-auto">
+          Complete the booking form below to reserve accommodation for your pet
+        </p>
+      </div>
+    </section>
+
+    <!-- Booking Form -->
+    <section class="py-16">
+      <div class="container mx-auto px-4">
+        <BookingForm client:only="react" />
+      </div>
+    </section>
+  </div>
+</MainLayout>
+
+

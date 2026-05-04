@@ -1,0 +1,90 @@
+
+
+
+---
+import MainLayout from '../../layouts/main.astro';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { baseUrl } from '../../lib/base-url';
+
+const booking_id = Astro.url.searchParams.get('booking_id');
+---
+
+<MainLayout pageClass="">
+  <div class="min-h-screen bg-background flex items-center justify-center py-16">
+    <div class="container mx-auto px-4 max-w-2xl">
+      <Card>
+        <CardHeader>
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full mx-auto flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <CardTitle className="text-3xl">Booking Confirmed!</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div class="space-y-6 text-center">
+            <p class="text-lg">
+              Thank you for booking with Glenugie Kennels. Your payment has been processed successfully.
+            </p>
+
+            {booking_id && (
+              <div class="bg-muted p-4 rounded-lg">
+                <p class="text-sm text-muted-foreground mb-1">Booking Reference</p>
+                <p class="font-mono font-semibold">{booking_id}</p>
+              </div>
+            )}
+
+            <div class="space-y-3 text-left">
+              <h3 class="font-semibold text-lg">What's Next?</h3>
+              <ul class="space-y-2 text-muted-foreground">
+                <li class="flex items-start gap-2">
+                  <span class="text-primary mt-1">✓</span>
+                  <span>You'll receive a confirmation email shortly with all the details</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-primary mt-1">✓</span>
+                  <span>Please review our terms and conditions before your arrival</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-primary mt-1">✓</span>
+                  <span>If you have any questions, don't hesitate to contact us</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-primary mt-1">✓</span>
+                  <span>After your stay, we'd love to hear your feedback</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="bg-primary/10 border border-primary/20 rounded-lg p-6 text-left">
+              <h3 class="font-semibold text-lg mb-2">📱 Manage Your Bookings Online</h3>
+              <p class="text-muted-foreground mb-4">
+                Create a customer account to view all your bookings, track upcoming stays, and manage your pet's information in one convenient place.
+              </p>
+              <a href={`${baseUrl}/my-bookings`}>
+                <Button className="w-full sm:w-auto">
+                  Access My Bookings
+                </Button>
+              </a>
+            </div>
+
+            <div class="flex gap-4 justify-center pt-4">
+              <a href={baseUrl || '/'}>
+                <Button>Return Home</Button>
+              </a>
+              <a href={`${baseUrl}/contact`}>
+                <Button variant="outline">Contact Us</Button>
+              </a>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+</MainLayout>
+
+
+
