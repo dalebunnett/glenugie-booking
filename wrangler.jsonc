@@ -1,6 +1,8 @@
 
 
 
+
+
 /**
  * For more details on how to configure Wrangler, refer to:
  * https://developers.cloudflare.com/workers/wrangler/configuration/
@@ -34,9 +36,8 @@
 	 */
 	"kv_namespaces": [
 		{ 
-			"binding": "KV", 
-			"id": "4dd144b89325450b8949d8132a8ad02c",
-			"preview_id": "4dd144b89325450b8949d8132a8ad02c"
+			"binding": "BOOKINGS_KV", 
+			"id": "4dd144b89325450b8949d8132a8ad02c"
 		}
 	],
 	/**
@@ -44,7 +45,9 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
 	"vars": { 
-		"ADMIN_PASSWORD": "Peterhead2026!"
+		"ADMIN_PASSWORD": "Peterhead2026!",
+		"ADMIN_EMAIL": "info@glenugiekennels.co.uk",
+		"GOOGLE_REVIEW_LINK": "https://maps.google.com/?cid=8993054838066790595"
 	},
 	/**
 	 * Note: Use secrets to store sensitive data.
@@ -72,6 +75,10 @@
 	 */
 	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
 }
+
+
+
+
 
 
 
