@@ -12,7 +12,7 @@ export default function AdminLoginWrapper() {
       console.log('[AdminLoginWrapper] Checking authentication...');
       
       try {
-        // First, check if we have a valid session cookie
+        // Check if we have a valid session cookie
         const response = await fetch(`${baseUrl}/api/admin/auth`, {
           credentials: 'include',
         });
@@ -22,40 +22,13 @@ export default function AdminLoginWrapper() {
           if (data.valid) {
             console.log('[AdminLoginWrapper] Already authenticated via cookie');
             setIsAuthenticated(true);
-            setIsChecking(false);
-            return;
           }
         }
       } catch (error) {
         console.error('[AdminLoginWrapper] Auth check failed:', error);
       }
       
-      // Auto-login with hardcoded password
-      console.log('[AdminLoginWrapper] Attempting auto-login...');
-      try {
-        const response = await fetch(`${baseUrl}/api/admin/auth`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ password: 'Peterhead2026!' })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('[AdminLoginWrapper] Auto-login successful');
-          console.log('[AdminLoginWrapper] Auth response:', data);
-          
-          setIsAuthenticated(true);
-        } else {
-          console.error('[AdminLoginWrapper] Auto-login failed:', response.status);
-          const errorText = await response.text();
-          console.error('[AdminLoginWrapper] Error response:', errorText);
-        }
-      } catch (error) {
-        console.error('[AdminLoginWrapper] Auto-login error:', error);
-      } finally {
-        setIsChecking(false);
-      }
+      setIsChecking(false);
     };
 
     checkAuth();
@@ -106,5 +79,6 @@ export default function AdminLoginWrapper() {
 
   return <AdminDashboard />;
 }
+
 
 

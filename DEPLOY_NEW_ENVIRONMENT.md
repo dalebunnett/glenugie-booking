@@ -1,335 +1,189 @@
-# 🚀 Deploying Glenugie Booking System to New Environment
+# 🚀 Setting Up Webflow Cloud Environment
 
-## 📦 Step 1: Get Your Files
+## Current Issue
 
-Since you're working in a sandbox environment, you need to get these files to your local computer.
+Your environment check shows:
+- ❌ KV Storage: Not Bound
+- ❌ Environment Variables: Missing
+- ✅ Database: Working (598 bookings found)
 
-### Option A: Download Individual Files
-Download these key files/folders from the sandbox:
-- `package.json`
-- `package-lock.json`
-- `astro.config.mjs`
-- `tsconfig.json`
-- `webflow.json`
-- `wrangler.jsonc`
-- `.gitignore`
-- `src/` (entire folder)
-- `public/` (entire folder)
-- `generated/` (entire folder)
-
-### Option B: Create Archive
-Run this in the sandbox to create a downloadable archive:
-
-```bash
-# Create archive (excludes node_modules and .env)
-tar -czf glenugie-booking.tar.gz \
-  --exclude='node_modules' \
-  --exclude='.env' \
-  --exclude='.astro' \
-  --exclude='dist' \
-  --exclude='.wrangler' \
-  package.json \
-  package-lock.json \
-  astro.config.mjs \
-  tsconfig.json \
-  webflow.json \
-  wrangler.jsonc \
-  .gitignore \
-  .npmrc \
-  components.json \
-  src/ \
-  public/ \
-  generated/ \
-  *.md
-
-# Check size
-ls -lh glenugie-booking.tar.gz
-```
-
-Then download `glenugie-booking.tar.gz` from the sandbox.
+This means Webflow Cloud isn't reading from `wrangler.jsonc` or the bindings aren't configured.
 
 ---
 
-## 💻 Step 2: Set Up on Your Local Computer
+## 📋 Solution: Configure in Webflow Dashboard
 
-### 1. Extract Files (if using archive)
-```bash
-tar -xzf glenugie-booking.tar.gz
-cd glenugie-booking
+### Step 1: Access Webflow App Settings
+
+1. Go to your Webflow account
+2. Navigate to your **Apps** project
+3. Find your "Glenugie Booking" app
+4. Click on **Settings** or **Configuration**
+
+### Step 2: Look for One of These Sections
+
+Webflow Cloud should have one of these:
+- **Environment Variables** section
+- **Bindings** or **Resources** section
+- **Cloudflare Settings** section
+- **Worker Configuration** section
+
+### Step 3: Add Environment Variables
+
+Add these variables in Webflow:
+
 ```
-
-### 2. Install Dependencies
-```bash
-npm install
-```
-
-### 3. Create Local `.env` File
-
-Create a new `.env` file with your credentials:
-
-```env
-# Stripe
-STRIPE_SECRET_KEY=sk_test_your_key_here
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
-
-# Resend Email
-RESEND_API_KEY=re_your_resend_key
-
-# Admin
+ADMIN_PASSWORD=Peterhead2026!
+RESEND_API_KEY=re_xxxxxxxxxx
+STRIPE_SECRET_KEY=sk_test_xxxxxxxxxx
 ADMIN_EMAIL=info@glenugiekennels.co.uk
-
-# JWT Secret (generate a random 32+ character string)
-JWT_SECRET=your-very-long-random-secret-string-min-32-chars
+GOOGLE_REVIEW_LINK=https://maps.google.com/?cid=8993054838066790595
 ```
 
-### 4. Test Locally (Optional)
-```bash
-npm run dev
-```
+### Step 4: Add KV Binding
 
-Visit `http://localhost:4321/app/` to test.
+If there's a **Bindings** section:
+1. Click **Add Binding**
+2. Select **KV Namespace**
+3. Set binding name: `BOOKINGS_KV`
+4. Create or select a KV namespace
+
+If there's **NO bindings section**, you might need to:
+1. Create a KV namespace in Cloudflare directly
+2. Link it via Cloudflare Workers dashboard
+3. Or contact Webflow support
 
 ---
 
-## 🔗 Step 3: Push to GitHub
+## 🔧 Alternative: Use Cloudflare Workers Directly
 
-### 1. Initialize Git Repository
-```bash
-git init
-```
+If Webflow Cloud doesn't support KV bindings properly, you can deploy directly to Cloudflare:
 
-### 2. Add All Files
-```bash
-git add .
-```
+### Option A: Deploy via Cloudflare Pages (Recommended)
 
-### 3. Verify Files (Check that .env is NOT included)
-```bash
-git status
-```
+1. **Disconnect from Webflow Cloud** (or run in parallel)
 
-You should see:
-- ✅ `package.json`
-- ✅ `src/`
-- ✅ `public/`
-- ✅ All other code files
-- ❌ `.env` should NOT appear (it's in `.gitignore`)
+2. **Connect GitHub to Cloudflare Pages**:
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
+   - Navigate to **Workers & Pages**
+   - Click **Create** → **Pages** → **Connect to Git**
+   - Select your GitHub repository
+   - Configure build settings:
+     ```
+     Build command: npm run build
+     Build output directory: dist
+     Root directory: /
+     ```
 
-### 4. Make First Commit
-```bash
-git commit -m "Initial commit - Glenugie Booking System complete"
-```
-
-### 5. Add GitHub Remote
-
-**First, create the repository on GitHub:**
-1. Go to https://github.com/new
-2. Repository name: `glenugie-booking`
-3. Make it **Private**
-4. **Do NOT** initialize with README, .gitignore, or license
-5. Click "Create repository"
-
-**Then connect it:**
-```bash
-git remote add origin https://github.com/dalebunnett/glenugie-booking.git
-git branch -M main
-git push -u origin main
-```
-
-If prompted, enter your GitHub username and **Personal Access Token** (not password).
-
----
-
-## 🌐 Step 4: Configure Webflow Cloud
-
-### 1. Connect GitHub to Webflow Cloud
-
-In your **Webflow Cloud** "Glenugie Booking System" app:
-
-1. Find **Source Control** or **Repository** section
-2. Click **Connect GitHub**
-3. Authorize Webflow to access your GitHub
-4. Select repository: `dalebunnett/glenugie-booking`
-5. Select branch: `main`
-6. Save
-
-### 2. Configure Build Settings
-
-```
-Build Command: npm run build
-Output Directory: dist
-Node Version: 18 or higher
-Mount Path: /app
-```
-
-### 3. Add Environment Variables
-
-In Webflow Cloud app settings, add these environment variables:
-
-```
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-RESEND_API_KEY=re_...
-ADMIN_EMAIL=info@glenugiekennels.co.uk
-JWT_SECRET=your-very-long-random-secret-string-min-32-chars
-```
-
-⚠️ **Important**: Use the SAME values from your local `.env` file!
-
-### 4. Add KV Namespace Binding
-
-```
-Binding Type: KV Namespace
-Binding Name: KV
-Namespace ID: 4dd144b89325450b8949d8132a8ad02c
-```
-
-### 5. Add D1 Database Binding (if available)
-
-If Webflow Cloud supports D1:
-```
-Binding Type: D1 Database
-Binding Name: DB
-Database ID: your-d1-database-id
-```
-
----
-
-## 🚀 Step 5: Deploy!
-
-### Automatic Deployment
-
-Once GitHub is connected, Webflow Cloud will:
-1. ✅ Automatically deploy on every push to `main`
-2. ✅ Show build logs
-3. ✅ Deploy to `https://www.glenugiekennels.co.uk/app/`
-
-### Manual Deployment
-
-If auto-deploy doesn't work:
-1. Go to your Webflow Cloud app
-2. Find "Deployments" section
-3. Click "Deploy Now" or "Trigger Deployment"
-
----
-
-## ✅ Step 6: Verify Deployment
-
-### Check These URLs:
-
-1. **Home/Booking Page**
+3. **Add Environment Variables** in Cloudflare Pages:
    ```
-   https://www.glenugiekennels.co.uk/app/
+   ADMIN_PASSWORD=Peterhead2026!
+   RESEND_API_KEY=your_key
+   STRIPE_SECRET_KEY=your_key
    ```
 
-2. **Admin Dashboard**
+4. **Add KV Binding** in Cloudflare Pages:
+   - Go to Settings → Functions → KV namespace bindings
+   - Add binding: `BOOKINGS_KV`
+   - Create new KV namespace or select existing
+
+5. **Deploy**
+
+Your app will be at: `https://your-project.pages.dev`
+
+Then you can add a custom domain: `https://app.glenugiekennels.co.uk`
+
+### Option B: Deploy via Wrangler CLI
+
+If you have Wrangler installed:
+
+1. **Create KV namespace**:
+   ```bash
+   npx wrangler kv:namespace create "BOOKINGS_KV"
    ```
-   https://www.glenugiekennels.co.uk/app/admin
+   This will output an ID like: `a1b2c3d4e5f6...`
+
+2. **Update wrangler.jsonc**:
+   ```jsonc
+   "kv_namespaces": [
+     { 
+       "binding": "BOOKINGS_KV", 
+       "id": "a1b2c3d4e5f6..."  // ← Your actual ID
+     }
+   ]
    ```
 
-3. **Customer Portal**
+3. **Add secrets**:
+   ```bash
+   npx wrangler secret put ADMIN_PASSWORD
+   # Enter: Peterhead2026!
+   
+   npx wrangler secret put RESEND_API_KEY
+   # Enter: your_resend_key
+   
+   npx wrangler secret put STRIPE_SECRET_KEY
+   # Enter: your_stripe_key
    ```
-   https://www.glenugiekennels.co.uk/app/my-bookings
+
+4. **Deploy**:
+   ```bash
+   npm run build
+   npx wrangler pages deploy dist
    ```
 
-### Test These Features:
+---
 
-- [ ] Can view kennel availability
-- [ ] Can make a test booking
-- [ ] Can access admin dashboard (use password: `glenugie2024`)
-- [ ] Emails are sent (check Resend dashboard)
-- [ ] Customer portal works
+## 🎯 Recommended Path Forward
+
+I recommend **Option A: Cloudflare Pages** because:
+- ✅ Full control over bindings
+- ✅ Free tier is generous
+- ✅ Auto-deploys from GitHub
+- ✅ Built-in KV support
+- ✅ Custom domains included
+- ✅ Better logging and diagnostics
+
+You can keep your main Webflow site and just host the `/app` section on Cloudflare Pages.
 
 ---
 
-## 🔧 Troubleshooting
+## 📞 If You Want to Stay with Webflow Cloud
 
-### Build Fails with "could not find package.json"
-- ✅ Make sure you pushed all files to GitHub
-- ✅ Check GitHub repository - you should see `package.json` in the root
+Contact Webflow support and ask:
+1. How to bind a Cloudflare KV namespace to your app
+2. How to set environment variables that are accessible at runtime
+3. Whether they support `locals.runtime.env` access
 
-### 404 Errors on All Pages
-- ✅ Check that **Mount Path** is set to `/app` in Webflow Cloud
-- ✅ Verify `webflow.json` has `"mountPath": "/app"`
-
-### Database/KV Errors
-- ✅ Make sure KV binding is configured in Webflow Cloud
-- ✅ Check KV namespace ID is correct
-- ✅ Verify environment variables are set
-
-### Stripe Errors
-- ✅ Confirm `STRIPE_SECRET_KEY` is set in Webflow Cloud
-- ✅ Use test key (`sk_test_...`) for testing
-- ✅ Update webhook URL in Stripe dashboard
-
-### Email Not Sending
-- ✅ Verify `RESEND_API_KEY` in Webflow Cloud
-- ✅ Check Resend dashboard for API errors
-- ✅ Make sure domain is verified in Resend
+In the meantime, the app **will work without KV**, but:
+- ⚠️ Data will be lost on Worker restarts
+- ⚠️ Admin auth won't persist
+- ⚠️ You'll need to re-enter bookings after deployments
 
 ---
 
-## 🔄 Future Updates
+## 🧪 Test Without KV (Temporary)
 
-To update your deployed app:
+To test if everything else works, I can modify the code to work without KV temporarily. This would:
+- Store everything in memory
+- Reset on each deployment
+- But let you test the UI and functionality
 
-### 1. Make Changes Locally
-```bash
-# Edit files
-# Test locally: npm run dev
-```
-
-### 2. Commit and Push
-```bash
-git add .
-git commit -m "Description of changes"
-git push origin main
-```
-
-### 3. Auto-Deploy
-Webflow Cloud will automatically deploy the changes!
+Want me to make this temporary change so you can at least test the app?
 
 ---
 
-## 📞 Support Resources
+## 📝 Summary
 
-- **Webflow Cloud Docs**: https://developers.webflow.com/cloud
-- **Astro Docs**: https://docs.astro.build
-- **Stripe Docs**: https://stripe.com/docs
-- **Resend Docs**: https://resend.com/docs
+**Current State**:
+- Code deployed ✓
+- Database working ✓
+- KV not bound ✗
+- Env vars not accessible ✗
 
----
+**Next Steps**:
+1. Try to find KV/binding settings in Webflow dashboard
+2. If not available → Switch to Cloudflare Pages
+3. Or → Ask Webflow support for help
+4. Or → Use temporary in-memory mode for testing
 
-## 🎯 Quick Reference
-
-### Project Structure
-```
-glenugie-booking/
-├── src/
-│   ├── pages/           # Routes
-│   ├── components/      # React components
-│   ├── lib/            # Utilities
-│   └── layouts/        # Astro layouts
-├── public/             # Static assets
-├── generated/          # Webflow styles
-├── package.json        # Dependencies
-├── astro.config.mjs    # Astro config
-├── webflow.json        # Webflow Cloud config
-└── wrangler.jsonc      # Cloudflare config
-```
-
-### Important Files
-- `webflow.json` - Mount path and project ID
-- `astro.config.mjs` - Base path configuration
-- `package.json` - All dependencies
-- `.env` - Local secrets (NEVER commit!)
-
-### Key URLs
-- App: `https://www.glenugiekennels.co.uk/app/`
-- Admin: `/app/admin`
-- Bookings: `/app/my-bookings`
-- Kennels: `/app/kennels/[slug]`
-
----
-
-**Ready to deploy?** Follow the steps above in order! 🚀
+**Let me know which path you want to take!** 🙂

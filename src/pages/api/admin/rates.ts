@@ -7,8 +7,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
   initDB(locals.runtime);
   
   // Check authentication
-  const { authorized } = requireAdminAuth(request, { locals } as any);
-  if (!authorized) {
+  const authResult = requireAdminAuth(request, { locals } as any);
+  if (!authResult.authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -35,8 +35,8 @@ export const PUT: APIRoute = async ({ request, locals }) => {
   initDB(locals.runtime);
   
   // Check authentication for updates
-  const { authorized } = requireAdminAuth(request, { locals } as any);
-  if (!authorized) {
+  const authResult = requireAdminAuth(request, { locals } as any);
+  if (!authResult.authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -59,6 +59,10 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
+
+
+
 
 
 

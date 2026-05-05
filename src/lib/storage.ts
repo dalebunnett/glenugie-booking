@@ -1,6 +1,9 @@
 
 
 
+
+
+
 /**
  * Storage adapter for Cloudflare Workers
  * Uses KV when available, falls back to global in-memory storage
@@ -212,19 +215,32 @@ export const getStorage = (kv?: any): Storage => {
   return storageInstance;
 };
 
+export function getKVStorage(locals: App.Locals): KVNamespace | null {
+  try {
+    return locals?.runtime?.env?.BOOKINGS_KV || null;
+  } catch (error) {
+    console.error('Failed to get KV storage:', error);
+    return null;
+  }
+}
+
 /**
  * Initialize storage with KV from Astro runtime
  * Call this in API routes to ensure KV is available
  */
 export const initializeStorage = (runtime?: any): Storage => {
-  const kv = runtime?.env?.KV;
+  const kv = runtime?.env?.BOOKINGS_KV;
   if (kv) {
-    console.log('[Storage] Initializing with KV binding');
+    console.log('[Storage] Initializing with BOOKINGS_KV binding');
   } else {
-    console.warn('[Storage] No KV binding found, using in-memory storage');
+    console.warn('[Storage] No BOOKINGS_KV binding found, using in-memory storage');
+    console.warn('[Storage] Available env keys:', runtime?.env ? Object.keys(runtime.env) : 'no runtime.env');
   }
   return getStorage(kv);
 };
+
+
+
 
 
 

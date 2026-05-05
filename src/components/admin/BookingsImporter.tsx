@@ -6,6 +6,7 @@ import { Textarea } from '../ui/textarea';
 import { baseUrl } from '../../lib/base-url';
 import { Alert, AlertDescription } from '../ui/alert';
 import { toast } from 'sonner';
+import { adminPost } from '../../lib/admin-fetch';
 
 interface ImportResult {
   success: boolean;
@@ -410,55 +411,59 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
   };
 
   const handleImport = async () => {
-    if (parsedBookings.length === 0) {
-      toast.error('No bookings to import');
+    if (!selectedFile && !jsonText) {
+      toast.error('Please select a file or paste JSON data');
       return;
     }
 
     setIsImporting(true);
-    try {
-      console.log('[Import] Starting import of', parsedBookings.length, 'bookings');
-      console.log('[Import] Sending POST to:', `${baseUrl}/api/admin/bookings/import`);
-      
-      const response = await fetch(`${baseUrl}/api/admin/bookings/import`, {
-        method: 'POST',
-        credentials: 'include', // Include cookies for authentication
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ bookings: parsedBookings }),
-      });
+    setError(null);
+    setResult(null);
 
-      console.log('[Import] Response status:', response.status);
-      console.log('[Import] Response ok:', response.ok);
-      
-      const result = await response.json();
-      console.log('[Import] Response data:', result);
+    try {
+      let bookings;
+
+      if (jsonText) {
+        // Parse JSON text
+        bookings = JSON.parse(jsonText);
+      } else if (selectedFile) {
+        // Read file content
+        const text = await selectedFile.text();
+        if (selectedFile.name.endsWith('.json')) {
+          bookings = JSON.parse(text);
+        } else {
+          // Parse CSV
+          bookings = parseCSV(text);
+        }
+      }
+
+      // Validate format
+      if (!Array.isArray(bookings)) {
+        throw new Error('Data must be an array of bookings');
+      }
+
+      // Send to API
+      const response = await adminPost('/api/admin/bookings/import', { bookings, dryRun });
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to import bookings');
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to import bookings');
       }
 
-      toast.success(`Successfully imported ${result.imported} bookings!`);
-      if (result.errors > 0) {
-        toast.error(`${result.errors} bookings failed to import`);
-        console.error('[Import] Failed bookings:', result.details?.errors);
+      const result = await response.json();
+      setResult(result);
+
+      if (!dryRun && result.imported > 0) {
+        toast.success(`Successfully imported ${result.imported} bookings`);
+        onImportComplete?.();
+      } else if (dryRun) {
+        toast.info('Validation complete. Review results below.');
       }
-      
-      console.log('[Import] Total bookings in DB after import:', result.totalBookingsInDB);
-      
-      // Refresh the bookings list
-      onImportComplete();
-      
-      // Reset the importer
-      setParsedBookings([]);
-      setFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    } catch (error) {
-      console.error('[Import] Import error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to import bookings');
+    } catch (err) {
+      console.error('Import error:', err);
+      const message = err instanceof Error ? err.message : 'Failed to import bookings';
+      setError(message);
+      toast.error(message);
     } finally {
       setIsImporting(false);
     }
@@ -567,6 +572,7 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
     </div>
   );
 }
+
 
 
 

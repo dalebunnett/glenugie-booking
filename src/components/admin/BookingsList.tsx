@@ -3,6 +3,7 @@
 
 
 
+
 import React from 'react';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
@@ -17,6 +18,7 @@ import { Textarea } from '../ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import type { Booking } from '../../lib/booking-types';
 import { baseUrl } from '../../lib/base-url';
+import { adminDelete, adminPut } from '../../lib/admin-fetch';
 
 interface BookingsListProps {
   bookings: Booking[];
@@ -168,12 +170,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
 
   const updateBookingStatus = async (bookingId: string, status: Booking['status']) => {
     try {
-      await fetch(`${baseUrl}/api/admin/bookings/${bookingId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ status })
-      });
+      await adminPut(`/api/admin/bookings/${bookingId}`, { status });
       onRefresh();
       setSelectedBooking(null);
       setIsDialogOpen(false);
@@ -196,12 +193,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
     if (!editedBooking || !isEditMode) return;
 
     try {
-      await fetch(`${baseUrl}/api/admin/bookings/${editedBooking.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(editedBooking)
-      });
+      await adminPut(`/api/admin/bookings/${editedBooking.id}`, editedBooking);
       onRefresh();
       setIsEditMode(false);
       setEditedBooking(null);
@@ -795,6 +787,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
     </div>
   );
 }
+
 
 
 

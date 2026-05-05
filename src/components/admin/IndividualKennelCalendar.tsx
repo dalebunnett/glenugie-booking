@@ -1,6 +1,3 @@
-
-
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
@@ -12,6 +9,7 @@ import type { Booking } from '../../lib/booking-types';
 import { LUXURY_SUITES, CATTERY_SUITES } from '../../lib/booking-types';
 import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWithinInterval, parseISO, startOfWeek, endOfWeek } from 'date-fns';
 import { baseUrl } from '../../lib/base-url';
+import { adminPut } from '../../lib/admin-fetch';
 
 interface IndividualKennelCalendarProps {
   bookings: Booking[];
@@ -205,6 +203,28 @@ export default function IndividualKennelCalendar({ bookings, onUpdate }: Individ
         </CardContent>
       </Card>
     );
+  };
+
+  const updateKennelNumber = async (bookingId: string, newKennelNumber: number) => {
+    try {
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) return;
+
+      const response = await adminPut(`/api/admin/bookings/${selectedBooking.id}`, {
+        ...booking,
+        kennelNumber: newKennelNumber
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update kennel number');
+      }
+
+      toast.success(`Kennel number updated to ${newKennelNumber}`);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error updating kennel number:', error);
+      toast.error('Failed to update kennel number');
+    }
   };
 
   return (
@@ -401,6 +421,7 @@ export default function IndividualKennelCalendar({ bookings, onUpdate }: Individ
     </div>
   );
 }
+
 
 
 

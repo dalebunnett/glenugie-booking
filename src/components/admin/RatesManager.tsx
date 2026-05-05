@@ -1,17 +1,11 @@
-
-
-
-
-
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
-import { baseUrl } from '../../lib/base-url';
 import { toast } from 'sonner';
+import { adminGet, adminPost } from '../../lib/admin-fetch';
 
 interface RateCategory {
   basePrice: number;
@@ -92,27 +86,18 @@ export default function RatesManager() {
   const loadRates = async () => {
     setLoading(true);
     try {
-      const sessionId = localStorage.getItem('admin_session');
-      const response = await fetch(`${baseUrl}/api/admin/rates`, {
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${sessionId || ''}`
-        }
-      });
+      const response = await adminGet('/api/admin/rates');
       
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to load rates: ${response.status} ${errorText}`);
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to load rates');
       }
       
       const data = await response.json();
       setRates(data);
-      if (data.paymentSettings) {
-        setPaymentValues(data.paymentSettings);
-      }
     } catch (error) {
       console.error('Error loading rates:', error);
-      toast.error('Failed to load rates: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error(error instanceof Error ? error.message : 'Failed to load rates');
     } finally {
       setLoading(false);
     }
@@ -532,6 +517,7 @@ export default function RatesManager() {
     </div>
   );
 }
+
 
 
 

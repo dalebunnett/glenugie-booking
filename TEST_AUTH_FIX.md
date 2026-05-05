@@ -1,161 +1,230 @@
-# 🔐 Admin Authentication Fix
+# Testing the Authentication Fix
 
-## What Was Fixed
+## 🔧 What Was Fixed
 
-### **Problem:**
-1. Login worked but logout didn't properly clear the session
-2. After logout, couldn't log back in
-3. Token mismatch between login response (`token`) and what the component was looking for (`sessionId`)
+1. ✅ **Cookie path changed** from `/` to `/app`
+2. ✅ **Token error fixed** in all admin endpoints
+3. ✅ **Dashboard stats calculation** added
+4. ✅ **Test pages created** for debugging
 
-### **Solution:**
-1. ✅ Fixed token storage - now using `data.token` instead of `data.sessionId`
-2. ✅ Added proper logout that clears everything and reloads the page
-3. ✅ Created `AdminLoginWrapper` component to handle authentication state
-4. ✅ Added authentication check on page load
+## 🧪 Step-by-Step Testing Guide
 
----
+### Before You Start
+- Make sure you've **pushed to GitHub** and Webflow has **deployed the latest build**
+- Clear your browser cache and cookies for the site
+- Open browser in **Incognito/Private mode** for cleanest test
 
-## Files Changed
+### Test 1: Authentication Test Page
 
-1. **`src/components/admin/AdminLogin.tsx`**
-   - Fixed: Now stores `data.token` instead of `data.sessionId`
-   - Cookie is set by server via `Set-Cookie` header
+**URL**: `https://glenugiekennels.webflow.io/app/api/debug/test-auth`
 
-2. **`src/components/admin/AdminDashboard.tsx`**
-   - Fixed: Logout now reloads the page after clearing session
-   - Clears: localStorage, sessionStorage, and cookies
-
-3. **`src/components/admin/AdminLoginWrapper.tsx`** ✨ NEW
-   - Handles authentication state
-   - Checks token validity on mount
-   - Shows login or dashboard based on auth status
-
-4. **`src/pages/admin/index.astro`**
-   - Now uses `AdminLoginWrapper` instead of direct dashboard
-
----
-
-## How It Works Now
-
-### **Login Flow:**
-1. User enters password
-2. POST to `/api/admin/auth`
-3. Server returns `{ token: "..." }`
-4. Token stored in localStorage
-5. Server sets HttpOnly cookie
-6. Dashboard shown
-
-### **Logout Flow:**
-1. User clicks "Logout"
-2. DELETE to `/api/admin/auth`
-3. Server clears cookie
-4. Client clears localStorage & sessionStorage
-5. **Page reloads** → forces re-authentication
-6. Login screen shown
-
-### **Authentication Check:**
-1. Page loads
-2. Check for token in localStorage
-3. GET to `/api/admin/auth` with token
-4. Server validates token signature & expiry
-5. If valid → show dashboard
-6. If invalid → clear token, show login
-
----
-
-## Testing Steps
-
-### **1. Test Login**
-```bash
-# Navigate to admin
-https://www.glenugiekennels.co.uk/app/admin
-
-# Should see login screen
-# Enter password: Peterhead2026!
-# Should redirect to dashboard
+**Expected Before Login**:
+```
+❌ Not Authenticated
+Token Found: ✗ No
+Token Source: Not found
 ```
 
-### **2. Test Session Persistence**
-```bash
-# Refresh the page
-# Should stay logged in (no login prompt)
+**Expected After Login** (after logging in at `/app/admin`):
+```
+✅ Authentication Successful  
+Token Found: ✓ Yes
+Token Source: Cookie (admin_session)
+Token Valid: ✓ Yes
 ```
 
-### **3. Test Logout**
-```bash
-# Click "Logout" button
-# Page should reload
-# Should see login screen again
-```
-
-### **4. Test Re-Login**
-```bash
-# Enter password again
-# Should successfully log in
-# Dashboard should load
-```
+**What This Tests**: Whether the authentication cookie is being set and sent correctly
 
 ---
 
-## Deploy Instructions
+### Test 2: Environment Check Page
 
-### **Option 1: Push to GitHub (Automatic Deploy)**
-```bash
-cd /app
-git add .
-git commit -m "Fix admin authentication and logout"
-git push https://YOUR_TOKEN@github.com/dalebunnett/glenugie-booking.git main
+**URL**: `https://glenugiekennels.webflow.io/app/api/debug/env-check`
+
+**Expected Results**:
+```
+✅ Runtime Environment: Available
+✅ KV Storage (BOOKINGS_KV): Bound
+✅ Read Test: ✓ Success
+✅ Write Test: ✓ Success
+✅ ADMIN_PASSWORD: ✓ Set
+✅ DB Initialization: ✓ Success
+✅ Bookings Query: ✓ X bookings found
 ```
 
-### **Option 2: Deploy to Webflow Cloud**
-Your Webflow deployment will automatically pick up the changes from GitHub!
+**What This Tests**: Whether your environment is configured correctly
 
 ---
 
-## Environment Variables Required
+### Test 3: Admin Login Flow
 
-Make sure these are set in Webflow Cloud:
+1. **Visit**: `https://glenugiekennels.webflow.io/app/admin`
 
+2. **Expected**: Login form appears
+
+3. **Enter**: Password `Peterhead2026!`
+
+4. **Click**: "Login" button
+
+5. **Expected**: 
+   - Success message appears
+   - Dashboard loads
+   - **NO console errors**
+   - Stats show correct numbers
+   - Bookings list appears
+
+6. **Open DevTools** → Application → Cookies
+
+7. **Expected Cookie**:
+   ```
+   Name: admin_session
+   Value: [long token string]
+   Path: /app
+   Secure: ✓
+   HttpOnly: ✓
+   SameSite: Lax
+   Expires: [7 days from now]
+   ```
+
+---
+
+### Test 4: Session Persistence
+
+1. **After logging in**, close the browser completely
+
+2. **Reopen browser** and visit: `https://glenugiekennels.webflow.io/app/admin`
+
+3. **Expected**: 
+   - Dashboard loads immediately
+   - NO login screen
+   - You're still authenticated
+
+4. **What This Tests**: Cookie persistence across browser sessions
+
+---
+
+### Test 5: API Requests (Browser Console)
+
+**While logged into admin dashboard**, open browser console and run:
+
+```javascript
+// Test bookings endpoint
+fetch('/app/api/admin/bookings', {
+  credentials: 'include'
+})
+.then(r => r.json())
+.then(data => console.log('Bookings:', data));
+
+// Test rules endpoint
+fetch('/app/api/admin/booking-rules', {
+  credentials: 'include'
+})
+.then(r => r.json())
+.then(data => console.log('Rules:', data));
+
+// Test rates endpoint  
+fetch('/app/api/admin/rates', {
+  credentials: 'include'
+})
+.then(r => r.json())
+.then(data => console.log('Rates:', data));
 ```
-ADMIN_PASSWORD=Peterhead2026!
-```
+
+**Expected**: All three should return data, **NO 403 errors**
 
 ---
 
-## Security Notes
+### Test 6: Create a Test Booking
 
-✅ Tokens are signed and expire after 7 days
-✅ HttpOnly cookies prevent XSS attacks
-✅ Tokens stored in localStorage as fallback
-✅ Server validates token signature on every request
-✅ Logout clears all session data
+1. Go to **Create tab** in admin dashboard
 
----
+2. Fill out a test booking:
+   - Customer: Test User
+   - Email: test@example.com
+   - Pet: Test Dog
+   - Dates: Any available dates
+   - Accommodation: Any type
 
-## Troubleshooting
+3. **Click**: "Create Booking"
 
-### **Still can't logout?**
-1. Check browser console for errors
-2. Clear browser cache
-3. Check Webflow Runtime Logs
-
-### **Can't login after logout?**
-1. Clear localStorage manually: `localStorage.clear()`
-2. Clear all cookies for the domain
-3. Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
-
-### **Token not persisting?**
-1. Check if `ADMIN_PASSWORD` env var is set in Webflow
-2. Check browser console for cookie errors
-3. Ensure site is served over HTTPS
+4. **Expected**:
+   - Success message
+   - Booking appears in Bookings tab
+   - Refresh page → booking still there (saved to KV)
 
 ---
 
-## Next Steps
+## 🚨 If Tests Fail
 
-1. ✅ Test locally (if needed)
-2. 🚀 Push to GitHub
-3. ⏱️ Wait for Webflow deployment
-4. 🧪 Test on production
-5. 🎉 Done!
+### If Auth Test Shows "Not Authenticated" After Login:
 
+1. Check browser DevTools → Application → Cookies
+2. Is `admin_session` cookie present?
+   - **No**: Cookie not being set (check server logs)
+   - **Yes, but Path=/**: Old cached build, need to redeploy
+   - **Yes, Path=/app**: Token might be invalid
+
+3. Run in console:
+   ```javascript
+   document.cookie
+   ```
+   Look for `admin_session` in output
+
+### If Environment Check Shows "KV Not Bound":
+
+1. Go to Webflow project settings
+2. Add KV namespace binding:
+   - Name: `BOOKINGS_KV`
+   - Type: KV Namespace
+3. Redeploy
+
+### If You See 403 Errors:
+
+1. Check that you deployed the **latest code**
+2. Clear browser cache completely
+3. Try in Incognito/Private window
+4. Check server logs for authentication errors
+
+### If Dashboard Won't Load:
+
+1. Open browser console
+2. Look for specific error message
+3. Check Network tab for failed requests
+4. Visit `/app/api/debug/env-check` to verify environment
+
+---
+
+## ✅ Success Checklist
+
+After deployment, confirm:
+
+- [ ] `/app/api/debug/test-auth` shows auth status correctly
+- [ ] `/app/api/debug/env-check` shows all green checkmarks
+- [ ] Can log in at `/app/admin` without errors
+- [ ] Dashboard loads with stats and bookings
+- [ ] Cookie is set with Path=/app
+- [ ] No 403 errors in console
+- [ ] Session persists after closing browser
+- [ ] Can create test bookings
+- [ ] Bookings appear in admin dashboard
+- [ ] Data persists after page refresh
+
+---
+
+## 📞 Need Help?
+
+If tests fail:
+
+1. Take screenshots of:
+   - `/app/api/debug/test-auth` page
+   - `/app/api/debug/env-check` page
+   - Browser console errors
+   - DevTools → Application → Cookies
+
+2. Share the screenshots for debugging
+
+3. Check that:
+   - Latest code is deployed
+   - Environment variables are set
+   - KV namespace is bound
+   - Browser cache is cleared

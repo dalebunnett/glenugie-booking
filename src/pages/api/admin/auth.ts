@@ -1,6 +1,22 @@
 import type { APIRoute } from 'astro';
 import { generateAdminToken, getTokenFromRequest, isValidAdminToken, getAdminSecret } from '../../../lib/admin-auth';
 
+// CORS headers for preview environments
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Password',
+  'Access-Control-Allow-Credentials': 'true',
+};
+
+// Handle preflight requests
+export const OPTIONS: APIRoute = async () => {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders
+  });
+};
+
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const { password } = await request.json();
@@ -14,7 +30,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       console.log('[Auth] Invalid password');
       return new Response(JSON.stringify({ error: 'Invalid password' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
       });
     }
 
@@ -35,7 +54,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': `admin_session=${token}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax; Secure`
+        'Set-Cookie': `admin_session=${token}; Path=/app; Max-Age=${maxAge}; HttpOnly; SameSite=Lax; Secure`,
+        ...corsHeaders
       }
     });
   } catch (error) {
@@ -45,7 +65,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
     });
   }
 };
@@ -59,19 +82,28 @@ export const GET: APIRoute = async ({ request, locals }) => {
     if (!isValidAdminToken(token, secret)) {
       return new Response(JSON.stringify({ valid: false }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
       });
     }
 
     return new Response(JSON.stringify({ valid: true, token }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
     });
   } catch (error) {
     console.error('[Auth] Verification error:', error);
     return new Response(JSON.stringify({ valid: false }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
     });
   }
 };
@@ -83,15 +115,21 @@ export const DELETE: APIRoute = async ({ request }) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': 'admin_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure'
+        'Set-Cookie': 'admin_session=; Path=/app; Max-Age=0; HttpOnly; SameSite=Lax; Secure',
+        ...corsHeaders
       }
     });
   } catch (error) {
     console.error('[Auth] Logout error:', error);
     return new Response(JSON.stringify({ error: 'Logout failed' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders
+      }
     });
   }
 };
+
+
 

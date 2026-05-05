@@ -1,6 +1,3 @@
-
-
-
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -24,6 +21,8 @@ import {
   type BookingRules
 } from '../../lib/booking-rules';
 import { baseUrl } from '../../lib/base-url';
+import { adminPost } from '../../lib/admin-fetch';
+import type { Booking } from '../../lib/booking-types';
 import { useEffect } from 'react';
 
 type AccommodationType = 'luxury-suite' | 'ruffs-retreat' | 'village' | 'cattery';
@@ -235,69 +234,67 @@ export default function CreateBookingForm({ onSuccess }: CreateBookingFormProps)
       };
 
       const sessionId = localStorage.getItem('admin_session');
-      const response = await fetch(`${baseUrl}/api/admin/bookings`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionId || ''}`
-        },
-        credentials: 'include',
-        body: JSON.stringify(bookingData)
-      });
+      const response = await adminPost('/api/admin/bookings', bookingData);
 
-      if (response.ok) {
-        // Reset form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          country: 'United Kingdom',
-          address: '',
-          city: '',
-          county: '',
-          postcode: '',
-          emergencyContactName: '',
-          emergencyContactNumber: '',
-          accommodationType: '',
-          specificSuite: '',
-          checkIn: undefined,
-          checkOut: undefined,
-          petName1: '',
-          microchip1: '',
-          breed1: '',
-          sex1: 'male',
-          age1: '',
-          petName2: '',
-          microchip2: '',
-          breed2: '',
-          sex2: 'male',
-          age2: '',
-          petName3: '',
-          microchip3: '',
-          breed3: '',
-          sex3: 'male',
-          age3: '',
-          veterinarySurgery: '',
-          petInsurance: '',
-          feedingInstructions: '',
-          medicalInstructions: '',
-          hasAggressionIssues: false,
-          aggressionDetails: '',
-          triesEscape: false,
-          escapeDetails: '',
-          additionalNotes: '',
-          specialRequests: ''
-        });
-        setNumberOfPets(1);
-        onSuccess();
-        alert('Booking created successfully!');
-      } else {
-        const data = await response.json() as { error?: string };
-        setError(data.error || 'Failed to create booking');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create booking');
       }
+
+      const newBooking = await response.json();
+      console.log('Created booking:', newBooking);
+      
+      toast.success('Booking created successfully!');
+      
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        country: 'United Kingdom',
+        address: '',
+        city: '',
+        county: '',
+        postcode: '',
+        emergencyContactName: '',
+        emergencyContactNumber: '',
+        accommodationType: '',
+        specificSuite: '',
+        checkIn: undefined,
+        checkOut: undefined,
+        petName1: '',
+        microchip1: '',
+        breed1: '',
+        sex1: 'male',
+        age1: '',
+        petName2: '',
+        microchip2: '',
+        breed2: '',
+        sex2: 'male',
+        age2: '',
+        petName3: '',
+        microchip3: '',
+        breed3: '',
+        sex3: 'male',
+        age3: '',
+        veterinarySurgery: '',
+        petInsurance: '',
+        feedingInstructions: '',
+        medicalInstructions: '',
+        hasAggressionIssues: false,
+        aggressionDetails: '',
+        triesEscape: false,
+        escapeDetails: '',
+        additionalNotes: '',
+        specialRequests: ''
+      });
+      
+      onSuccess?.();
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error('Error creating booking:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create booking');
+      toast.error(err instanceof Error ? err.message : 'Failed to create booking');
     } finally {
       setLoading(false);
     }
@@ -824,6 +821,7 @@ export default function CreateBookingForm({ onSuccess }: CreateBookingFormProps)
     </form>
   );
 }
+
 
 
 

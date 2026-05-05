@@ -1,248 +1,163 @@
-# 🔐 Authentication Fix - Cloudflare Workers Compatible
+# Critical Authentication Fix - Cookie Path
 
-## What Was The Problem?
+## 🚨 Problem Identified
 
-The old authentication system used **in-memory storage** (`Set<string>`) which gets cleared when Cloudflare Workers restart. This caused:
-- ❌ Tokens to expire randomly
-- ❌ Users getting logged out unexpectedly
-- ❌ "Unauthorized" errors after Worker restarts
+The authentication cookie was being set with `Path=/` but your app runs at `/app`, so the cookie wasn't being sent with requests to `/app/*` endpoints.
 
-## What I Fixed
+## ✅ Fixes Applied
 
-### ✅ New Authentication System:
+### 1. **Cookie Path Corrected**
+Updated auth endpoint to set cookies with `Path=/app`:
 
-1. **Signed Tokens** - Tokens are now cryptographically signed with your admin password
-2. **Stateless** - No in-memory storage needed
-3. **Persistent** - Works across Worker restarts
-4. **Secure** - 7-day expiration, HttpOnly cookies
+**File**: `src/pages/api/admin/auth.ts`
+```typescript
+// Before
+'Set-Cookie': `admin_session=${token}; Path=/; ...`
 
-### How It Works:
-
-```
-User logs in → Generate signed token → Store in HttpOnly cookie
-                    ↓
-Token = timestamp + signature
-                    ↓
-Signature = hash(timestamp + admin_password)
-                    ↓
-On verification: Re-compute signature and compare
+// After  
+'Set-Cookie': `admin_session=${token}; Path=/app; ...`
 ```
 
-## Files Updated
+### 2. **Logout Cookie Path**
+Updated logout to clear cookies with correct path:
 
-✅ `src/lib/admin-auth.ts` - New token signing/verification  
-✅ `src/pages/api/admin/auth.ts` - Uses new token generation  
-✅ `src/pages/api/admin/bookings.ts` - Updated auth calls  
-✅ `src/pages/api/admin/bookings/[bookingId].ts` - Updated auth calls  
-✅ `src/pages/api/admin/rates.ts` - Updated auth calls  
-✅ `src/pages/api/admin/booking-rules.ts` - Updated auth calls  
-✅ `src/pages/api/admin/init-data.ts` - Updated auth calls  
+**File**: `src/components/admin/AdminDashboard.tsx`
+```typescript
+document.cookie = 'admin_session=; Path=/app; Max-Age=0; ...';
+```
 
-## Testing Your Fix
+### 3. **RequireAdminAuth Fixed** (Previous Issue)
+All admin endpoints now call `requireAdminAuth(request)` correctly without the broken second parameter.
 
-### Step 1: Deploy the Fix
+### 4. **Test Pages Created**
+- ✅ `/app/api/debug/env-check` - Environment & KV diagnostics
+- ✅ `/app/api/debug/test-auth` - Authentication test page
 
+## 🧪 How to Test After Deployment
+
+### Step 1: Test Authentication Flow
+1. Go to: `https://glenugiekennels.webflow.io/app/api/debug/test-auth`
+2. **Should show**: ❌ Not Authenticated
+3. Click "Go to Login" button
+4. Enter password: `Peterhead2026!`
+5. After login, revisit: `/app/api/debug/test-auth`
+6. **Should now show**: ✅ Authentication Successful
+7. **Should see**:
+   - Token Found: ✓ Yes
+   - Token Source: Cookie (admin_session)
+   - Token Valid: ✓ Yes
+
+### Step 2: Test Admin Dashboard
+1. Go to: `/app/admin`
+2. Enter password: `Peterhead2026!`
+3. Dashboard should load **without errors**
+4. Check browser console - **should be clean** (no 403 errors)
+5. Stats should display correctly
+6. Bookings tab should show data
+
+### Step 3: Test Environment
+1. Visit: `/app/api/debug/env-check`
+2. Verify:
+   - KV Storage: "Bound" badge
+   - KV Read/Write Tests: ✓ Success
+   - ADMIN_PASSWORD: ✓ Set
+   - Database Tests: ✓ Success
+
+## 🔍 Debug Cookie Issues
+
+If authentication still fails after deployment, check:
+
+### Browser Console Check
+```javascript
+// Run this in browser console while on /app/admin
+document.cookie
+// Should see: admin_session=xxxxx-xxxxx; ...
+```
+
+### Cookie Path Verification
+1. Open DevTools → Application → Cookies
+2. Look for `admin_session` cookie
+3. **Path should be**: `/app`
+4. **Domain should be**: `.webflow.io` or your domain
+5. **Secure**: ✓ (checkbox checked)
+6. **HttpOnly**: ✓ (checkbox checked)
+7. **SameSite**: Lax
+
+## 📋 Pre-Deployment Checklist
+
+Before deploying:
+- [ ] Code has been rebuilt (not just re-uploaded)
+- [ ] Environment variable `ADMIN_PASSWORD` is set
+- [ ] KV namespace `BOOKINGS_KV` is bound
+- [ ] Clear any cached builds
+
+## 🚀 Deployment Steps
+
+### Option 1: Via GitHub (Recommended)
 ```bash
+# Commit all changes
+git add .
+git commit -m "Fix authentication cookie path and token errors"
+git push origin main
+
+# Webflow Cloud will auto-deploy from GitHub
+```
+
+### Option 2: Manual Build & Deploy
+```bash
+# Build the project
 npm run build
-wrangler deploy
+
+# The built files will be in dist/
+# Upload to Webflow Cloud
 ```
 
-### Step 2: Test Authentication
+## 🎯 Expected Behavior After Fix
 
-Visit: **https://glenugiekennels.co.uk/debug-auth**
+### Login Flow:
+1. User visits `/app/admin`
+2. Sees login form
+3. Enters password `Peterhead2026!`
+4. Clicks "Login"
+5. Server sets cookie: `admin_session=token; Path=/app`
+6. Browser stores cookie
+7. Redirects to dashboard
+8. Dashboard loads successfully
 
-This debug page lets you:
-1. ✅ Test login with password
-2. ✅ Verify token is valid
-3. ✅ Test admin API access
-4. ✅ Check environment/cookies
-5. ✅ Logout and clear session
+### Subsequent Requests:
+1. User navigates to any `/app/*` page
+2. Browser **automatically sends** `admin_session` cookie
+3. Server validates token from cookie
+4. Request succeeds (no 403 errors)
 
-### Step 3: Test Admin Dashboard
+### Session Persistence:
+1. User closes browser
+2. Reopens within 7 days
+3. Visits `/app/admin`
+4. **Still logged in** (cookie persists)
+5. No need to re-enter password
 
-1. Go to `/admin`
-2. Login with: `Peterhead2026!`
-3. Should stay logged in (7 days)
-4. Refresh page - should stay logged in
-5. Close browser and reopen - should stay logged in
+## 🔒 Security Notes
 
-## How to Use
+The authentication system now uses:
+- **Signed tokens** (can't be forged)
+- **HttpOnly cookies** (XSS protection)
+- **Secure flag** (HTTPS only)
+- **SameSite=Lax** (CSRF protection)
+- **7-day expiration** (auto logout)
+- **Correct path scoping** (only sent to /app/*)
 
-### Admin Login:
-```javascript
-// POST /api/admin/auth
-{
-  "password": "Peterhead2026!"
-}
+## 📚 Related Documentation
 
-// Response:
-{
-  "token": "l9k2j3h-a7s8d9",
-  "success": true
-}
+- `FIXES_APPLIED.md` - Complete fix history
+- `TOKEN_ERROR_FIX.md` - Token error details
+- `KV_SETUP_GUIDE.md` - KV namespace setup
+- `EMAIL_COMPLETE_GUIDE.md` - Email system
 
-// Cookie set automatically:
-admin_session=l9k2j3h-a7s8d9; HttpOnly; Secure; Max-Age=604800
-```
+## ❓ Still Having Issues?
 
-### Check Token:
-```javascript
-// GET /api/admin/auth
-// Automatically reads cookie
-
-// Response if valid:
-{
-  "valid": true,
-  "token": "l9k2j3h-a7s8d9"
-}
-
-// Response if invalid:
-{
-  "valid": false
-}
-```
-
-### Logout:
-```javascript
-// DELETE /api/admin/auth
-
-// Response:
-{
-  "success": true
-}
-
-// Cookie cleared
-```
-
-## Environment Variables
-
-Make sure these are set in Cloudflare:
-
-```bash
-# In wrangler.jsonc (already set):
-"vars": {
-  "ADMIN_PASSWORD": "Peterhead2026!"
-}
-
-# Or set as secret (more secure):
-wrangler secret put ADMIN_PASSWORD
-# Then enter: Peterhead2026!
-```
-
-## Token Lifecycle
-
-```
-Login
-  ↓
-Token generated with signature
-  ↓
-Stored in HttpOnly cookie (7 days)
-  ↓
-Every API request: Token verified with signature
-  ↓
-After 7 days: Token expires
-  ↓
-User needs to login again
-```
-
-## Security Features
-
-✅ **HttpOnly Cookies** - JavaScript can't access tokens  
-✅ **Secure Flag** - Only sent over HTTPS  
-✅ **SameSite=Lax** - CSRF protection  
-✅ **7-day Expiration** - Automatic timeout  
-✅ **Signed Tokens** - Tamper-proof  
-✅ **Stateless** - No database needed  
-
-## Troubleshooting
-
-### "Unauthorized" after login
-
-**Check 1:** Is ADMIN_PASSWORD set correctly?
-```bash
-wrangler secret list
-```
-
-**Check 2:** Test login:
-```bash
-curl -X POST https://glenugiekennels.co.uk/api/admin/auth \
-  -H "Content-Type: application/json" \
-  -d '{"password":"Peterhead2026!"}'
-```
-
-**Check 3:** Check cookies in browser DevTools:
-- Application → Cookies → admin_session
-- Should be HttpOnly, Secure
-
-### Token expires immediately
-
-**Check:** System time might be wrong. Tokens use timestamps.
-
-### Can't access admin APIs
-
-**Check 1:** Is cookie being sent?
-- DevTools → Network → Request Headers → Cookie
-
-**Check 2:** Is token valid?
-```bash
-curl https://glenugiekennels.co.uk/api/admin/auth \
-  -H "Cookie: admin_session=your-token"
-```
-
-## Changing Admin Password
-
-### Option 1: Update wrangler.jsonc
-```json
-"vars": {
-  "ADMIN_PASSWORD": "YourNewPassword123!"
-}
-```
-
-Then deploy:
-```bash
-wrangler deploy
-```
-
-### Option 2: Use Secrets (More Secure)
-```bash
-wrangler secret put ADMIN_PASSWORD
-# Enter your new password when prompted
-```
-
-**Note:** All existing tokens will be invalid after password change. Users must login again.
-
-## Why This Is Better
-
-| Old System | New System |
-|------------|------------|
-| ❌ In-memory storage | ✅ Stateless tokens |
-| ❌ Lost on Worker restart | ✅ Persistent across restarts |
-| ❌ No expiration | ✅ 7-day auto-expiration |
-| ❌ Not signed | ✅ Cryptographically signed |
-| ❌ Not Cloudflare-friendly | ✅ Built for Cloudflare Workers |
-
-## Next Steps
-
-1. ✅ Deploy the fix: `wrangler deploy`
-2. ✅ Test at `/debug-auth`
-3. ✅ Try logging into `/admin`
-4. ✅ Verify it persists across refreshes
-5. ✅ Delete `/debug-auth` page when done (optional)
-
-## Questions?
-
-- **Q: How long do tokens last?**  
-  A: 7 days from login
-
-- **Q: Can I change the expiration?**  
-  A: Yes, edit `src/lib/admin-auth.ts` line with `sevenDays`
-
-- **Q: Is this secure?**  
-  A: Yes - signed tokens + HttpOnly + Secure + HTTPS = very secure
-
-- **Q: What if I forget the password?**  
-  A: Update `ADMIN_PASSWORD` in wrangler.jsonc or secrets
-
----
-
-**Your authentication is now Cloudflare Workers compatible! 🎉**
+1. Visit `/app/api/debug/test-auth` and take a screenshot
+2. Visit `/app/api/debug/env-check` and take a screenshot
+3. Open browser DevTools → Network tab
+4. Try logging in, check request/response headers
+5. Share screenshots for further debugging

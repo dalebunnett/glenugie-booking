@@ -19,41 +19,51 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     setError('');
     setLoading(true);
 
+    console.log('🔐 Attempting login with password:', password);
+    console.log('🔐 Request URL:', `${baseUrl}/api/admin/auth`);
+
     try {
-      console.log('🔐 Attempting login with password:', password);
-      console.log('🔐 Request URL:', `${baseUrl}/api/admin/auth`);
-      
       const response = await fetch(`${baseUrl}/api/admin/auth`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
         body: JSON.stringify({ password }),
       });
 
       console.log('🔐 Response status:', response.status);
       console.log('🔐 Response headers:', Object.fromEntries(response.headers.entries()));
-      
+
       const data = await response.json();
       console.log('🔐 Response data:', data);
 
-      if (response.ok) {
-        console.log('✅ Login successful!');
-        // Store token in localStorage (using 'token' from response, not 'sessionId')
-        if (data.token) {
-          localStorage.setItem('admin_session', data.token);
-          console.log('✅ Session stored in localStorage:', data.token);
-          
-          // Cookie is already set by the server via Set-Cookie header
-          console.log('✅ Cookie set by server');
-        }
+      // Check for preview environment authentication error
+      if (data.error?.code === 'AUTHENTICATION_REQUIRED' || 
+          data.error?.message?.includes('Authentication required for preview')) {
+        setError('⚠️ Preview Environment Detected: This appears to be a Webflow preview URL that requires authentication. Please use the production URL (e.g., https://www.glenugiekennels.co.uk/app/admin) or contact support to configure preview access.');
+        setLoading(false);
+        return;
+      }
+
+      if (response.ok && data.token) {
+        console.log('✅ Login successful, token received');
+        localStorage.setItem('adminPassword', password);
+        localStorage.setItem('adminToken', data.token);
         onLogin();
       } else {
-        console.log('❌ Login failed:', data.error);
-        setError('Invalid password');
+        console.log('❌ Login failed:', data);
+        setError(data.error || 'Invalid password');
       }
     } catch (err) {
       console.error('❌ Login error:', err);
-      setError('Login failed. Please try again.');
+      
+      // Check if it's a network error that might indicate preview auth
+      if (err instanceof TypeError && (err as Error).message.includes('Failed to fetch')) {
+        setError('⚠️ Connection Error: Unable to reach the authentication service. If you\'re using a preview URL, please use the production URL instead (e.g., https://www.glenugiekennels.co.uk/app/admin)');
+      } else {
+        setError('Failed to connect to server. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -101,6 +111,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     </div>
   );
 }
+
 
 
 

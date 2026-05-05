@@ -6,10 +6,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
-  // Check authentication - pass mock Astro object with locals
-  const { authorized } = requireAdminAuth(request, { locals } as any);
-  if (!authorized) {
-    console.error('[booking-rules] Unauthorized access attempt');
+  // Check authentication
+  const authResult = requireAdminAuth(request, { locals } as any);
+  if (!authResult.authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -39,8 +38,8 @@ export const PUT: APIRoute = async ({ request, locals }) => {
   initDB(locals.runtime);
   
   // Check authentication for updates
-  const { authorized } = requireAdminAuth(request, { locals } as any);
-  if (!authorized) {
+  const authResult = requireAdminAuth(request, { locals } as any);
+  if (!authResult.authorized) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -63,6 +62,10 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
+
+
+
 
 
 

@@ -3,26 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Badge } from '../ui/badge';
 import { Switch } from '../ui/switch';
-import { baseUrl } from '../../lib/base-url';
+import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner';
+import { adminGet, adminPost } from '../../lib/admin-fetch';
+import type { BookingRules } from '../../lib/booking-rules';
 import { format } from 'date-fns';
-
-interface BookingRules {
-  id: number;
-  minAdvanceBookingDays: number;
-  maxAdvanceBookingDays: number;
-  minNights: number;
-  maxNights: number;
-  blockedDates: string[];
-  blockedDateRanges: { start: string; end: string; reason?: string }[];
-  allowedCheckInDays: number[];
-  allowedCheckOutDays: number[];
-  peakSeasonDates: { start: string; end: string; minNights?: number }[];
-  allowSameDayCheckInOut: boolean;
-  cutoffTimeForSameDayBooking: number;
-}
 
 export default function BookingRulesManager() {
   const [rules, setRules] = useState<BookingRules | null>(null);
@@ -45,29 +31,17 @@ export default function BookingRulesManager() {
 
   const loadRules = async () => {
     try {
-      const sessionId = localStorage.getItem('admin_session');
-      const response = await fetch(`${baseUrl}/api/admin/booking-rules`, {
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${sessionId || ''}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to load rules');
+      const response = await adminGet('/api/admin/booking-rules');
+      
+      if (!response.ok) {
+        throw new Error('Failed to load rules');
+      }
+      
       const data = await response.json();
       setRules(data);
-      setGeneralValues({
-        minAdvanceBookingDays: data.minAdvanceBookingDays,
-        maxAdvanceBookingDays: data.maxAdvanceBookingDays,
-        minNights: data.minNights,
-        maxNights: data.maxNights,
-        allowSameDayCheckInOut: Boolean(data.allowSameDayCheckInOut),
-        cutoffTimeForSameDayBooking: data.cutoffTimeForSameDayBooking
-      });
     } catch (error) {
       console.error('Error loading rules:', error);
-      toast.error('Failed to load booking rules');
-    } finally {
-      setLoading(false);
+      toast.error('Failed to load rules');
     }
   };
 
@@ -411,6 +385,7 @@ export default function BookingRulesManager() {
     </div>
   );
 }
+
 
 
 

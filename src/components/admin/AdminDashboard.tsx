@@ -11,6 +11,7 @@ import BookingRulesManager from './BookingRulesManager';
 import RatesManager from './RatesManager';
 import BookingsImporter from './BookingsImporter';
 import { baseUrl } from '../../lib/base-url';
+import { adminGet, adminPost, adminDelete } from '../../lib/admin-fetch';
 import type { Booking } from '../../lib/booking-types';
 
 export default function AdminDashboard() {
@@ -32,14 +33,7 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     try {
-      const sessionId = localStorage.getItem('admin_session');
-      await fetch(`${baseUrl}/api/admin/auth`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: {
-          'Authorization': `Bearer ${sessionId || ''}`
-        }
-      });
+      await adminDelete('/api/admin/auth');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -47,7 +41,8 @@ export default function AdminDashboard() {
       localStorage.removeItem('admin_session');
       sessionStorage.removeItem('admin_authenticated');
       
-      // Clear all cookies
+      // Clear all cookies with correct path
+      document.cookie = 'admin_session=; Path=/app; Max-Age=0; SameSite=Lax; Secure';
       document.cookie = 'admin_session=; Path=/; Max-Age=0; SameSite=Lax; Secure';
       
       // Reload the page to force re-authentication
@@ -57,20 +52,8 @@ export default function AdminDashboard() {
 
   const loadBookings = async () => {
     try {
-      console.log('[AdminDashboard] Loading bookings from:', `${baseUrl}/api/admin/bookings`);
-      const response = await fetch(`${baseUrl}/api/admin/bookings`, {
-        credentials: 'include', // Include cookies for authentication
-      });
-      console.log('[AdminDashboard] Response status:', response.status);
-      console.log('[AdminDashboard] Response ok:', response.ok);
-      
-      if (response.status === 403) {
-        // Unauthorized - redirect to login
-        console.error('[AdminDashboard] Unauthorized - redirecting to login');
-        toast.error('Session expired. Please log in again.');
-        window.location.href = `${baseUrl}/admin`;
-        return;
-      }
+      console.log('[AdminDashboard] Loading bookings...');
+      const response = await adminGet('/api/admin/bookings');
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -80,19 +63,35 @@ export default function AdminDashboard() {
       
       const data = await response.json();
       console.log('[AdminDashboard] Received data:', data);
-      console.log('[AdminDashboard] Data type:', Array.isArray(data) ? 'array' : typeof data);
-      console.log('[AdminDashboard] Data length:', data?.length);
       
       setBookings(data);
+      calculateStats(data);
       console.log('[AdminDashboard] Loaded bookings:', data.length);
-      console.log('[AdminDashboard] Village bookings:', data.filter((b: any) => b.accommodation === 'The Village').length);
-      console.log('[AdminDashboard] Village with kennelNumber:', data.filter((b: any) => b.accommodation === 'The Village' && b.kennelNumber).length);
-      console.log('[AdminDashboard] Sample village:', data.find((b: any) => b.accommodation === 'The Village'));
-      console.log('[AdminDashboard] Ruffs Retreat bookings:', data.filter((b: any) => b.accommodation === "Ruff's Retreat").length);
     } catch (error) {
       console.error('[AdminDashboard] Error loading bookings:', error);
       toast.error('Failed to load bookings');
     }
+  };
+
+  const calculateStats = (bookingsData: Booking[]) => {
+    const now = new Date();
+    const upcoming = bookingsData.filter(b => new Date(b.checkIn) > now);
+    const confirmed = bookingsData.filter(b => b.status === 'confirmed');
+    const pending = bookingsData.filter(b => b.status === 'pending');
+    const cancelled = bookingsData.filter(b => b.status === 'cancelled');
+    
+    const totalRevenue = confirmed.reduce((sum, b) => sum + (b.paidAmount || 0), 0);
+    const pendingRevenue = pending.reduce((sum, b) => sum + (b.totalDue || 0), 0);
+    
+    setStats({
+      total: bookingsData.length,
+      confirmed: confirmed.length,
+      pending: pending.length,
+      cancelled: cancelled.length,
+      upcoming: upcoming.length,
+      totalRevenue,
+      pendingRevenue
+    });
   };
 
   // Mark tab as loaded when switching to it
@@ -113,14 +112,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const initializeData = async () => {
       try {
-        const sessionId = localStorage.getItem('admin_session');
-        const response = await fetch(`${baseUrl}/api/admin/init-data`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${sessionId || ''}`
-          }
-        });
+        const response = await adminPost('/api/admin/init-data');
         
         if (response.ok) {
           const result = await response.json();
@@ -149,7 +141,7 @@ export default function AdminDashboard() {
               <Button 
                 variant="secondary" 
                 size="sm"
-                onClick={() => loadBookings(true)}
+                onClick={() => loadBookings()}
                 disabled={isLoadingBookings}
               >
                 {isLoadingBookings ? 'Refreshing...' : 'Refresh Data'}
@@ -231,7 +223,7 @@ export default function AdminDashboard() {
               <CardContent>
                 <BookingsList 
                   bookings={bookings} 
-                  onRefresh={() => loadBookings(true)}
+                  onRefresh={() => loadBookings()}
                   selectedBookingId={selectedBooking?.id}
                 />
               </CardContent>
@@ -266,7 +258,7 @@ export default function AdminDashboard() {
                 <CardDescription>Manually create a booking</CardDescription>
               </CardHeader>
               <CardContent>
-                {loadedTabs.has('create') && <CreateBookingForm onSuccess={() => loadBookings(true)} />}
+                {loadedTabs.has('create') && <CreateBookingForm onSuccess={() => loadBookings()} />}
               </CardContent>
             </Card>
           </TabsContent>
@@ -302,7 +294,7 @@ export default function AdminDashboard() {
                 <CardDescription>Bulk import bookings from CSV or JSON format</CardDescription>
               </CardHeader>
               <CardContent>
-                {loadedTabs.has('import') && <BookingsImporter onImportComplete={() => loadBookings(true)} />}
+                {loadedTabs.has('import') && <BookingsImporter onImportComplete={() => loadBookings()} />}
               </CardContent>
             </Card>
           </TabsContent>
@@ -311,6 +303,12 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+
+
+
+
+
 
 
 
