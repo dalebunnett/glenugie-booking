@@ -9,55 +9,64 @@ export default function AdminLoginWrapper() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      console.log('[AdminLoginWrapper] Checking authentication...');
+      console.log('🔐 Checking authentication...');
       
       // First check if we have a token in localStorage
       const storedToken = localStorage.getItem('admin_session');
       
       if (!storedToken) {
-        console.log('[AdminLoginWrapper] No stored token, showing login form');
+        console.log('🔐 No stored token found');
         setIsChecking(false);
+        setIsAuthenticated(false);
         return;
       }
+      
+      console.log('🔐 Found stored token, verifying...');
       
       try {
         // Verify the stored token is still valid
         const response = await fetch(`${baseUrl}/api/admin/auth`, {
+          method: 'GET',
           credentials: 'include',
           headers: {
             'Authorization': `Bearer ${storedToken}`
           }
         });
         
+        console.log('🔐 Verification response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('🔐 Verification response:', data);
+          
           if (data.valid) {
-            console.log('[AdminLoginWrapper] Token is valid, authenticated');
-            sessionStorage.setItem('admin_authenticated', 'true');
+            console.log('✅ Token is valid, user authenticated');
             setIsAuthenticated(true);
           } else {
-            console.log('[AdminLoginWrapper] Token invalid, clearing and showing login');
+            console.log('❌ Token is invalid, clearing session');
             localStorage.removeItem('admin_session');
-            sessionStorage.removeItem('admin_authenticated');
+            setIsAuthenticated(false);
           }
         } else {
-          console.log('[AdminLoginWrapper] Auth check failed, clearing and showing login');
+          console.log('❌ Verification failed, clearing session');
           localStorage.removeItem('admin_session');
-          sessionStorage.removeItem('admin_authenticated');
+          setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error('[AdminLoginWrapper] Auth check error:', error);
+        console.error('❌ Auth check error:', error);
         localStorage.removeItem('admin_session');
-        sessionStorage.removeItem('admin_authenticated');
+        setIsAuthenticated(false);
       }
       
       setIsChecking(false);
     };
 
     checkAuth();
-  }, []);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleLogin = async (password: string) => {
+    console.log('🔐 Attempting login...');
+    
     try {
       const response = await fetch(`${baseUrl}/api/admin/auth`, {
         method: 'POST',
@@ -66,21 +75,27 @@ export default function AdminLoginWrapper() {
         body: JSON.stringify({ password })
       });
 
+      console.log('🔐 Login response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('🔐 Login response:', data);
         
         // Store the token
         if (data.token) {
+          console.log('✅ Storing token in localStorage');
           localStorage.setItem('admin_session', data.token);
-          sessionStorage.setItem('admin_authenticated', 'true');
         }
         
+        console.log('✅ Login successful, setting authenticated state');
         setIsAuthenticated(true);
         return true;
+      } else {
+        console.log('❌ Login failed');
+        return false;
       }
-      return false;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       return false;
     }
   };
@@ -102,8 +117,3 @@ export default function AdminLoginWrapper() {
 
   return <AdminDashboard />;
 }
-
-
-
-
-
