@@ -12,6 +12,7 @@ import RatesManager from './RatesManager';
 import BookingsImporter from './BookingsImporter';
 import { baseUrl } from '../../lib/base-url';
 import { adminGet, adminPost, adminDelete } from '../../lib/admin-fetch';
+import { BUILD_VERSION } from '../../lib/build-version';
 import type { Booking } from '../../lib/booking-types';
 
 export default function AdminDashboard() {
@@ -30,6 +31,9 @@ export default function AdminDashboard() {
     totalRevenue: 0,
     pendingRevenue: 0
   });
+
+  // Log build version to verify we're using the latest code
+  console.log('🏗️ AdminDashboard Build Version:', BUILD_VERSION);
 
   const handleLogout = async () => {
     try {
@@ -112,6 +116,15 @@ export default function AdminDashboard() {
   useEffect(() => {
     const initializeData = async () => {
       try {
+        // Wait a bit for token to be set in localStorage after login
+        const token = localStorage.getItem('admin_session');
+        
+        if (!token) {
+          console.log('[AdminDashboard] No token available yet, skipping data initialization');
+          return;
+        }
+        
+        console.log('[AdminDashboard] Initializing data with token');
         const response = await adminPost('/api/admin/init-data');
         
         if (response.ok) {
@@ -123,8 +136,9 @@ export default function AdminDashboard() {
       }
     };
 
-    // Initialize data once on mount
-    initializeData();
+    // Small delay to ensure token is set after login
+    const timer = setTimeout(initializeData, 100);
+    return () => clearTimeout(timer);
   }, []); // Empty dependency array - run once on mount
 
   return (
@@ -303,6 +317,9 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+
+
 
 
 

@@ -1,4 +1,6 @@
 
+
+
 /**
  * Admin API fetch utility
  * Automatically includes authentication token in all admin API requests
@@ -11,39 +13,21 @@ export interface AdminFetchOptions extends RequestInit {
 }
 
 /**
- * Get token from cookie
- */
-function getTokenFromCookie(): string | null {
-  if (typeof document === 'undefined') return null;
-  
-  const cookies = document.cookie.split(';');
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=');
-    if (name === 'admin_session') {
-      return value;
-    }
-  }
-  return null;
-}
-
-/**
  * Get authentication headers for admin API requests
  */
 export function getAuthHeaders(): HeadersInit {
-  // First try localStorage
-  let token = localStorage.getItem('admin_session');
+  // Get token from localStorage (fallback for when cookie isn't set yet)
+  const token = localStorage.getItem('admin_session');
   
-  // If not in localStorage, check cookie
-  if (!token) {
-    token = getTokenFromCookie();
-    // Sync to localStorage for future requests
-    if (token) {
-      localStorage.setItem('admin_session', token);
-    }
+  if (token) {
+    console.log('💾 Using token from localStorage for Authorization header');
+  } else {
+    console.log('ℹ️ No token in localStorage, relying on cookie (sent automatically)');
   }
   
   return {
     'Content-Type': 'application/json',
+    // Add Authorization header as fallback (cookie is sent automatically)
     ...(token && { 'Authorization': `Bearer ${token}` })
   };
 }
@@ -68,16 +52,21 @@ export async function adminFetch(
         ...(fetchOptions.headers || {})
       };
   
+  console.log(`[adminFetch] ${fetchOptions.method || 'GET'} ${url}`);
+  
   // Make request with auth headers and credentials
+  // credentials: 'include' ensures cookies are sent automatically
   const response = await fetch(url, {
     ...fetchOptions,
     headers,
     credentials: 'include',
   });
   
+  console.log(`[adminFetch] Response: ${response.status}`);
+  
   // Handle auth failures
   if (response.status === 403 || response.status === 401) {
-    console.error('[adminFetch] Authentication failed');
+    console.error('[adminFetch] ❌ Authentication failed - clearing session and redirecting');
     
     // Clear auth data
     localStorage.removeItem('admin_session');
@@ -129,4 +118,6 @@ export async function adminPut(
 export async function adminDelete(endpoint: string): Promise<Response> {
   return adminFetch(endpoint, { method: 'DELETE' });
 }
+
+
 

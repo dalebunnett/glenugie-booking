@@ -1,6 +1,7 @@
 
 
 
+
 /**
  * Admin authentication helpers
  * Uses environment-based password and signed tokens for persistence across Worker restarts
@@ -62,19 +63,33 @@ export const generateAdminToken = (secret: string): string => {
 };
 
 export const getTokenFromRequest = (request: Request): string | null => {
+  console.log('[getTokenFromRequest] Extracting token...');
+  
   // Try Authorization header first
   const authHeader = request.headers.get('authorization') || '';
+  console.log('[getTokenFromRequest] Authorization header:', authHeader ? authHeader.substring(0, 30) + '...' : 'not present');
+  
   if (authHeader.startsWith('Bearer ')) {
-    return authHeader.substring(7);
+    const token = authHeader.substring(7);
+    console.log('[getTokenFromRequest] ✅ Found token in Authorization header:', token.substring(0, 20) + '...');
+    return token;
   }
 
   // Try cookie
   const cookies = request.headers.get('cookie') || '';
-  const sessionMatch = cookies.match(/admin_session=([^;]+)/);
-  if (sessionMatch) {
-    return sessionMatch[1];
+  console.log('[getTokenFromRequest] Cookie header:', cookies ? 'present' : 'not present');
+  
+  if (cookies) {
+    console.log('[getTokenFromRequest] Cookies:', cookies.substring(0, 100) + (cookies.length > 100 ? '...' : ''));
+    const sessionMatch = cookies.match(/admin_session=([^;]+)/);
+    if (sessionMatch) {
+      const token = sessionMatch[1];
+      console.log('[getTokenFromRequest] ✅ Found token in cookie:', token.substring(0, 20) + '...');
+      return token;
+    }
   }
 
+  console.log('[getTokenFromRequest] ❌ No token found in request');
   return null;
 };
 
@@ -135,6 +150,7 @@ export const requireAdminAuth = (
   
   return { authorized, token };
 };
+
 
 
 

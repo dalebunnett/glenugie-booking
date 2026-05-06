@@ -27,23 +27,24 @@ let lastCacheTime = 0;
 const CACHE_DURATION = 30000; // 30 seconds
 
 export const GET: APIRoute = async ({ request, locals }) => {
-  console.log('[Bookings GET] Starting request');
-  console.log('[Bookings GET] Locals available:', !!locals);
-  console.log('[Bookings GET] Locals.runtime:', !!locals?.runtime);
+  console.log('[/api/admin/bookings] GET request received');
+  console.log('[/api/admin/bookings] Headers:', Object.fromEntries(request.headers.entries()));
   
   // Initialize DB with KV binding
   initDB(locals.runtime);
-  console.log('[Bookings GET] DB initialized');
   
-  // Check authentication
-  const authResult = requireAdminAuth(request, { locals } as any);
-  if (!authResult.authorized) {
+  const { authorized } = requireAdminAuth(request, { locals } as any);
+  
+  if (!authorized) {
+    console.log('[/api/admin/bookings] ❌ Unauthorized - returning 403');
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
     });
   }
-
+  
+  console.log('[/api/admin/bookings] ✅ Authorized - fetching bookings');
+  
   try {
     console.log('[Bookings GET] Fetching all bookings...');
     const bookings = await db.bookings.getAll();
@@ -101,6 +102,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
+
 
 
 

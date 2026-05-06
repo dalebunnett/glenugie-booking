@@ -3,19 +3,22 @@ import { db, initDB } from '../../../lib/db';
 import { requireAdminAuth } from '../../../lib/admin-auth';
 
 export const GET: APIRoute = async ({ request, locals }) => {
+  console.log('[booking-rules] GET request received');
+  
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
   // Check authentication
   const authResult = requireAdminAuth(request, { locals } as any);
   if (!authResult.authorized) {
+    console.log('[booking-rules] ❌ Unauthorized');
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
     });
   }
   
-  console.log('[booking-rules] Auth successful, fetching rules');
+  console.log('[booking-rules] ✅ Auth successful, fetching rules');
   
   try {
     const rules = await db.bookingRules.get();
@@ -62,6 +65,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
 
 
 

@@ -47,9 +47,14 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
       }
 
       if (response.ok && data.token) {
-        console.log('✅ Login successful, token received');
-        localStorage.setItem('adminPassword', password);
-        localStorage.setItem('adminToken', data.token);
+        console.log('✅ Login successful!');
+        
+        // Store token with the key that admin-fetch.ts expects
+        localStorage.setItem('admin_session', data.token);
+        sessionStorage.setItem('admin_authenticated', 'true');
+        console.log('✅ Session stored in localStorage:', data.token.substring(0, 20) + '...');
+        console.log('✅ Cookie set by server');
+        
         onLogin();
       } else {
         console.log('❌ Login failed:', data);
@@ -111,6 +116,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     </div>
   );
 }
+
 
 
 

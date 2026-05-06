@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { generateAdminToken, getTokenFromRequest, isValidAdminToken, getAdminSecret } from '../../../lib/admin-auth';
+import { baseUrl } from '../../../lib/base-url';
 
 // CORS headers for preview environments
 const corsHeaders = {
@@ -41,10 +42,25 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const secret = correctPassword;
     const token = generateAdminToken(secret);
     
-    console.log('[Auth] Login successful, token generated');
+    console.log('[Auth] Login successful, token generated:', token.substring(0, 20) + '...');
+    console.log('[Auth] Request URL:', request.url);
+    console.log('[Auth] Setting cookies with Secure:', request.url.startsWith('https://'));
 
     // Set session cookie that lasts 7 days
     const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+    
+    // Determine if we should use Secure flag (only on HTTPS)
+    const isSecure = request.url.startsWith('https://');
+    const securePart = isSecure ? '; Secure' : '';
+    
+    // Set multiple cookies to ensure it works:
+    // 1. Cookie at root path
+    // 2. Cookie at /app path (for backwards compatibility)
+    const cookieOptions = `Max-Age=${maxAge}; HttpOnly; SameSite=Lax${securePart}`;
+    const cookies = [
+      `admin_session=${token}; Path=/; ${cookieOptions}`,
+      `admin_session=${token}; Path=/app; ${cookieOptions}`,
+    ];
 
     return new Response(JSON.stringify({ 
       token,
@@ -54,7 +70,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': `admin_session=${token}; Path=/app; Max-Age=${maxAge}; HttpOnly; SameSite=Lax; Secure`,
+        'Set-Cookie': cookies.join(', '),
         ...corsHeaders
       }
     });
@@ -111,11 +127,18 @@ export const GET: APIRoute = async ({ request, locals }) => {
 // Logout endpoint
 export const DELETE: APIRoute = async ({ request }) => {
   try {
+    // Determine if we should use Secure flag (only on HTTPS)
+    const isSecure = request.url.startsWith('https://');
+    const securePart = isSecure ? '; Secure' : '';
+    
+    // Always use root path '/' for cookies
+    const cookiePath = '/';
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': 'admin_session=; Path=/app; Max-Age=0; HttpOnly; SameSite=Lax; Secure',
+        'Set-Cookie': `admin_session=; Path=${cookiePath}; Max-Age=0; HttpOnly; SameSite=Lax${securePart}`,
         ...corsHeaders
       }
     });
@@ -130,6 +153,12 @@ export const DELETE: APIRoute = async ({ request }) => {
     });
   }
 };
+
+
+
+
+
+
 
 
 

@@ -3,17 +3,22 @@ import { db, initDB } from '../../../lib/db';
 import { requireAdminAuth } from '../../../lib/admin-auth';
 
 export const GET: APIRoute = async ({ request, locals }) => {
+  console.log('[rates] GET request received');
+  
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
   // Check authentication
   const authResult = requireAdminAuth(request, { locals } as any);
   if (!authResult.authorized) {
+    console.log('[rates] ❌ Unauthorized');
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
     });
   }
+  
+  console.log('[rates] ✅ Auth successful, fetching rates');
   
   try {
     const rates = await db.rates.get();
@@ -59,6 +64,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
 
 
 
