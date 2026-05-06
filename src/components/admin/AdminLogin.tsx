@@ -65,17 +65,13 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
             </Button>
-
-            <div className="mt-4 p-3 bg-muted rounded text-sm">
-              <p className="font-semibold mb-1">Password:</p>
-              <p className="text-muted-foreground font-mono">Peterhead2026!</p>
-            </div>
           </form>
         </CardContent>
       </Card>
     </div>
   );
 }
+
 
 
 
