@@ -1,73 +1,75 @@
 import type { APIRoute } from 'astro';
-import { getTokenFromRequest, getAdminSecret, isValidAdminToken, generateAdminToken } from '../../../lib/admin-auth';
+import { getTokenFromRequest, isValidAdminToken, getAdminSecret } from '../../../lib/admin-auth';
 
 export const GET: APIRoute = async ({ request, locals }) => {
-  try {
-    const token = getTokenFromRequest(request);
-    const secret = getAdminSecret({ locals } as any);
+  const diagnostics: any = {
+    timestamp: new Date().toISOString(),
+    headers: {},
+    token: {
+      found: false,
+      location: null,
+      value: null,
+      valid: false,
+      details: {}
+    },
+    environment: {
+      hasLocals: !!locals,
+      hasRuntime: !!locals?.runtime,
+      hasEnv: !!locals?.runtime?.env,
+      adminPasswordSet: !!(locals?.runtime?.env?.ADMIN_PASSWORD || import.meta.env.ADMIN_PASSWORD)
+    }
+  };
+
+  // Check headers
+  const authHeader = request.headers.get('authorization');
+  const cookieHeader = request.headers.get('cookie');
+  
+  diagnostics.headers.authorization = authHeader ? `present (${authHeader.substring(0, 30)}...)` : 'missing';
+  diagnostics.headers.cookie = cookieHeader ? `present (${cookieHeader.substring(0, 50)}...)` : 'missing';
+
+  // Try to get token
+  const token = getTokenFromRequest(request);
+  
+  if (token) {
+    diagnostics.token.found = true;
+    diagnostics.token.value = `${token.substring(0, 20)}...`;
     
-    // Generate a fresh token for comparison
-    const freshToken = generateAdminToken(secret);
-    
-    // Debug token validation step by step
-    let validationSteps: any = {};
-    if (token) {
-      const [timestamp, signature] = token.split('-');
-      const sign = (data: string, secret: string): string => {
-        let hash = 0;
-        const combined = data + secret;
-        for (let i = 0; i < combined.length; i++) {
-          const char = combined.charCodeAt(i);
-          hash = ((hash << 5) - hash) + char;
-          hash = hash & hash;
-        }
-        return Math.abs(hash).toString(36);
-      };
-      
-      const expectedSig = sign(timestamp, secret);
-      const tokenTime = parseInt(timestamp, 36);
-      const now = Date.now();
-      const age = now - tokenTime;
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-      
-      validationSteps = {
-        timestamp,
-        signature: signature?.substring(0, 15) + '...',
-        expectedSignature: expectedSig?.substring(0, 15) + '...',
-        signaturesMatch: signature === expectedSig,
-        tokenAge: age,
-        tokenExpired: age >= sevenDays,
-        tokenTime: new Date(tokenTime).toISOString(),
-        now: new Date(now).toISOString()
-      };
+    // Determine location
+    if (authHeader?.includes(token)) {
+      diagnostics.token.location = 'Authorization header';
+    } else if (cookieHeader?.includes(token)) {
+      diagnostics.token.location = 'Cookie';
     }
     
-    const debug = {
-      hasToken: !!token,
-      token: token ? token.substring(0, 30) + '...' : null,
-      fullToken: token, // Include full token for debugging
-      tokenValid: token ? isValidAdminToken(token, secret) : false,
-      secret: secret.substring(0, 10) + '...',
-      secretLength: secret.length,
-      fullSecret: secret, // Include full secret for debugging
-      freshToken: freshToken,
-      cookies: request.headers.get('cookie'),
-      authHeader: request.headers.get('authorization'),
-      validationSteps
-    };
+    // Validate token
+    const secret = getAdminSecret({ locals } as any);
+    const valid = isValidAdminToken(token, secret);
     
-    return new Response(JSON.stringify(debug, null, 2), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      stack: error.stack 
-    }, null, 2), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    diagnostics.token.valid = valid;
+    
+    // Parse token details
+    try {
+      const [timestamp, signature] = token.split('-');
+      if (timestamp && signature) {
+        const tokenTime = parseInt(timestamp, 36);
+        const now = Date.now();
+        const age = now - tokenTime;
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        
+        diagnostics.token.details = {
+          timestamp: new Date(tokenTime).toISOString(),
+          ageHours: Math.round(age / (1000 * 60 * 60)),
+          expired: age >= sevenDays,
+          signature: signature.substring(0, 10) + '...'
+        };
+      }
+    } catch (e) {
+      diagnostics.token.details.error = 'Failed to parse token';
+    }
   }
-};
 
+  return new Response(JSON.stringify(diagnostics, null, 2), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
+};
