@@ -1,7 +1,17 @@
 import type { APIRoute } from 'astro';
 import { deleteAllBookings } from '../../../../lib/storage';
+import { requireAdminAuth } from '../../../../lib/admin-auth';
 
-export const DELETE: APIRoute = async ({ locals }) => {
+export const DELETE: APIRoute = async ({ request, locals }) => {
+  // Check authentication
+  const authResult = requireAdminAuth(request, { locals } as any);
+  if (!authResult.authorized) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   try {
     console.log('[DELETE /api/admin/bookings/delete-all] Deleting all bookings...');
     
@@ -28,3 +38,4 @@ export const DELETE: APIRoute = async ({ locals }) => {
     });
   }
 };
+

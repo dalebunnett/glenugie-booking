@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import React from 'react';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
@@ -40,6 +34,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
   const [editedBooking, setEditedBooking] = useState<Booking | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const selectedRowRef = useRef<HTMLTableRowElement>(null);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   // Handle selectedBookingId from calendar
   useEffect(() => {
@@ -258,6 +253,46 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
     }
   };
 
+  const handleDeleteAll = async () => {
+    console.log('[Frontend] Starting delete all bookings...');
+    setIsDeletingAll(true);
+
+    try {
+      const url = `${baseUrl}/api/admin/bookings/delete-all`;
+      console.log('[Frontend] DELETE request to:', url);
+      
+      const response = await fetch(url, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_session') || ''}`
+        }
+      });
+
+      console.log('[Frontend] Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('[Frontend] Delete all failed:', errorData);
+        throw new Error(errorData.error || 'Failed to delete all bookings');
+      }
+
+      const result = await response.json();
+      console.log('[Frontend] Delete all successful:', result);
+      alert(`Successfully deleted ${result.deletedCount} bookings`);
+
+      // Refresh bookings list
+      console.log('[Frontend] Refreshing bookings list');
+      onRefresh();
+    } catch (error) {
+      console.error('[Frontend] Error deleting all bookings:', error);
+      alert('Failed to delete all bookings: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsDeletingAll(false);
+      console.log('[Frontend] Delete all operation completed');
+    }
+  };
+
   const getStatusBadge = (status: Booking['status']) => {
     const variants = {
       pending: 'secondary',
@@ -311,9 +346,48 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
           />
         </div>
         
-        <Button onClick={exportToCSV} variant="outline" className="w-full md:w-auto">
-          Export to CSV
-        </Button>
+        <div className="flex gap-2 w-full md:w-auto">
+          <Button onClick={exportToCSV} variant="outline" className="flex-1 md:flex-none">
+            Export to CSV
+          </Button>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive" 
+                className="flex-1 md:flex-none"
+                disabled={bookings.length === 0 || isDeletingAll}
+              >
+                {isDeletingAll ? 'Deleting...' : 'Delete All'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>⚠️ Delete ALL Bookings?</AlertDialogTitle>
+                <AlertDialogDescription className="space-y-2">
+                  <p className="font-semibold text-destructive">
+                    This will permanently delete ALL {bookings.length} bookings from the system.
+                  </p>
+                  <p>
+                    This action cannot be undone. All booking data, customer information, and payment records will be lost.
+                  </p>
+                  <p className="text-sm">
+                    Are you absolutely sure you want to continue?
+                  </p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAll}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Yes, Delete All {bookings.length} Bookings
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       {/* Table */}
@@ -787,6 +861,9 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
     </div>
   );
 }
+
+
+
 
 
 
