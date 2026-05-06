@@ -6,7 +6,7 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  console.log('[middleware v2] 🔍 Checking path:', pathname);
+  console.log('[middleware] 🔍 Checking path:', pathname);
   
   // ONLY protect /api/admin/* routes (NOT /api/debug-cookies)
   if (pathname.includes('/api/admin')) {
@@ -14,35 +14,36 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
     if (pathname.includes('/api/admin/auth') || 
         pathname.includes('/api/admin/debug') || 
         pathname.includes('/api/admin/test-')) {
-      console.log('[middleware v2] ⏭️ Skipping auth check for:', pathname);
+      console.log('[middleware] ⏭️ Skipping auth check for:', pathname);
       return next();
     }
     
-    console.log('[middleware v2] 🔒 Requiring auth for:', pathname);
+    console.log('[middleware] 🔒 Requiring auth for:', pathname);
     
     const token = getTokenFromRequest(request);
     const secret = getAdminSecret({ locals } as any);
     const isValid = token && isValidAdminToken(token, secret);
     
-    console.log('[middleware v2] Token found:', !!token);
-    console.log('[middleware v2] Secret available:', !!secret);
-    console.log('[middleware v2] Token valid:', isValid);
+    console.log('[middleware] Token found:', !!token);
+    console.log('[middleware] Token value:', token ? `${token.substring(0, 20)}...` : 'none');
+    console.log('[middleware] Secret available:', !!secret);
+    console.log('[middleware] Token valid:', isValid);
     
     if (!isValid) {
-      console.log('[middleware v2] ❌ Auth failed');
+      console.log('[middleware] ❌ Auth failed - returning 401');
       return new Response(JSON.stringify({ 
-        error: 'Unauthorized - Please log in again',
-        version: 'v2'
+        error: 'Unauthorized - Invalid or missing token'
       }), {
-        status: 403,
+        status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
     }
     
-    console.log('[middleware v2] ✅ Auth passed');
+    console.log('[middleware] ✅ Auth passed');
   } else {
-    console.log('[middleware v2] ⏭️ Not admin API, skipping auth');
+    console.log('[middleware] ⏭️ Not admin API, skipping auth');
   }
 
   return next();
 };
+

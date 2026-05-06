@@ -54,6 +54,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteAllBookings = async () => {
+    if (!confirm('⚠️ WARNING: This will permanently delete ALL bookings!\n\nAre you absolutely sure?')) {
+      return;
+    }
+
+    if (!confirm('This action CANNOT be undone. Type "DELETE" to confirm.')) {
+      return;
+    }
+
+    try {
+      const response = await adminDelete('/api/admin/bookings/delete-all');
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete bookings');
+      }
+
+      const result = await response.json();
+      toast.success(`Successfully deleted ${result.deletedCount} bookings`);
+      
+      // Reload bookings
+      await loadBookings();
+    } catch (error) {
+      console.error('Error deleting bookings:', error);
+      toast.error('Failed to delete bookings');
+    }
+  };
+
   const loadBookings = async () => {
     try {
       console.log('[AdminDashboard] Loading bookings...');
@@ -159,6 +186,13 @@ export default function AdminDashboard() {
                 disabled={isLoadingBookings}
               >
                 {isLoadingBookings ? 'Refreshing...' : 'Refresh Data'}
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={handleDeleteAllBookings}
+              >
+                Delete All Bookings
               </Button>
               <Button variant="secondary" onClick={handleLogout}>
                 Logout
@@ -317,6 +351,7 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
 
 
 

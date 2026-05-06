@@ -12,8 +12,8 @@ import { format } from 'date-fns';
 
 export default function BookingRulesManager() {
   const [rules, setRules] = useState<BookingRules | null>(null);
-  const [editingGeneral, setEditingGeneral] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   
   const [generalValues, setGeneralValues] = useState({
@@ -31,17 +31,47 @@ export default function BookingRulesManager() {
 
   const loadRules = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      console.log('[BookingRulesManager] Loading rules...');
+      
       const response = await adminGet('/api/admin/booking-rules');
       
       if (!response.ok) {
-        throw new Error('Failed to load rules');
+        const errorText = await response.text();
+        console.error('[BookingRulesManager] Failed to load rules:', response.status, errorText);
+        throw new Error(`Failed to load booking rules: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log('[BookingRulesManager] Rules loaded:', data);
       setRules(data);
-    } catch (error) {
-      console.error('Error loading rules:', error);
-      toast.error('Failed to load rules');
+    } catch (err: any) {
+      console.error('[BookingRulesManager] Error loading rules:', err);
+      setError(err.message || 'Failed to load booking rules');
+      
+      // Try to initialize if rules are missing
+      console.log('[BookingRulesManager] Attempting to initialize KV storage...');
+      try {
+        const initResponse = await fetch(`${baseUrl}/api/admin/init-kv`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('admin_session')}`
+          }
+        });
+        
+        if (initResponse.ok) {
+          console.log('[BookingRulesManager] KV initialized, retrying...');
+          // Retry loading rules
+          setTimeout(() => loadRules(), 1000);
+        }
+      } catch (initErr) {
+        console.error('[BookingRulesManager] Failed to initialize KV:', initErr);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -385,6 +415,7 @@ export default function BookingRulesManager() {
     </div>
   );
 }
+
 
 
 

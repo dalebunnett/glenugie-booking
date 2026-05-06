@@ -1,0 +1,224 @@
+---
+import MainLayout from '../layouts/main.astro';
+---
+
+<MainLayout title="Email Testing - Glenugie Kennels">
+  <main class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-8 text-center">📧 Email Testing Suite</h1>
+      
+      <div class="bg-card rounded-lg shadow-lg p-8 mb-8">
+        <div class="mb-6">
+          <label for="testEmail" class="block text-sm font-medium mb-2">
+            Test Email Address
+          </label>
+          <input
+            type="email"
+            id="testEmail"
+            value="info@bcreativ.co.uk"
+            class="w-full px-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="your@email.com"
+          />
+          <p class="text-sm text-muted-foreground mt-2">
+            All test emails will be sent to this address
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Booking Confirmation -->
+          <button
+            onclick="sendTestEmail('booking-confirmation')"
+            class="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-4 rounded-lg font-medium transition-colors text-left"
+          >
+            <div class="text-lg font-semibold mb-1">✅ Booking Confirmation</div>
+            <div class="text-sm opacity-90">Sent when customer books</div>
+          </button>
+
+          <!-- Admin Notification -->
+          <button
+            onclick="sendTestEmail('admin-notification')"
+            class="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-6 py-4 rounded-lg font-medium transition-colors text-left"
+          >
+            <div class="text-lg font-semibold mb-1">🔔 Admin Notification</div>
+            <div class="text-sm opacity-90">Sent to admin on new booking</div>
+          </button>
+
+          <!-- Day Before Reminder -->
+          <button
+            onclick="sendTestEmail('day-before-reminder')"
+            class="bg-accent text-accent-foreground hover:bg-accent/90 px-6 py-4 rounded-lg font-medium transition-colors text-left"
+          >
+            <div class="text-lg font-semibold mb-1">⏰ Day Before Reminder</div>
+            <div class="text-sm opacity-90">Sent 1 day before check-in</div>
+          </button>
+
+          <!-- Payment Received -->
+          <button
+            onclick="sendTestEmail('payment-received')"
+            class="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-4 rounded-lg font-medium transition-colors text-left"
+          >
+            <div class="text-lg font-semibold mb-1">💰 Payment Received</div>
+            <div class="text-sm opacity-90">Sent when payment is made</div>
+          </button>
+
+          <!-- Booking Cancelled -->
+          <button
+            onclick="sendTestEmail('booking-cancelled')"
+            class="bg-destructive text-white hover:bg-destructive/90 px-6 py-4 rounded-lg font-medium transition-colors text-left"
+          >
+            <div class="text-lg font-semibold mb-1">❌ Booking Cancelled</div>
+            <div class="text-sm opacity-90">Sent when booking is cancelled</div>
+          </button>
+
+          <!-- Booking Amended -->
+          <button
+            onclick="sendTestEmail('booking-amended')"
+            class="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-6 py-4 rounded-lg font-medium transition-colors text-left"
+          >
+            <div class="text-lg font-semibold mb-1">✏️ Booking Amended</div>
+            <div class="text-sm opacity-90">Sent when booking is changed</div>
+          </button>
+
+          <!-- Thank You Email -->
+          <button
+            onclick="sendTestEmail('thank-you')"
+            class="bg-accent text-accent-foreground hover:bg-accent/90 px-6 py-4 rounded-lg font-medium transition-colors text-left"
+          >
+            <div class="text-lg font-semibold mb-1">💝 Thank You Email</div>
+            <div class="text-sm opacity-90">Sent day after checkout</div>
+          </button>
+
+          <!-- Send All -->
+          <button
+            onclick="sendAllEmails()"
+            class="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-4 rounded-lg font-medium transition-colors text-left border-4 border-primary/30"
+          >
+            <div class="text-lg font-semibold mb-1">🚀 Send All Emails</div>
+            <div class="text-sm opacity-90">Test all 7 email types</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="statusMessages" class="space-y-2"></div>
+    </div>
+  </main>
+</MainLayout>
+
+<script>
+  import { baseUrl } from '../lib/base-url';
+
+  async function sendTestEmail(emailType: string) {
+    const testEmail = (document.getElementById('testEmail') as HTMLInputElement).value;
+    
+    if (!testEmail) {
+      showStatus('Please enter a test email address', 'error');
+      return;
+    }
+
+    const button = event?.target as HTMLButtonElement;
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<div class="text-lg font-semibold">⏳ Sending...</div>';
+
+    try {
+      const response = await fetch(`${baseUrl}/api/emails/test-all`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailType, testEmail })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showStatus(`✅ ${data.message}`, 'success');
+      } else {
+        showStatus(`❌ ${data.error}`, 'error');
+      }
+    } catch (error) {
+      showStatus(`❌ Failed to send email: ${error}`, 'error');
+    } finally {
+      button.disabled = false;
+      button.innerHTML = originalText;
+    }
+  }
+
+  async function sendAllEmails() {
+    const testEmail = (document.getElementById('testEmail') as HTMLInputElement).value;
+    
+    if (!testEmail) {
+      showStatus('Please enter a test email address', 'error');
+      return;
+    }
+
+    const emailTypes = [
+      'booking-confirmation',
+      'admin-notification',
+      'day-before-reminder',
+      'payment-received',
+      'booking-cancelled',
+      'booking-amended',
+      'thank-you'
+    ];
+
+    showStatus(`🚀 Sending ${emailTypes.length} test emails to ${testEmail}...`, 'info');
+
+    for (const emailType of emailTypes) {
+      try {
+        const response = await fetch(`${baseUrl}/api/emails/test-all`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ emailType, testEmail })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showStatus(`✅ ${data.message}`, 'success');
+        } else {
+          showStatus(`❌ ${data.error}`, 'error');
+        }
+
+        // Wait 1 second between emails to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error) {
+        showStatus(`❌ Failed to send ${emailType}: ${error}`, 'error');
+      }
+    }
+
+    showStatus(`🎉 Finished sending all test emails!`, 'success');
+  }
+
+  function showStatus(message: string, type: 'success' | 'error' | 'info') {
+    const statusDiv = document.getElementById('statusMessages');
+    if (!statusDiv) return;
+
+    const colors = {
+      success: 'bg-green-50 border-green-200 text-green-800',
+      error: 'bg-red-50 border-red-200 text-red-800',
+      info: 'bg-blue-50 border-blue-200 text-blue-800'
+    };
+
+    const messageEl = document.createElement('div');
+    messageEl.className = `${colors[type]} border px-4 py-3 rounded-lg`;
+    messageEl.textContent = message;
+    
+    statusDiv.insertBefore(messageEl, statusDiv.firstChild);
+
+    // Remove after 10 seconds
+    setTimeout(() => {
+      messageEl.remove();
+    }, 10000);
+  }
+
+  // Make functions available globally
+  (window as any).sendTestEmail = sendTestEmail;
+  (window as any).sendAllEmails = sendAllEmails;
+</script>
+
+<style>
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>

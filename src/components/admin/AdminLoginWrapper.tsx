@@ -11,28 +11,44 @@ export default function AdminLoginWrapper() {
     const checkAuth = async () => {
       console.log('[AdminLoginWrapper] Checking authentication...');
       
+      // First check if we have a token in localStorage
+      const storedToken = localStorage.getItem('admin_session');
+      
+      if (!storedToken) {
+        console.log('[AdminLoginWrapper] No stored token, showing login form');
+        setIsChecking(false);
+        return;
+      }
+      
       try {
-        // Check if we have a valid session cookie
+        // Verify the stored token is still valid
         const response = await fetch(`${baseUrl}/api/admin/auth`, {
           credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${storedToken}`
+          }
         });
         
         if (response.ok) {
           const data = await response.json();
           if (data.valid) {
-            console.log('[AdminLoginWrapper] Already authenticated via cookie');
-            
-            // Store token in localStorage for API calls
-            if (data.token) {
-              localStorage.setItem('admin_session', data.token);
-              sessionStorage.setItem('admin_authenticated', 'true');
-            }
-            
+            console.log('[AdminLoginWrapper] Token is valid, authenticated');
+            sessionStorage.setItem('admin_authenticated', 'true');
             setIsAuthenticated(true);
+          } else {
+            console.log('[AdminLoginWrapper] Token invalid, clearing and showing login');
+            localStorage.removeItem('admin_session');
+            sessionStorage.removeItem('admin_authenticated');
           }
+        } else {
+          console.log('[AdminLoginWrapper] Auth check failed, clearing and showing login');
+          localStorage.removeItem('admin_session');
+          sessionStorage.removeItem('admin_authenticated');
         }
       } catch (error) {
-        console.error('[AdminLoginWrapper] Auth check failed:', error);
+        console.error('[AdminLoginWrapper] Auth check error:', error);
+        localStorage.removeItem('admin_session');
+        sessionStorage.removeItem('admin_authenticated');
       }
       
       setIsChecking(false);
@@ -86,6 +102,7 @@ export default function AdminLoginWrapper() {
 
   return <AdminDashboard />;
 }
+
 
 
 

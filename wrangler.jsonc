@@ -35,7 +35,12 @@
 	 * databases, object storage, AI inference, real-time communication and more.
 	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
 	 */
-	// No KV binding needed - using file-based storage
+	"kv_namespaces": [
+		{
+			"binding": "BOOKINGS_KV",
+			"id": "4dd144b89325450b8949d8132a8ad02c"
+		}
+	],
 	
 	/**
 	 * Environment Variables
@@ -72,6 +77,8 @@
 	 */
 	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
 }
+
+
 
 
 

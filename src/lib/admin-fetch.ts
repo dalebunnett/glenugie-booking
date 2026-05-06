@@ -1,6 +1,7 @@
 
 
 
+
 /**
  * Admin API fetch utility
  * Automatically includes authentication token in all admin API requests
@@ -64,16 +65,10 @@ export async function adminFetch(
   
   console.log(`[adminFetch] Response: ${response.status}`);
   
-  // Handle auth failures
+  // Handle auth failures - just log, don't redirect
+  // Let the calling component decide what to do
   if (response.status === 403 || response.status === 401) {
-    console.error('[adminFetch] ❌ Authentication failed - clearing session and redirecting');
-    
-    // Clear auth data
-    localStorage.removeItem('admin_session');
-    sessionStorage.removeItem('admin_authenticated');
-    
-    // Redirect to login
-    window.location.href = `${baseUrl}/admin`;
+    console.warn('[adminFetch] ⚠️ Authentication failed - token may be invalid');
   }
   
   return response;
@@ -118,6 +113,7 @@ export async function adminPut(
 export async function adminDelete(endpoint: string): Promise<Response> {
   return adminFetch(endpoint, { method: 'DELETE' });
 }
+
 
 
 

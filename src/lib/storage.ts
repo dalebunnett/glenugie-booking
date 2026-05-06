@@ -1,11 +1,11 @@
+
 /**
  * Storage adapter for Cloudflare Workers
- * Uses file-based storage (JSON files in repository)
- * This is simpler and works perfectly with Webflow Cloud deployment
+ * Uses Cloudflare KV for persistent storage
  */
 
 import type { Booking } from './booking-types';
-import { getFileStorage, FileStorage } from './file-storage';
+import { KVStorage } from './kv-storage';
 
 interface BookingRules {
   id: number;
@@ -37,56 +37,80 @@ interface StorageData {
 }
 
 export class Storage {
-  private fileStorage: FileStorage;
+  private kvStorage: KVStorage;
 
-  constructor() {
-    this.fileStorage = getFileStorage();
+  constructor(kv: KVNamespace) {
+    this.kvStorage = new KVStorage(kv);
   }
 
   async getBookings(): Promise<Booking[]> {
-    return await this.fileStorage.getBookings();
+    return await this.kvStorage.getBookings();
   }
 
   async saveBookings(bookings: Booking[]): Promise<void> {
-    await this.fileStorage.saveBookings(bookings);
+    await this.kvStorage.saveBookings(bookings);
   }
 
   async getBookingRules(): Promise<BookingRules> {
-    return await this.fileStorage.getBookingRules();
+    return await this.kvStorage.getBookingRules();
   }
 
   async saveBookingRules(rules: BookingRules): Promise<void> {
-    await this.fileStorage.saveBookingRules(rules);
+    await this.kvStorage.saveBookingRules(rules);
   }
 
   async getRates(): Promise<Rates> {
-    return await this.fileStorage.getRates();
+    return await this.kvStorage.getRates();
   }
 
   async saveRates(rates: Rates): Promise<void> {
-    await this.fileStorage.saveRates(rates);
+    await this.kvStorage.saveRates(rates);
   }
 
   async initialize(initialData?: StorageData): Promise<void> {
-    await this.fileStorage.initialize(initialData);
+    await this.kvStorage.initialize(initialData);
   }
 }
 
-// Create a singleton storage instance
+// Storage instance cache per request
 let storageInstance: Storage | null = null;
 
-export const getStorage = (): Storage => {
-  if (!storageInstance) {
-    storageInstance = new Storage();
-    console.log('[Storage] Initialized file-based storage');
+export const getStorage = (kv?: KVNamespace): Storage => {
+  if (!kv) {
+    throw new Error('[Storage] KV namespace is required');
   }
+  
+  // Create new instance for each request (stateless)
+  storageInstance = new Storage(kv);
   return storageInstance;
 };
 
 /**
- * Initialize storage (no runtime needed for file storage)
+ * Initialize storage with KV namespace from runtime
  */
-export const initializeStorage = (): Storage => {
-  console.log('[Storage] Using file-based storage (no KV required)');
-  return getStorage();
+export const initializeStorage = (runtime: any): Storage => {
+  const kv = runtime?.env?.BOOKINGS_KV;
+  
+  if (!kv) {
+    console.error('[Storage] BOOKINGS_KV not found in runtime.env');
+    throw new Error('KV namespace BOOKINGS_KV is not configured');
+  }
+  
+  console.log('[Storage] Initialized KV storage');
+  return getStorage(kv);
 };
+
+/**
+ * Delete all bookings from storage
+ */
+export const deleteAllBookings = async (locals: any): Promise<number> => {
+  const storage = initializeStorage(locals.runtime);
+  const bookings = await storage.getBookings();
+  const count = bookings.length;
+  
+  // Save empty array
+  await storage.saveBookings([]);
+  
+  return count;
+};
+
