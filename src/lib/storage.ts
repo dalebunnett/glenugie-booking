@@ -1,15 +1,11 @@
-
-
-
-
-
-
 /**
  * Storage adapter for Cloudflare Workers
- * Uses KV when available, falls back to global in-memory storage
+ * Uses file-based storage (JSON files in repository)
+ * This is simpler and works perfectly with Webflow Cloud deployment
  */
 
 import type { Booking } from './booking-types';
+import { getFileStorage, FileStorage } from './file-storage';
 
 interface BookingRules {
   id: number;
@@ -40,207 +36,57 @@ interface StorageData {
   rates: Rates;
 }
 
-// Global storage that persists across requests in the same worker instance
-// This is better than Map because it survives module reloads
-const GLOBAL_STORAGE_KEY = '__GLENUGIE_STORAGE__';
-
-declare global {
-  var __GLENUGIE_STORAGE__: StorageData | undefined;
-}
-
-const getGlobalStorage = (): StorageData => {
-  if (!globalThis[GLOBAL_STORAGE_KEY]) {
-    // Initialize with default data
-    globalThis[GLOBAL_STORAGE_KEY] = {
-      bookings: [],
-      bookingRules: {
-        id: 1,
-        minAdvanceBookingDays: 1,
-        maxAdvanceBookingDays: 365,
-        minNights: 1,
-        maxNights: 90,
-        blockedDates: [],
-        blockedDateRanges: [
-          { start: '2026-12-24', end: '2026-12-26', reason: 'Christmas Holiday' }
-        ],
-        allowedCheckInDays: [],
-        allowedCheckOutDays: [],
-        peakSeasonDates: [
-          { start: '2026-07-01', end: '2026-08-31', minNights: 2 },
-          { start: '2026-12-20', end: '2027-01-05', minNights: 3 }
-        ],
-        allowSameDayCheckInOut: false,
-        cutoffTimeForSameDayBooking: 14
-      },
-      rates: {
-        luxurySuites: { basePrice: 25, additionalPet: 10 },
-        cattery: { basePrice: 15, additionalPet: 7.5 },
-        ruffsRetreat: { basePrice: 20, additionalPet: 10 },
-        theVillage: { basePrice: 20, additionalPet: 10 },
-        paymentSettings: { depositAmount: 50, fullPaymentDaysBefore: 7 }
-      }
-    };
-  }
-  return globalThis[GLOBAL_STORAGE_KEY]!;
-};
-
 export class Storage {
-  private kv: any;
+  private fileStorage: FileStorage;
 
-  constructor(kv?: any) {
-    this.kv = kv;
+  constructor() {
+    this.fileStorage = getFileStorage();
   }
 
   async getBookings(): Promise<Booking[]> {
-    console.log('[Storage] getBookings called, KV available:', !!this.kv);
-    if (this.kv) {
-      try {
-        console.log('[Storage] Attempting to read from KV...');
-        const data = await this.kv.get('bookings', 'json');
-        console.log('[Storage] KV read result:', data ? `${data.length} bookings` : 'null/empty');
-        if (data) return data;
-      } catch (error) {
-        console.error('[Storage] KV read error:', error);
-      }
-    }
-    
-    const globalBookings = getGlobalStorage().bookings;
-    console.log('[Storage] Returning from global storage:', globalBookings.length, 'bookings');
-    return globalBookings;
+    return await this.fileStorage.getBookings();
   }
 
   async saveBookings(bookings: Booking[]): Promise<void> {
-    console.log('[Storage] saveBookings called with', bookings.length, 'bookings, KV available:', !!this.kv);
-    
-    // Always update global storage
-    getGlobalStorage().bookings = bookings;
-    console.log('[Storage] Updated global storage');
-
-    // Try to persist to KV
-    if (this.kv) {
-      try {
-        console.log('[Storage] Attempting to write to KV...');
-        await this.kv.put('bookings', JSON.stringify(bookings));
-        console.log(`[Storage] Successfully saved ${bookings.length} bookings to KV`);
-      } catch (error) {
-        console.error('[Storage] KV write error:', error);
-      }
-    } else {
-      console.warn('[Storage] No KV binding available, only saved to global storage');
-    }
+    await this.fileStorage.saveBookings(bookings);
   }
 
   async getBookingRules(): Promise<BookingRules> {
-    if (this.kv) {
-      try {
-        const data = await this.kv.get('booking-rules', 'json');
-        if (data) return data;
-      } catch (error) {
-        console.error('[Storage] KV read error:', error);
-      }
-    }
-    
-    return getGlobalStorage().bookingRules;
+    return await this.fileStorage.getBookingRules();
   }
 
   async saveBookingRules(rules: BookingRules): Promise<void> {
-    getGlobalStorage().bookingRules = rules;
-
-    if (this.kv) {
-      try {
-        await this.kv.put('booking-rules', JSON.stringify(rules));
-        console.log('[Storage] Saved booking rules to KV');
-      } catch (error) {
-        console.error('[Storage] KV write error:', error);
-      }
-    }
+    await this.fileStorage.saveBookingRules(rules);
   }
 
   async getRates(): Promise<Rates> {
-    if (this.kv) {
-      try {
-        const data = await this.kv.get('rates', 'json');
-        if (data) return data;
-      } catch (error) {
-        console.error('[Storage] KV read error:', error);
-      }
-    }
-    
-    return getGlobalStorage().rates;
+    return await this.fileStorage.getRates();
   }
 
   async saveRates(rates: Rates): Promise<void> {
-    getGlobalStorage().rates = rates;
-
-    if (this.kv) {
-      try {
-        await this.kv.put('rates', JSON.stringify(rates));
-        console.log('[Storage] Saved rates to KV');
-      } catch (error) {
-        console.error('[Storage] KV write error:', error);
-      }
-    }
+    await this.fileStorage.saveRates(rates);
   }
 
   async initialize(initialData?: StorageData): Promise<void> {
-    if (initialData) {
-      console.log(`[Storage] Initializing with ${initialData.bookings.length} bookings`);
-      globalThis[GLOBAL_STORAGE_KEY] = initialData;
-      
-      // Try to persist to KV
-      if (this.kv) {
-        try {
-          await this.kv.put('bookings', JSON.stringify(initialData.bookings));
-          await this.kv.put('booking-rules', JSON.stringify(initialData.bookingRules));
-          await this.kv.put('rates', JSON.stringify(initialData.rates));
-          console.log('[Storage] Initialized KV with data');
-        } catch (error) {
-          console.error('[Storage] KV initialization error:', error);
-        }
-      }
-    }
+    await this.fileStorage.initialize(initialData);
   }
 }
 
 // Create a singleton storage instance
 let storageInstance: Storage | null = null;
 
-export const getStorage = (kv?: any): Storage => {
+export const getStorage = (): Storage => {
   if (!storageInstance) {
-    storageInstance = new Storage(kv);
-  } else if (kv) {
-    // Always update KV binding when provided (important for Cloudflare Workers)
-    storageInstance['kv'] = kv;
+    storageInstance = new Storage();
+    console.log('[Storage] Initialized file-based storage');
   }
   return storageInstance;
 };
 
-export function getKVStorage(locals: App.Locals): KVNamespace | null {
-  try {
-    return locals?.runtime?.env?.BOOKINGS_KV || null;
-  } catch (error) {
-    console.error('Failed to get KV storage:', error);
-    return null;
-  }
-}
-
 /**
- * Initialize storage with KV from Astro runtime
- * Call this in API routes to ensure KV is available
+ * Initialize storage (no runtime needed for file storage)
  */
-export const initializeStorage = (runtime?: any): Storage => {
-  const kv = runtime?.env?.BOOKINGS_KV;
-  if (kv) {
-    console.log('[Storage] Initializing with BOOKINGS_KV binding');
-  } else {
-    console.warn('[Storage] No BOOKINGS_KV binding found, using in-memory storage');
-    console.warn('[Storage] Available env keys:', runtime?.env ? Object.keys(runtime.env) : 'no runtime.env');
-  }
-  return getStorage(kv);
+export const initializeStorage = (): Storage => {
+  console.log('[Storage] Using file-based storage (no KV required)');
+  return getStorage();
 };
-
-
-
-
-
-
