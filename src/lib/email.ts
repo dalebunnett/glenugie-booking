@@ -4,8 +4,9 @@ import type { Booking } from './booking-types';
 import { format, addDays, differenceInDays } from 'date-fns';
 
 // Initialize Resend client
-function getResendClient() {
-  const apiKey = import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY;
+function getResendClient(env?: any) {
+  // Try to get API key from multiple sources
+  const apiKey = env?.RESEND_API_KEY || import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn('⚠️ RESEND_API_KEY not configured - emails will be logged only');
     return null;
@@ -1208,8 +1209,8 @@ export function adminPaymentNotification(booking: Booking, paymentAmount: number
 }
 
 // Send email function using Resend
-export async function sendEmail(options: EmailOptions): Promise<boolean> {
-  const resend = getResendClient();
+export async function sendEmail(options: EmailOptions, env?: any): Promise<boolean> {
+  const resend = getResendClient(env);
   
   if (!resend) {
     console.log('📧 [EMAIL - Not Configured]');
@@ -1242,24 +1243,24 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
 // Helper functions for common email scenarios
 
 // 1. Send booking confirmation (customer + admin)
-export async function sendBookingConfirmation(booking: Booking, isManualBooking: boolean = false): Promise<void> {
+export async function sendBookingConfirmation(booking: Booking, isManualBooking: boolean = false, env?: any): Promise<void> {
   await Promise.all([
-    sendEmail(bookingConfirmationEmail(booking)),
-    sendEmail(adminBookingNotification(booking, isManualBooking))
+    sendEmail(bookingConfirmationEmail(booking), env),
+    sendEmail(adminBookingNotification(booking, isManualBooking), env)
   ]);
 }
 
 // 2. Send payment received (customer + admin)
-export async function sendPaymentReceived(booking: Booking, amount: number, type: 'deposit' | 'balance' | 'full'): Promise<void> {
+export async function sendPaymentReceived(booking: Booking, amount: number, type: 'deposit' | 'balance' | 'full', env?: any): Promise<void> {
   await Promise.all([
-    sendEmail(paymentReceivedEmail(booking, amount, type)),
-    sendEmail(adminPaymentNotification(booking, amount, type === 'full' ? 'deposit' : type))
+    sendEmail(paymentReceivedEmail(booking, amount, type), env),
+    sendEmail(adminPaymentNotification(booking, amount, type === 'full' ? 'deposit' : type), env)
   ]);
 }
 
 // 3. Send booking cancelled (customer only)
-export async function sendBookingCancelled(booking: Booking, refundAmount?: number): Promise<void> {
-  await sendEmail(bookingCancelledEmail(booking, refundAmount));
+export async function sendBookingCancelled(booking: Booking, refundAmount?: number, env?: any): Promise<void> {
+  await sendEmail(bookingCancelledEmail(booking, refundAmount), env);
 }
 
 // 4. Send booking amended (customer only)
@@ -1270,28 +1271,29 @@ export async function sendBookingAmended(
     oldCheckOut?: string;
     oldAccommodation?: string;
     oldTotalPrice?: number;
-  }
+  },
+  env?: any
 ): Promise<void> {
-  await sendEmail(bookingAmendedEmail(booking, changes));
+  await sendEmail(bookingAmendedEmail(booking, changes), env);
 }
 
 // 5. Send day-before reminder
-export async function sendDayBeforeReminder(booking: Booking): Promise<void> {
-  await sendEmail(dayBeforeReminderEmail(booking));
+export async function sendDayBeforeReminder(booking: Booking, env?: any): Promise<void> {
+  await sendEmail(dayBeforeReminderEmail(booking), env);
 }
 
 // 6. Send thank you/review email
-export async function sendThankYouReview(booking: Booking): Promise<void> {
-  await sendEmail(thankYouReviewEmail(booking));
+export async function sendThankYouReview(booking: Booking, env?: any): Promise<void> {
+  await sendEmail(thankYouReviewEmail(booking), env);
 }
 
 // 7. Send admin payment notification only
-export async function sendAdminPaymentNotification(booking: Booking, amount: number, type: 'deposit' | 'balance'): Promise<void> {
-  await sendEmail(adminPaymentNotification(booking, amount, type));
+export async function sendAdminPaymentNotification(booking: Booking, amount: number, type: 'deposit' | 'balance', env?: any): Promise<void> {
+  await sendEmail(adminPaymentNotification(booking, amount, type), env);
 }
 
 // Function to check and send day-before reminders (called by cron)
-export async function sendDailyReminders(allBookings: Booking[]): Promise<void> {
+export async function sendDailyReminders(allBookings: Booking[], env?: any): Promise<void> {
   const tomorrow = addDays(new Date(), 1);
   const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
   
@@ -1303,12 +1305,12 @@ export async function sendDailyReminders(allBookings: Booking[]): Promise<void> 
   console.log(`📧 Sending ${bookingsCheckingInTomorrow.length} day-before reminder emails`);
 
   for (const booking of bookingsCheckingInTomorrow) {
-    await sendDayBeforeReminder(booking);
+    await sendDayBeforeReminder(booking, env);
   }
 }
 
 // Function to check and send thank you/review emails (called by cron)
-export async function sendDailyThankYous(allBookings: Booking[]): Promise<void> {
+export async function sendDailyThankYous(allBookings: Booking[], env?: any): Promise<void> {
   const yesterday = addDays(new Date(), -1);
   const yesterdayStr = format(yesterday, 'yyyy-MM-dd');
   
@@ -1320,6 +1322,9 @@ export async function sendDailyThankYous(allBookings: Booking[]): Promise<void> 
   console.log(`📧 Sending ${bookingsCheckedOutYesterday.length} thank you/review emails`);
 
   for (const booking of bookingsCheckedOutYesterday) {
-    await sendThankYouReview(booking);
+    await sendThankYouReview(booking, env);
   }
 }
+
+
+

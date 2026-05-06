@@ -1,24 +1,19 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async ({ locals }) => {
-  const debug = {
-    hasLocals: !!locals,
-    hasRuntime: !!locals?.runtime,
-    hasRuntimeEnv: !!locals?.runtime?.env,
-    runtimeEnvKeys: locals?.runtime?.env ? Object.keys(locals.runtime.env) : [],
-    hasBookingsKV: !!locals?.runtime?.env?.BOOKINGS_KV,
-    bookingsKVType: locals?.runtime?.env?.BOOKINGS_KV ? typeof locals.runtime.env.BOOKINGS_KV : 'undefined',
-    
-    // Check if it's a KV namespace
-    isKVNamespace: locals?.runtime?.env?.BOOKINGS_KV ? 
-      typeof locals.runtime.env.BOOKINGS_KV.get === 'function' : false,
-    
-    // Environment variables (non-sensitive)
-    hasAdminPassword: !!locals?.runtime?.env?.ADMIN_PASSWORD,
-    hasAdminEmail: !!locals?.runtime?.env?.ADMIN_EMAIL,
-  };
-
-  return new Response(JSON.stringify(debug, null, 2), {
+  const env = locals?.runtime?.env;
+  
+  return new Response(JSON.stringify({
+    hasEnv: !!env,
+    hasResendKey: !!env?.RESEND_API_KEY,
+    resendKeyLength: env?.RESEND_API_KEY?.length || 0,
+    resendKeyPrefix: env?.RESEND_API_KEY?.substring(0, 10) || 'not found',
+    allEnvKeys: env ? Object.keys(env) : [],
+    importMetaEnv: {
+      hasResendKey: !!import.meta.env.RESEND_API_KEY,
+      resendKeyLength: import.meta.env.RESEND_API_KEY?.length || 0
+    }
+  }, null, 2), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
   });
