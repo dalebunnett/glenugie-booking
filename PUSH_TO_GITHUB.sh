@@ -1,56 +1,60 @@
 #!/bin/bash
 
-# Glenugie Booking - Push to GitHub Script
-# Run this on your local computer after downloading the code
+# Push to GitHub Script
+# This will push your committed changes to GitHub
 
-echo "🚀 Pushing Glenugie Booking System to GitHub..."
+echo "🚀 Pushing authentication fix to GitHub..."
 echo ""
 
-# Check if git is initialized
+# Check if we're in a git repository
 if [ ! -d .git ]; then
-    echo "❌ Error: Not a git repository"
-    echo "Make sure you're in the project directory"
+    echo "❌ Error: Not in a git repository"
     exit 1
 fi
 
-# Set Git config
-git config user.email "info@glenugiekennels.co.uk"
-git config user.name "Glenugie Kennels"
+# Check if there are commits to push
+if git rev-parse @{u} > /dev/null 2>&1; then
+    COMMITS_AHEAD=$(git rev-list --count @{u}..HEAD)
+    if [ "$COMMITS_AHEAD" -eq 0 ]; then
+        echo "✅ Already up to date - no commits to push"
+        exit 0
+    fi
+    echo "📦 Found $COMMITS_AHEAD commit(s) to push"
+else
+    echo "📦 Preparing to push to remote..."
+fi
 
-# Add remote (will fail if already exists, which is fine)
-git remote add origin https://github.com/dalebunnett/glenugie-booking.git 2>/dev/null || true
-
-# Show status
-echo "📦 Repository status:"
-git status --short | head -20
+# Show what will be pushed
+echo ""
+echo "📋 Commits to push:"
+git log origin/main..HEAD --oneline
 echo ""
 
-# Push to GitHub
-echo "🔄 Pushing to GitHub..."
-echo "You will be prompted for:"
-echo "  Username: dalebunnett"
-echo "  Password: <your Personal Access Token>"
-echo ""
-
-git push -u origin main
-
-if [ $? -eq 0 ]; then
+# Try to push
+echo "🔄 Pushing to origin/main..."
+if git push origin main; then
     echo ""
     echo "✅ Successfully pushed to GitHub!"
-    echo "🌐 View your repository: https://github.com/dalebunnett/glenugie-booking"
     echo ""
     echo "Next steps:"
-    echo "1. Webflow Cloud will automatically detect the new code"
-    echo "2. Check your Webflow dashboard for build progress"
-    echo "3. Your app will be live at: https://www.glenugiekennels.co.uk/app/"
+    echo "1. Go to your Webflow project"
+    echo "2. Wait 2-3 minutes for auto-deployment"
+    echo "3. Hard refresh browser (Ctrl+Shift+R)"
+    echo "4. Login at: https://www.glenugiekennels.co.uk/app/admin"
+    echo ""
 else
     echo ""
     echo "❌ Push failed!"
     echo ""
-    echo "Common issues:"
-    echo "1. Make sure you created the repository on GitHub"
-    echo "2. Use your Personal Access Token (not password)"
-    echo "3. Token must have 'repo' permissions"
+    echo "This usually means:"
+    echo "1. Git credentials not configured"
+    echo "2. No internet connection"
+    echo "3. Remote repository not accessible"
     echo ""
-    echo "Generate token: https://github.com/settings/tokens"
+    echo "Solutions:"
+    echo "• Use GitHub Desktop instead"
+    echo "• Configure Git credentials"
+    echo "• Push manually from your Git client"
+    echo ""
+    exit 1
 fi

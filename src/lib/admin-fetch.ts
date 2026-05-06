@@ -1,3 +1,4 @@
+
 /**
  * Admin API fetch utility
  * Automatically includes authentication token in all admin API requests
@@ -10,10 +11,37 @@ export interface AdminFetchOptions extends RequestInit {
 }
 
 /**
+ * Get token from cookie
+ */
+function getTokenFromCookie(): string | null {
+  if (typeof document === 'undefined') return null;
+  
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'admin_session') {
+      return value;
+    }
+  }
+  return null;
+}
+
+/**
  * Get authentication headers for admin API requests
  */
 export function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('admin_session');
+  // First try localStorage
+  let token = localStorage.getItem('admin_session');
+  
+  // If not in localStorage, check cookie
+  if (!token) {
+    token = getTokenFromCookie();
+    // Sync to localStorage for future requests
+    if (token) {
+      localStorage.setItem('admin_session', token);
+    }
+  }
+  
   return {
     'Content-Type': 'application/json',
     ...(token && { 'Authorization': `Bearer ${token}` })
@@ -101,3 +129,4 @@ export async function adminPut(
 export async function adminDelete(endpoint: string): Promise<Response> {
   return adminFetch(endpoint, { method: 'DELETE' });
 }
+

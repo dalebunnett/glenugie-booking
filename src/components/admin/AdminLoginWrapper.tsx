@@ -21,6 +21,13 @@ export default function AdminLoginWrapper() {
           const data = await response.json();
           if (data.valid) {
             console.log('[AdminLoginWrapper] Already authenticated via cookie');
+            
+            // Store token in localStorage for API calls
+            if (data.token) {
+              localStorage.setItem('admin_session', data.token);
+              sessionStorage.setItem('admin_authenticated', 'true');
+            }
+            
             setIsAuthenticated(true);
           }
         }
@@ -79,6 +86,7 @@ export default function AdminLoginWrapper() {
 
   return <AdminDashboard />;
 }
+
 
 
 
