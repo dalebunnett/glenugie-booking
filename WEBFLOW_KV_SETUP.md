@@ -1,142 +1,115 @@
-# 🔧 Webflow Cloud + KV Setup Guide
+# Webflow Cloud KV Storage Setup Guide
 
-## Overview
-Your booking app uses **Cloudflare KV** (Key-Value storage) to persist data:
-- Bookings
-- Booking rules
-- Rates
-- Customer sessions
+## Problem
+The booking system can't access bookings or rules because the **Cloudflare KV binding** isn't configured in Webflow Cloud.
 
-Since you're deploying via **Webflow Cloud** (which runs on Cloudflare Workers), you need to configure the KV binding.
+## Solution: Configure KV in Webflow Cloud
 
----
+### Step 1: Find Your KV Namespace ID
 
-## ✅ Step 1: Get Your KV Namespace ID
+Your KV namespace ID is already in `wrangler.jsonc`:
+```
+"id": "4dd144b89325450b8949d8132a8ad02c"
+```
 
-1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/)
-2. Navigate to **Workers & Pages** → **KV**
-3. Find your KV namespace (or create one if needed)
-4. Copy the **Namespace ID** (looks like: `a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6`)
+### Step 2: Configure in Webflow Cloud
 
----
+1. **Go to your Webflow project**
+2. **Navigate to:** Apps → Your App → Settings
+3. **Find the "Bindings" or "Environment" section**
+4. **Add KV Namespace Binding:**
+   - **Binding Name:** `BOOKINGS_KV`
+   - **Namespace ID:** `4dd144b89325450b8949d8132a8ad02c`
 
-## ✅ Step 2: Update wrangler.jsonc
+### Step 3: Verify Environment Variables
 
-Open `wrangler.jsonc` and replace `YOUR_KV_NAMESPACE_ID_HERE` with your actual KV ID:
+Make sure these are also set in Webflow Cloud:
 
-```jsonc
-"kv_namespaces": [
-  { 
-    "binding": "KV", 
-    "id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",  // ← Your actual KV ID
-    "preview_id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
-  }
-],
+```
+ADMIN_PASSWORD=Peterhead2026!
+ADMIN_EMAIL=info@glenugiekennels.co.uk
+GOOGLE_REVIEW_LINK=https://maps.google.com/?cid=8993054838066790595
+```
+
+### Step 4: Test the Configuration
+
+After deploying, visit:
+```
+https://www.glenugiekennels.co.uk/app/api/debug/env-check
+```
+
+You should see:
+```json
+{
+  "hasBookingsKV": true,
+  "isKVNamespace": true,
+  "runtimeEnvKeys": ["BOOKINGS_KV", "ADMIN_PASSWORD", "ADMIN_EMAIL", ...]
+}
 ```
 
 ---
 
-## ✅ Step 3: Configure Webflow Cloud
+## Alternative: If Webflow Cloud Doesn't Support KV Bindings
 
-### Option A: If Webflow reads from wrangler.jsonc
-1. Commit your updated `wrangler.jsonc` to GitHub
-2. Push to your repository
-3. Webflow Cloud should automatically detect the KV binding
+If Webflow Cloud doesn't have a UI for KV bindings, you may need to:
 
-### Option B: If Webflow has its own settings
-1. In Webflow Apps settings, find **Cloudflare Bindings**
-2. Add a KV binding:
-   - **Binding name**: `KV`
-   - **Namespace ID**: Your KV namespace ID
+### Option A: Use Cloudflare Pages Instead
+Deploy directly to Cloudflare Pages (not through Webflow Cloud):
+1. Connect your GitHub repo to Cloudflare Pages
+2. Set build command: `npm run build`
+3. Set output directory: `dist`
+4. Add KV binding in Cloudflare Pages settings
+
+### Option B: Contact Webflow Support
+Ask them how to configure Cloudflare KV bindings for Workers deployed through Webflow Cloud.
 
 ---
 
-## ✅ Step 4: Set Environment Variables
+## Troubleshooting
 
-Make sure these are set in Webflow Cloud:
+### Check if KV is working:
+```bash
+# Visit this URL after deployment:
+https://www.glenugiekennels.co.uk/app/api/debug/env-check
+```
+
+### Expected Output (Working):
+```json
+{
+  "hasBookingsKV": true,
+  "isKVNamespace": true
+}
+```
+
+### Expected Output (Not Working):
+```json
+{
+  "hasBookingsKV": false,
+  "isKVNamespace": false
+}
+```
+
+---
+
+## Initialize Data (After KV is Working)
+
+Once KV is properly bound, initialize it with default data:
 
 ```bash
-ADMIN_PASSWORD=Peterhead2026!
-RESEND_API_KEY=your_resend_key
-ADMIN_EMAIL=your_admin_email
-GOOGLE_REVIEW_LINK=your_google_review_link
+# Visit this URL to initialize:
+https://www.glenugiekennels.co.uk/app/api/admin/init-data
 ```
 
----
-
-## ✅ Step 5: Initialize Data (First Time Only)
-
-After deploying, you need to initialize the KV with default data:
-
-1. Go to your admin dashboard: `https://www.glenugiekennels.co.uk/app/admin`
-2. Click **"Initialize Data"** button (if available)
-3. Or call the init endpoint: `https://www.glenugiekennels.co.uk/app/api/admin/init-data`
-
-This will populate KV with:
+This will populate:
 - Default booking rules
 - Default rates
 - Empty bookings array
 
 ---
 
-## 🔍 Verify It's Working
+## Need Help?
 
-### Check KV in Cloudflare Dashboard:
-1. Go to **Workers & Pages** → **KV**
-2. Click on your namespace
-3. You should see keys like:
-   - `bookings`
-   - `booking-rules`
-   - `rates`
-
-### Check in Your App:
-1. Go to admin dashboard
-2. Try viewing bookings
-3. Try updating rates
-4. If you see data persisting after refresh, KV is working! ✅
-
----
-
-## ⚠️ Troubleshooting
-
-### "No KV binding found" warning in logs
-- Check that `wrangler.jsonc` has the correct KV ID
-- Verify Webflow Cloud has the binding configured
-- Redeploy after making changes
-
-### Data not persisting
-- Check Cloudflare KV dashboard to see if data is being written
-- Look at Worker logs for errors
-- Verify the binding name is exactly `KV` (case-sensitive)
-
-### Can't see bookings/rules
-- Run the init-data endpoint first
-- Check browser console for API errors
-- Verify admin authentication is working
-
----
-
-## 📝 How It Works
-
-1. **API routes** initialize storage with KV binding:
-   ```ts
-   initDB(locals.runtime);
-   ```
-
-2. **Storage layer** tries KV first, falls back to in-memory:
-   - ✅ With KV: Data persists across deployments
-   - ⚠️ Without KV: Data lost on Worker restart
-
-3. **Webflow Cloud** provides `locals.runtime.env.KV` to access the binding
-
----
-
-## 🚀 Next Steps
-
-After setup:
-1. ✅ Initialize data
-2. ✅ Test creating a booking
-3. ✅ Verify data persists after refresh
-4. ✅ Check KV dashboard to see stored data
-
-Need help? Check the logs in Cloudflare Workers dashboard!
+1. Check the debug endpoint: `/app/api/debug/env-check`
+2. Check browser console for errors
+3. Check Cloudflare Workers logs in Cloudflare dashboard
+4. Contact Webflow support about KV bindings
