@@ -37,9 +37,9 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
       const checkIn = parseISO(booking.checkIn);
       const checkOut = parseISO(booking.checkOut);
       
-      const isInRange = isWithinInterval(date, { start: checkIn, end: checkOut }) ||
-                       isSameDay(date, checkIn) || 
-                       isSameDay(date, checkOut);
+      // FIXED: Exclude checkout date - guest leaves that day, kennel is available
+      // Only block dates from check-in up to (but not including) check-out
+      const isInRange = (date >= checkIn && date < checkOut);
       
       const matchesFilter = accommodationFilter === 'all' || 
                            booking.accommodationType === accommodationFilter ||
@@ -313,6 +313,7 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
     </div>
   );
 }
+
 
 
 

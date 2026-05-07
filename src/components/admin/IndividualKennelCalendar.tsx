@@ -89,9 +89,9 @@ export default function IndividualKennelCalendar({ bookings, onUpdate }: Individ
       const checkIn = parseISO(booking.checkIn);
       const checkOut = parseISO(booking.checkOut);
       
-      const isInRange = isWithinInterval(date, { start: checkIn, end: checkOut }) ||
-                       isSameDay(date, checkIn) || 
-                       isSameDay(date, checkOut);
+      // FIXED: Exclude checkout date - guest leaves that day, kennel is available
+      // Only block dates from check-in up to (but not including) check-out
+      const isInRange = (date >= checkIn && date < checkOut);
       
       // Check if it's a kennel number reference (e.g., "village-3" or "ruffs-retreat-5")
       if (accommodationValue.includes('-') && (accommodationValue.startsWith('village-') || accommodationValue.startsWith('ruffs-retreat-'))) {
@@ -116,9 +116,9 @@ export default function IndividualKennelCalendar({ bookings, onUpdate }: Individ
       const checkIn = parseISO(booking.checkIn);
       const checkOut = parseISO(booking.checkOut);
       
-      const isInRange = isWithinInterval(date, { start: checkIn, end: checkOut }) ||
-                       isSameDay(date, checkIn) || 
-                       isSameDay(date, checkOut);
+      // FIXED: Exclude checkout date - guest leaves that day, kennel is available
+      // Only block dates from check-in up to (but not including) check-out
+      const isInRange = (date >= checkIn && date < checkOut);
       
       // Check if it's a kennel number reference (e.g., "village-3" or "ruffs-retreat-5")
       if (accommodationValue.includes('-') && (accommodationValue.startsWith('village-') || accommodationValue.startsWith('ruffs-retreat-'))) {
@@ -421,6 +421,7 @@ export default function IndividualKennelCalendar({ bookings, onUpdate }: Individ
     </div>
   );
 }
+
 
 
 
