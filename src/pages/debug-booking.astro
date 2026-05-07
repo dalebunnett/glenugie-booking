@@ -1,0 +1,10 @@
+---
+import MainLayout from '../layouts/main.astro';
+import BookingFormDebug from '../components/BookingFormDebug';
+---
+
+<MainLayout title="Debug Booking Calendar">
+  <main class="container mx-auto py-8">
+    <BookingFormDebug client:only="react" />
+  </main>
+</MainLayout>

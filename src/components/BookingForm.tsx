@@ -637,21 +637,18 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                     // Check if date is in blocked dates from rules
                     if (isDateBlocked(date, bookingRules)) return true;
                     
-                    // FIXED: Normalize date for comparison
-                    const normalizedDate = new Date(date);
-                    normalizedDate.setHours(0, 0, 0, 0);
-                    const dateStr = normalizedDate.toISOString().split('T')[0];
+                    // CRITICAL FIX: Use getTime() for exact comparison
+                    const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                    const checkTime = checkDate.getTime();
                     
                     // Check if date is in booked dates
                     const isBooked = bookedDates.some(bookedDate => {
-                      const normalizedBookedDate = new Date(bookedDate);
-                      normalizedBookedDate.setHours(0, 0, 0, 0);
-                      const bookedStr = normalizedBookedDate.toISOString().split('T')[0];
-                      return bookedStr === dateStr;
+                      const bookedTime = new Date(bookedDate.getFullYear(), bookedDate.getMonth(), bookedDate.getDate()).getTime();
+                      return bookedTime === checkTime;
                     });
                     
                     if (isBooked) {
-                      console.log('✅ Date BLOCKED in calendar:', dateStr);
+                      console.log('🚫 BLOCKING DATE:', date.toISOString().split('T')[0]);
                     }
                     
                     return isBooked;
@@ -700,21 +697,18 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                     // Check if date is in blocked dates from rules
                     if (isDateBlocked(date, bookingRules)) return true;
                     
-                    // FIXED: Normalize date for comparison
-                    const normalizedDate = new Date(date);
-                    normalizedDate.setHours(0, 0, 0, 0);
-                    const dateStr = normalizedDate.toISOString().split('T')[0];
+                    // CRITICAL FIX: Use getTime() for exact comparison
+                    const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                    const checkTime = checkDate.getTime();
                     
                     // Check if date is in booked dates
                     const isBooked = bookedDates.some(bookedDate => {
-                      const normalizedBookedDate = new Date(bookedDate);
-                      normalizedBookedDate.setHours(0, 0, 0, 0);
-                      const bookedStr = normalizedBookedDate.toISOString().split('T')[0];
-                      return bookedStr === dateStr;
+                      const bookedTime = new Date(bookedDate.getFullYear(), bookedDate.getMonth(), bookedDate.getDate()).getTime();
+                      return bookedTime === checkTime;
                     });
                     
                     if (isBooked) {
-                      console.log('✅ Date BLOCKED in calendar:', dateStr);
+                      console.log('🚫 BLOCKING DATE:', date.toISOString().split('T')[0]);
                     }
                     
                     return isBooked;
@@ -1108,6 +1102,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
+
 
 
 
