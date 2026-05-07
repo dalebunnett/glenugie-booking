@@ -68,122 +68,111 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     }
   }, []);
 
-  // Fetch availability when accommodation changes
+  // Fetch availability when accommodation changes OR when step changes to 2
   useEffect(() => {
     const fetchAvailability = async () => {
       // Only fetch if we're on step 2 (dates) or later
-      if (step < 2) return;
-      if (!accommodationType && !specificSuite) return;
+      if (step < 2) {
+        console.log('Step < 2, skipping availability fetch');
+        return;
+      }
+      if (!accommodationType && !specificSuite) {
+        console.log('No accommodation selected, skipping availability fetch');
+        return;
+      }
       
       console.log('=== FETCH AVAILABILITY DEBUG ===');
       console.log('accommodationType:', accommodationType);
       console.log('specificSuite:', specificSuite);
       console.log('step:', step);
       
-      // Clear any existing timeout
-      if (fetchTimeout) {
-        clearTimeout(fetchTimeout);
-      }
-      
-      // Debounce the fetch by 300ms
-      const timeout = setTimeout(async () => {
-        setLoadingAvailability(true);
-        try {
-          const slug = specificSuite || accommodationType;
-          console.log('Fetching availability for slug:', slug);
-          console.log('Full URL:', `${baseUrl}/api/availability/${slug}`);
+      setLoadingAvailability(true);
+      try {
+        const slug = specificSuite || accommodationType;
+        console.log('Fetching availability for slug:', slug);
+        console.log('Full URL:', `${baseUrl}/api/availability/${slug}`);
+        
+        const response = await fetch(`${baseUrl}/api/availability/${slug}`);
+        console.log('Response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Availability fetch for slug:', slug, 'returned:', data);
+          console.log('Number of bookings returned:', data?.length || 0);
           
-          const response = await fetch(`${baseUrl}/api/availability/${slug}`);
-          console.log('Response status:', response.status);
+          // Determine if this is a multi-kennel accommodation
+          const isMultiKennel = slug === 'ruffs-retreat' || slug === 'village' || slug === 'the-village';
+          const totalCapacity = (slug === 'village' || slug === 'the-village') ? 6 : slug === 'ruffs-retreat' ? 12 : 1;
           
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Availability fetch for slug:', slug, 'returned:', data);
-            console.log('Number of bookings returned:', data?.length || 0);
+          // Convert booked date strings to Date objects
+          const booked: Date[] = [];
+          
+          if (isMultiKennel) {
+            // For multi-kennel accommodations, only block dates when ALL kennels are occupied
+            // Group bookings by date and count occupied kennels
+            const dateOccupancy = new Map<string, Set<number>>();
             
-            // Determine if this is a multi-kennel accommodation
-            const isMultiKennel = slug === 'ruffs-retreat' || slug === 'village' || slug === 'the-village';
-            const totalCapacity = (slug === 'village' || slug === 'the-village') ? 6 : slug === 'ruffs-retreat' ? 12 : 1;
-            
-            // Convert booked date strings to Date objects
-            const booked: Date[] = [];
-            
-            if (isMultiKennel) {
-              // For multi-kennel accommodations, only block dates when ALL kennels are occupied
-              // Group bookings by date and count occupied kennels
-              const dateOccupancy = new Map<string, Set<number>>();
+            data?.forEach((booking: any) => {
+              const checkIn = new Date(booking.checkIn);
+              const checkOut = new Date(booking.checkOut);
+              const kennelNum = booking.kennelNumber;
               
-              data?.forEach((booking: any) => {
-                const checkIn = new Date(booking.checkIn);
-                const checkOut = new Date(booking.checkOut);
-                const kennelNum = booking.kennelNumber;
-                
-                // Add all dates between check-in and check-out
-                const current = new Date(checkIn);
-                while (current < checkOut) {
-                  const dateKey = current.toISOString().split('T')[0];
-                  if (!dateOccupancy.has(dateKey)) {
-                    dateOccupancy.set(dateKey, new Set());
-                  }
-                  if (kennelNum) {
-                    dateOccupancy.get(dateKey)!.add(kennelNum);
-                  }
-                  current.setDate(current.getDate() + 1);
+              // Add all dates between check-in and check-out
+              const current = new Date(checkIn);
+              while (current < checkOut) {
+                const dateKey = current.toISOString().split('T')[0];
+                if (!dateOccupancy.has(dateKey)) {
+                  dateOccupancy.set(dateKey, new Set());
                 }
-              });
-              
-              // Only mark dates as booked if ALL kennels are occupied
-              dateOccupancy.forEach((occupiedKennels, dateKey) => {
-                if (occupiedKennels.size >= totalCapacity) {
-                  const date = new Date(dateKey + 'T00:00:00');
-                  booked.push(date);
+                if (kennelNum) {
+                  dateOccupancy.get(dateKey)!.add(kennelNum);
                 }
-              });
-              console.log('Multi-kennel dates blocked:', booked.length, 'dates');
-            } else {
-              // For single suites, block all dates in any booking
-              data?.forEach((booking: any) => {
-                const checkIn = new Date(booking.checkIn);
-                const checkOut = new Date(booking.checkOut);
-                
-                // Add all dates between check-in and check-out
-                const current = new Date(checkIn);
-                while (current < checkOut) {
-                  const date = new Date(current);
-                  date.setHours(0, 0, 0, 0);
-                  booked.push(date);
-                  current.setDate(current.getDate() + 1);
-                }
-              });
-              console.log('Single suite dates blocked:', booked.length, 'dates');
-            }
+                current.setDate(current.getDate() + 1);
+              }
+            });
             
-            setBookedDates(booked);
-            console.log('=== BOOKED DATES SET ===');
-            console.log('Total dates blocked:', booked.length);
-            console.log('Blocked dates:', booked.map(d => d.toISOString().split('T')[0]).join(', '));
-            console.log('========================');
+            // Only mark dates as booked if ALL kennels are occupied
+            dateOccupancy.forEach((occupiedKennels, dateKey) => {
+              if (occupiedKennels.size >= totalCapacity) {
+                const date = new Date(dateKey + 'T00:00:00');
+                booked.push(date);
+              }
+            });
+            console.log('Multi-kennel dates blocked:', booked.length, 'dates');
           } else {
-            console.error('Failed to fetch availability, status:', response.status);
+            // For single suites, block all dates in any booking
+            data?.forEach((booking: any) => {
+              const checkIn = new Date(booking.checkIn);
+              const checkOut = new Date(booking.checkOut);
+              
+              // Add all dates between check-in and check-out
+              const current = new Date(checkIn);
+              while (current < checkOut) {
+                const date = new Date(current);
+                date.setHours(0, 0, 0, 0);
+                booked.push(date);
+                current.setDate(current.getDate() + 1);
+              }
+            });
+            console.log('Single suite dates blocked:', booked.length, 'dates');
           }
-        } catch (error) {
-          console.error('Failed to fetch availability:', error);
-        } finally {
-          setLoadingAvailability(false);
+          
+          setBookedDates(booked);
+          console.log('=== BOOKED DATES SET ===');
+          console.log('Total dates blocked:', booked.length);
+          console.log('Blocked dates:', booked.map(d => d.toISOString().split('T')[0]).join(', '));
+          console.log('========================');
+        } else {
+          console.error('Failed to fetch availability, status:', response.status);
         }
-      }, 300);
-      
-      setFetchTimeout(timeout);
+      } catch (error) {
+        console.error('Failed to fetch availability:', error);
+      } finally {
+        setLoadingAvailability(false);
+      }
     };
     
     fetchAvailability();
-    
-    // Cleanup
-    return () => {
-      if (fetchTimeout) {
-        clearTimeout(fetchTimeout);
-      }
-    };
   }, [accommodationType, specificSuite, step]);
 
   const [checkIn, setCheckIn] = useState<Date>();
@@ -191,7 +180,6 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
   const [numberOfPets, setNumberOfPets] = useState(1);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [fetchTimeout, setFetchTimeout] = useState<number | null>(null);
   const [validationErrorsState, setValidationErrorsState] = useState<string[]>([]);
   const [minNightsRequiredState, setMinNightsRequiredState] = useState(bookingRules.minNights);
 
@@ -1063,6 +1051,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
+
 
 
 
