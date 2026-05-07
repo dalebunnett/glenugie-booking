@@ -129,10 +129,6 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
               const checkOut = new Date(booking.checkOutDate);
               const kennelNum = booking.kennelNumber;
               
-              // FIXED: Normalize to midnight UTC for consistent comparison
-              checkIn.setUTCHours(0, 0, 0, 0);
-              checkOut.setUTCHours(0, 0, 0, 0);
-              
               // Add all dates between check-in and check-out (excluding checkout)
               const current = new Date(checkIn);
               while (current < checkOut) {
@@ -150,10 +146,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
             // Only mark dates as booked if ALL kennels are occupied
             dateOccupancy.forEach((occupiedKennels, dateKey) => {
               if (occupiedKennels.size >= totalCapacity) {
-                // Create date in UTC to avoid timezone issues
-                const [year, month, day] = dateKey.split('-').map(Number);
-                const date = new Date(Date.UTC(year, month - 1, day));
-                booked.push(date);
+                // Simple: just create a Date from the ISO string
+                booked.push(new Date(dateKey + 'T00:00:00.000Z'));
               }
             });
             console.log('Multi-kennel dates blocked:', booked.length, 'dates');
@@ -163,18 +157,12 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
               const checkIn = new Date(booking.checkInDate);
               const checkOut = new Date(booking.checkOutDate);
               
-              // FIXED: Normalize to midnight UTC for consistent comparison
-              checkIn.setUTCHours(0, 0, 0, 0);
-              checkOut.setUTCHours(0, 0, 0, 0);
-              
               // Add all dates between check-in and check-out (excluding checkout)
               const current = new Date(checkIn);
               while (current < checkOut) {
-                // Create date in UTC to avoid timezone issues
                 const dateKey = current.toISOString().split('T')[0];
-                const [year, month, day] = dateKey.split('-').map(Number);
-                const date = new Date(Date.UTC(year, month - 1, day));
-                booked.push(date);
+                // Simple: just create a Date from the ISO string
+                booked.push(new Date(dateKey + 'T00:00:00.000Z'));
                 current.setUTCDate(current.getUTCDate() + 1);
               }
             });
@@ -651,28 +639,17 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                     // Check if date is in blocked dates from rules
                     if (isDateBlocked(date, bookingRules)) return true;
                     
-                    // CRITICAL FIX: Normalize to UTC midnight for exact comparison
-                    const checkDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-                    const checkTime = checkDate.getTime();
-                    
-                    console.log('🔍 Checking date:', date.toISOString().split('T')[0]);
-                    console.log('   bookedDates.length:', bookedDates.length);
-                    console.log('   checkTime:', checkTime);
+                    // FIXED: Simple string comparison - no timezone issues
+                    const checkDateStr = date.toISOString().split('T')[0];
                     
                     // Check if date is in booked dates
                     const isBooked = bookedDates.some(bookedDate => {
-                      const bookedTime = new Date(Date.UTC(bookedDate.getUTCFullYear(), bookedDate.getUTCMonth(), bookedDate.getUTCDate())).getTime();
-                      const matches = bookedTime === checkTime;
-                      if (matches) {
-                        console.log('   ✅ MATCH FOUND!', bookedDate.toISOString().split('T')[0]);
-                      }
-                      return matches;
+                      const bookedDateStr = bookedDate.toISOString().split('T')[0];
+                      return bookedDateStr === checkDateStr;
                     });
                     
-                    console.log('   isBooked:', isBooked);
-                    
                     if (isBooked) {
-                      console.log('🚫 BLOCKING CHECK-IN DATE:', date.toISOString().split('T')[0]);
+                      console.log('🚫 BLOCKING CHECK-IN DATE:', checkDateStr);
                     }
                     
                     return isBooked;
@@ -721,18 +698,17 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                     // Check if date is in blocked dates from rules
                     if (isDateBlocked(date, bookingRules)) return true;
                     
-                    // CRITICAL FIX: Normalize to UTC midnight for exact comparison
-                    const checkDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-                    const checkTime = checkDate.getTime();
+                    // FIXED: Simple string comparison - no timezone issues
+                    const checkDateStr = date.toISOString().split('T')[0];
                     
                     // Check if date is in booked dates
                     const isBooked = bookedDates.some(bookedDate => {
-                      const bookedTime = new Date(Date.UTC(bookedDate.getUTCFullYear(), bookedDate.getUTCMonth(), bookedDate.getUTCDate())).getTime();
-                      return bookedTime === checkTime;
+                      const bookedDateStr = bookedDate.toISOString().split('T')[0];
+                      return bookedDateStr === checkDateStr;
                     });
                     
                     if (isBooked) {
-                      console.log('🚫 BLOCKING CHECK-OUT DATE:', date.toISOString().split('T')[0]);
+                      console.log('🚫 BLOCKING CHECK-OUT DATE:', checkDateStr);
                     }
                     
                     return isBooked;
@@ -1126,6 +1102,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
+
 
 
 

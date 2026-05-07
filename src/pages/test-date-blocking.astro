@@ -1,0 +1,111 @@
+---
+import MainLayout from '../layouts/main.astro';
+import { db, initDB } from '../lib/db';
+
+// Initialize DB
+initDB(Astro.locals.runtime);
+
+// Get all bookings
+const allBookings = await db.bookings.getAll();
+const activeBookings = allBookings.filter(b => b.status !== 'cancelled');
+
+// Get bookings for Sniffany Suite as a test
+const sniffanyBookings = activeBookings.filter(b => 
+  b.specificSuite === 'sniffany-suite'
+);
+---
+
+<MainLayout title="Date Blocking Test">
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Date Blocking Test Page</h1>
+    
+    <div class="space-y-6">
+      <!-- System Status -->
+      <div class="bg-card p-6 rounded-lg border">
+        <h2 class="text-xl font-semibold mb-4">System Status</h2>
+        <div class="space-y-2">
+          <p><strong>Total Bookings:</strong> {allBookings.length}</p>
+          <p><strong>Active Bookings:</strong> {activeBookings.length}</p>
+          <p><strong>Sniffany Suite Bookings:</strong> {sniffanyBookings.length}</p>
+        </div>
+      </div>
+
+      <!-- Sniffany Suite Bookings -->
+      {sniffanyBookings.length > 0 && (
+        <div class="bg-card p-6 rounded-lg border">
+          <h2 class="text-xl font-semibold mb-4">Sniffany Suite Bookings</h2>
+          <div class="space-y-4">
+            {sniffanyBookings.map(booking => (
+              <div class="border-l-4 border-primary pl-4">
+                <p><strong>Booking ID:</strong> {booking.id}</p>
+                <p><strong>Check-in:</strong> {booking.checkIn}</p>
+                <p><strong>Check-out:</strong> {booking.checkOut}</p>
+                <p><strong>Status:</strong> {booking.status}</p>
+                <p><strong>Customer:</strong> {booking.customerName}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Date Blocking Test -->
+      <div class="bg-card p-6 rounded-lg border">
+        <h2 class="text-xl font-semibold mb-4">Date Blocking Test</h2>
+        <div class="space-y-4">
+          <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded">
+            <h3 class="font-semibold mb-2">Test Instructions:</h3>
+            <ol class="list-decimal list-inside space-y-2">
+              <li>Note the check-in and check-out dates above</li>
+              <li>Go to the <a href="/booking?suite=sniffany-suite&type=dog&accommodation=luxury-suite" class="text-primary underline">booking form for Sniffany Suite</a></li>
+              <li>Try to select the dates shown above</li>
+              <li><strong>Expected Result:</strong> Those dates should be disabled/blocked</li>
+              <li>Open browser console to see blocking logs</li>
+            </ol>
+          </div>
+
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded">
+            <h3 class="font-semibold mb-2">What to Look For:</h3>
+            <ul class="list-disc list-inside space-y-1">
+              <li>Booked dates should appear with red background</li>
+              <li>Clicking booked dates should not select them</li>
+              <li>Console should show "🚫 BLOCKING CHECK-IN DATE" messages</li>
+              <li>Calendar should prevent booking on occupied dates</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Test -->
+      <div class="bg-card p-6 rounded-lg border">
+        <h2 class="text-xl font-semibold mb-4">API Response Test</h2>
+        <div class="space-y-2">
+          <p>Test the availability API directly:</p>
+          <a 
+            href="/api/availability/sniffany-suite" 
+            target="_blank"
+            class="inline-block bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
+          >
+            View Sniffany Suite API Response
+          </a>
+        </div>
+      </div>
+
+      <!-- Debug Info -->
+      <div class="bg-card p-6 rounded-lg border">
+        <h2 class="text-xl font-semibold mb-4">Debug Information</h2>
+        <div class="bg-muted p-4 rounded font-mono text-sm overflow-x-auto">
+          <pre>{JSON.stringify({
+            totalBookings: allBookings.length,
+            activeBookings: activeBookings.length,
+            sniffanyBookings: sniffanyBookings.map(b => ({
+              id: b.id,
+              checkIn: b.checkIn,
+              checkOut: b.checkOut,
+              status: b.status
+            }))
+          }, null, 2)}</pre>
+        </div>
+      </div>
+    </div>
+  </main>
+</MainLayout>
