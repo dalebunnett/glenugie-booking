@@ -2,7 +2,7 @@
     "cloud": {
         "framework": "astro",
         "project_id": "53141b3e9bef8243d9e1abf07050086d0c76da75",
-        "environment": "production",
+        "environment": "staging",
         "mountPath": "/app"
     },
     "devlink": {
@@ -18,4 +18,3 @@
         }
     }
 }
-
