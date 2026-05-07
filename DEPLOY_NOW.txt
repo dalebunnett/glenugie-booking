@@ -1,0 +1,55 @@
+HOW TO DEPLOY THE FIX
+======================
+
+ON YOUR LOCAL MACHINE:
+----------------------
+
+1. Open terminal/command prompt
+
+2. Go to project folder:
+   cd /path/to/glenugie-booking
+
+3. Switch to staging branch:
+   git checkout staging
+
+4. Pull the fix:
+   git pull origin staging
+
+5. Deploy:
+   npm run build
+   npx wrangler deploy
+
+   OR just run:
+   ./deploy.sh
+
+
+THAT'S IT. DONE.
+----------------
+
+Test it:
+- Go to your site
+- Visit /test-date-blocking
+- Try to book occupied dates
+- Should be blocked
+
+
+IF IT DOESN'T WORK:
+-------------------
+
+Tell me:
+1. What error message you see
+2. At what step it fails
+3. What command you ran
+
+
+ALTERNATIVE - DEPLOY VIA WEBFLOW:
+----------------------------------
+
+1. Go to Webflow Apps dashboard
+2. Find your app
+3. Click Deploy
+4. Select "staging" branch
+5. Deploy
+
+
+NO MORE DOCS. JUST DO IT.
