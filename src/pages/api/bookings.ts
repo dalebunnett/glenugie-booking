@@ -5,6 +5,66 @@ import { sendBookingConfirmation } from '../../lib/email';
 import type { Booking } from '../../lib/booking-types';
 import { allocateKennelNumber } from '../../lib/kennel-allocation';
 
+/**
+ * Check if a suite/kennel is available for the given date range
+ */
+function isAvailable(
+  accommodationType: string,
+  specificSuite: string | undefined,
+  kennelNumber: string | undefined,
+  checkIn: string,
+  checkOut: string,
+  existingBookings: Booking[]
+): boolean {
+  const requestedCheckIn = new Date(checkIn);
+  const requestedCheckOut = new Date(checkOut);
+  
+  // Normalize dates to midnight UTC
+  requestedCheckIn.setHours(0, 0, 0, 0);
+  requestedCheckOut.setHours(0, 0, 0, 0);
+  
+  // Filter bookings that could conflict
+  const conflictingBookings = existingBookings.filter(booking => {
+    // Skip cancelled bookings
+    if (booking.status === 'cancelled') return false;
+    
+    // Check if it's the same accommodation
+    let isSameAccommodation = false;
+    
+    if (accommodationType === 'luxury-suite' && specificSuite) {
+      // For luxury suites, check specific suite name
+      isSameAccommodation = booking.accommodationType === 'luxury-suite' && 
+                           booking.specificSuite === specificSuite;
+    } else if (accommodationType === 'cattery' && specificSuite) {
+      // For cattery, check specific suite name
+      isSameAccommodation = booking.accommodationType === 'cattery' && 
+                           booking.specificSuite === specificSuite;
+    } else if ((accommodationType === 'village' || accommodationType === 'ruffs-retreat') && kennelNumber) {
+      // For standard kennels, check kennel number
+      isSameAccommodation = booking.accommodationType === accommodationType && 
+                           booking.kennelNumber === kennelNumber;
+    }
+    
+    if (!isSameAccommodation) return false;
+    
+    // Check date overlap
+    const bookingCheckIn = new Date(booking.checkIn);
+    const bookingCheckOut = new Date(booking.checkOut);
+    
+    bookingCheckIn.setHours(0, 0, 0, 0);
+    bookingCheckOut.setHours(0, 0, 0, 0);
+    
+    // Bookings overlap if:
+    // - New check-in is before existing check-out AND
+    // - New check-out is after existing check-in
+    const overlaps = requestedCheckIn < bookingCheckOut && requestedCheckOut > bookingCheckIn;
+    
+    return overlaps;
+  });
+  
+  return conflictingBookings.length === 0;
+}
+
 export const POST: APIRoute = async ({ request, locals }) => {
   // Initialize DB with KV binding
   initDB(locals.runtime);
@@ -12,13 +72,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const data = await request.json();
     
-    // Generate booking ID
-    const bookingId = `booking-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    // Get all existing bookings to check availability
+    const existingBookings = await db.bookings.getAll();
     
     // Auto-allocate kennel number for standard kennels
     let kennelNumber = data.kennelNumber;
     if ((data.accommodationType === 'village' || data.accommodationType === 'ruffs-retreat') && !kennelNumber) {
-      const existingBookings = await db.bookings.getAll();
       kennelNumber = allocateKennelNumber(
         data.accommodationType,
         data.checkIn,
@@ -37,6 +96,29 @@ export const POST: APIRoute = async ({ request, locals }) => {
       
       console.log(`[Booking] Auto-allocated kennel number ${kennelNumber} for ${data.accommodationType}`);
     }
+    
+    // Check availability for the requested accommodation
+    const available = isAvailable(
+      data.accommodationType,
+      data.specificSuite,
+      kennelNumber,
+      data.checkIn,
+      data.checkOut,
+      existingBookings
+    );
+    
+    if (!available) {
+      const accommodationName = data.specificSuite || data.accommodationType;
+      return new Response(JSON.stringify({ 
+        error: `${accommodationName} is not available for the selected dates. Please choose different dates or another accommodation.`,
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Generate booking ID
+    const bookingId = `booking-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
     
     // Create booking object with all required fields
     const booking: Booking = {
@@ -205,8 +287,3 @@ export const GET: APIRoute = async ({ locals }) => {
     });
   }
 };
-
-
-
-
-

@@ -1,198 +1,101 @@
-# 🚀 DEPLOY CRITICAL BOOKING FIX - IMMEDIATE ACTION REQUIRED
-
-## ⚠️ CRITICAL ISSUE FIXED
-
-**Booked dates were NOT blocking in the frontend calendar**, allowing double bookings. This has been **FIXED** and must be deployed immediately.
+# 🚀 DEPLOY BOOKING BLOCKING FIX NOW
 
 ## What Was Fixed
+✅ Suites can now be properly blocked from double-booking  
+✅ API checks availability before creating bookings  
+✅ Frontend calendar shows blocked dates correctly  
 
-✅ Calendar now properly blocks booked dates  
-✅ Date comparison normalized across timezones  
-✅ Visual indicators enhanced for blocked dates  
-✅ UTC date handling implemented  
-✅ Multi-kennel logic preserved  
+## Deploy Steps
 
-## Deployment Steps
-
-### 1. Verify Build Success ✅
-
+### Option 1: Deploy from Local Machine (Fastest)
 ```bash
-npm run build
-```
+# 1. Navigate to project
+cd /path/to/glenugie-kennels
 
-**Status**: ✅ Build completed successfully (see output above)
+# 2. Pull latest changes
+git pull origin main
 
-### 2. Test Locally (Optional but Recommended)
-
-```bash
-npm run preview
-```
-
-Then test:
-1. Go to `/booking`
-2. Select a kennel/suite that has existing bookings
-3. Verify booked dates show as red/blocked in calendar
-4. Try to select a booked date - should be disabled
-5. Check browser console for "✅ Date BLOCKED in calendar" messages
-
-### 3. Deploy to Webflow
-
-#### Option A: Via Webflow Dashboard
-1. Go to your Webflow project
-2. Navigate to Apps section
-3. Find your booking app
-4. Click "Deploy" or "Publish"
-5. Wait for deployment to complete
-
-#### Option B: Via Wrangler CLI
-```bash
+# 3. Build and deploy
 npm run build
 npx wrangler deploy
 ```
 
-### 4. Verify Deployment
+### Option 2: Deploy via Webflow Dashboard
+1. Changes are already pushed to GitHub
+2. Go to: https://webflow.com/dashboard
+3. Find your Glenugie Kennels app
+4. Click **"Deploy"**
+5. Wait 2-3 minutes for build
 
-After deployment, immediately test:
+### Option 3: Deploy via Webflow CLI
+```bash
+# If you have Webflow CLI installed
+webflow deploy
+```
 
-1. **Go to your live site**: `https://glenugiekennels.co.uk/booking`
+## Verify It's Working
 
-2. **Test with existing bookings**:
-   - Select "Luxury Suite" → Pick any suite (e.g., "Sniffany")
-   - Click "Continue to Dates"
-   - **VERIFY**: Dates with existing bookings should be:
-     - Red/pink background
-     - Line-through text
-     - Not clickable
-     - Show "✅ Date BLOCKED" in console
+### Test 1: Check Existing Booking Blocks New One
+1. Go to your booking page
+2. Select "Sniffany" suite
+3. Try to book dates that overlap with existing booking
+4. **Expected:** Those dates should be disabled/red in calendar
+5. **Expected:** If you bypass UI, you get error message
 
-3. **Test multi-kennel**:
-   - Select "Ruff's Retreat" or "The Village"
-   - Click "Continue to Dates"
-   - **VERIFY**: Only fully booked dates are blocked
+### Test 2: Check API Rejects Double Booking
+```bash
+# Try to create a booking for already-booked dates
+curl -X POST https://your-site.com/api/bookings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accommodationType": "luxury-suite",
+    "specificSuite": "sniffany",
+    "checkIn": "2026-05-10",
+    "checkOut": "2026-05-15",
+    ...
+  }'
 
-4. **Check console logs**:
-   - Open browser DevTools (F12)
-   - Go to Console tab
-   - Look for these messages:
-     ```
-     🔴 BOOKED DATES STATE CHANGED 🔴
-     Number of booked dates: X
-     ✅ Date BLOCKED in calendar: YYYY-MM-DD
-     ```
+# Expected response:
+# {
+#   "error": "sniffany is not available for the selected dates..."
+# }
+```
 
-## Expected Behavior After Fix
+## What Changed
 
-### Single Suites (Luxury Dog Suites, Cattery)
-- ❌ **Before**: Could select any date, even if booked
-- ✅ **After**: Booked dates are disabled and visually marked
+### Backend (`src/pages/api/bookings.ts`)
+- Added `isAvailable()` function
+- Checks for date overlaps before creating booking
+- Returns 400 error if suite unavailable
 
-### Multi-Kennel (Ruff's Retreat, The Village)
-- ❌ **Before**: Could select dates even with partial bookings
-- ✅ **After**: Only blocks when ALL kennels are occupied
-
-## Visual Indicators
-
-Users will see:
-- 🔴 **Red background + line-through**: Booked/unavailable dates
-- 🟢 **Normal appearance**: Available dates
-- 🔵 **Blue border**: Selected dates
+### Frontend (`src/components/BookingForm.tsx`)
+- Fixed data access: `data.bookings` instead of `data`
+- Fixed field names: `checkInDate`/`checkOutDate` instead of `checkIn`/`checkOut`
+- Calendar now properly blocks booked dates
 
 ## Rollback Plan (If Needed)
-
-If issues occur after deployment:
-
 ```bash
-git log --oneline -5
-git revert <commit-hash>
+# Revert to previous version
+git revert HEAD
+git push origin main
+
+# Then deploy again
 npm run build
 npx wrangler deploy
 ```
 
-## Files Changed
+## Support
+If you see any issues after deployment:
+1. Check browser console for errors
+2. Check Cloudflare Workers logs
+3. Test with a known booked suite
 
-- `src/components/BookingForm.tsx` - Fixed date blocking logic
-- `CRITICAL_BOOKING_BLOCKING_FIX.md` - Documentation
-
-## Post-Deployment Monitoring
-
-### First 24 Hours
-- [ ] Monitor for any booking conflicts
-- [ ] Check customer support for complaints
-- [ ] Review booking logs for double bookings
-- [ ] Test on different devices/browsers
-
-### Check These Metrics
-- Number of failed booking attempts (should decrease)
-- Customer complaints about unavailable dates (should decrease)
-- Successful bookings (should remain stable)
-
-## Communication
-
-### To Customers (If Needed)
-```
-We've improved our booking system to show real-time availability 
-more accurately. You'll now see which dates are available before 
-you start your booking.
-```
-
-### To Staff
-```
-IMPORTANT: The booking calendar now properly blocks booked dates. 
-If customers report they can't select certain dates, this is 
-working as intended - those dates are already booked.
-```
-
-## Troubleshooting
-
-### Issue: Dates still not blocking
-**Solution**: 
-1. Clear browser cache (Ctrl+Shift+Delete)
-2. Hard refresh (Ctrl+Shift+R)
-3. Check if deployment completed successfully
-
-### Issue: Wrong dates being blocked
-**Solution**:
-1. Check booking data in admin panel
-2. Verify kennel numbers are assigned correctly
-3. Check console logs for date comparison issues
-
-### Issue: Multi-kennel blocking too many dates
-**Solution**:
-1. Verify kennel capacity settings
-2. Check if kennel numbers are properly assigned
-3. Review booking allocation logic
-
-## Success Criteria
-
-✅ Booked dates are visually blocked in calendar  
-✅ Users cannot select booked dates  
-✅ Console shows "Date BLOCKED" messages  
-✅ No double bookings occur  
-✅ Multi-kennel logic works correctly  
-
-## Timeline
-
-- **Build**: ✅ Completed
-- **Deploy**: ⏳ **DO THIS NOW**
-- **Verify**: ⏳ Within 5 minutes of deployment
-- **Monitor**: ⏳ Next 24 hours
+## Status
+🟢 **READY TO DEPLOY**  
+⚠️ **CRITICAL FIX** - Deploy ASAP to prevent double bookings
 
 ---
 
-## 🚨 ACTION REQUIRED
-
-**Deploy this fix immediately to prevent double bookings!**
-
-```bash
-# Quick deploy command:
-npm run build && npx wrangler deploy
-```
-
-**Then verify at**: https://glenugiekennels.co.uk/booking
-
----
-
-**Status**: 🔴 AWAITING DEPLOYMENT  
-**Priority**: CRITICAL  
-**Impact**: Prevents double bookings  
-**Risk**: LOW (thoroughly tested)
+**Estimated Deploy Time:** 5 minutes  
+**Downtime:** None (zero-downtime deployment)  
+**Risk Level:** Low (only adds validation, doesn't break existing functionality)

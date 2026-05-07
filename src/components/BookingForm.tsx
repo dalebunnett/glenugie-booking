@@ -106,7 +106,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
         if (response.ok) {
           const data = await response.json();
           console.log('Availability fetch for slug:', slug, 'returned:', data);
-          console.log('Number of bookings returned:', data?.length || 0);
+          console.log('Number of bookings returned:', data?.bookings?.length || 0);
           console.log('🔍 RAW BOOKING DATA:', JSON.stringify(data, null, 2));
           
           // Determine if this is a multi-kennel accommodation
@@ -124,9 +124,9 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
             // Group bookings by date and count occupied kennels
             const dateOccupancy = new Map<string, Set<number>>();
             
-            data?.forEach((booking: any) => {
-              const checkIn = new Date(booking.checkIn);
-              const checkOut = new Date(booking.checkOut);
+            data?.bookings?.forEach((booking: any) => {
+              const checkIn = new Date(booking.checkInDate);
+              const checkOut = new Date(booking.checkOutDate);
               const kennelNum = booking.kennelNumber;
               
               // FIXED: Normalize to midnight UTC for consistent comparison
@@ -159,9 +159,9 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
             console.log('Multi-kennel dates blocked:', booked.length, 'dates');
           } else {
             // For single suites, block all dates in any booking
-            data?.forEach((booking: any) => {
-              const checkIn = new Date(booking.checkIn);
-              const checkOut = new Date(booking.checkOut);
+            data?.bookings?.forEach((booking: any) => {
+              const checkIn = new Date(booking.checkInDate);
+              const checkOut = new Date(booking.checkOutDate);
               
               // FIXED: Normalize to midnight UTC for consistent comparison
               checkIn.setUTCHours(0, 0, 0, 0);
@@ -1110,6 +1110,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
 
 
 
