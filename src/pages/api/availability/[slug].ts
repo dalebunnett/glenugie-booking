@@ -1,12 +1,14 @@
 import type { APIRoute } from 'astro';
 import { db, initDB } from '../../../lib/db';
-import type { Booking } from '../../../lib/booking-types';
 
 export const GET: APIRoute = async ({ params, locals }) => {
   const { slug } = params;
 
   if (!slug) {
-    return new Response(JSON.stringify({ error: 'Accommodation slug is required' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Accommodation slug is required',
+      bookings: []
+    }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -70,31 +72,37 @@ export const GET: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    // Return only necessary booking info (no personal details)
+    // Return bookings with consistent field names for the calendar component
     const publicBookings = kennelBookings.map(booking => ({
       id: booking.id,
-      checkIn: booking.checkIn,
-      checkOut: booking.checkOut,
+      checkInDate: booking.checkIn,  // Map checkIn to checkInDate
+      checkOutDate: booking.checkOut, // Map checkOut to checkOutDate
       numberOfNights: booking.numberOfNights,
       status: booking.status,
+      petName: booking.pets && booking.pets.length > 0 ? booking.pets[0].name : 'Guest',
       petCount: booking.pets.length,
-      kennelNumber: booking.kennelNumber // Include kennel number for multi-kennel types
+      kennelNumber: booking.kennelNumber,
+      accommodationType: booking.accommodationType,
+      specificSuite: booking.specificSuite
     }));
 
-    return new Response(JSON.stringify(publicBookings), {
+    return new Response(JSON.stringify({ 
+      bookings: publicBookings,
+      total: publicBookings.length,
+      slug: normalizedSlug
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Error fetching availability:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch availability' }), {
+    console.error('[Availability API] Error fetching availability:', error);
+    return new Response(JSON.stringify({ 
+      error: 'Failed to fetch availability',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      bookings: []
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
   }
 };
-
-
-
-
-
