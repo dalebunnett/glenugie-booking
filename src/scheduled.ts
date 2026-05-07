@@ -7,16 +7,14 @@ import { sendDailyReminders, sendDailyThankYous } from './lib/email';
 
 export default {
   async scheduled(
-    controller: ScheduledController,
-    env: any,
-    ctx: any
+    controller: ScheduledController
   ): Promise<void> {
     console.log('🕐 Scheduled email job started at:', new Date().toISOString());
     console.log('   Cron schedule:', controller.cron);
 
     try {
       // Get all bookings from the database
-      const allBookings = db.bookings.getAll();
+      const allBookings = await db.bookings.getAll();
       console.log(`   Found ${allBookings.length} total bookings`);
 
       // Send day-before reminder emails
@@ -34,3 +32,4 @@ export default {
     }
   }
 };
+

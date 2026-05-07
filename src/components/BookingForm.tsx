@@ -41,6 +41,14 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
+  
+  // Debug: Log bookedDates whenever it changes
+  useEffect(() => {
+    console.log('🔴 BOOKED DATES STATE CHANGED 🔴');
+    console.log('Number of booked dates:', bookedDates.length);
+    console.log('Booked dates:', bookedDates.map(d => d.toISOString().split('T')[0]).join(', '));
+  }, [bookedDates]);
+
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [minNightsRequired, setMinNightsRequired] = useState(bookingRules.minNights);
 
@@ -99,10 +107,14 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
           const data = await response.json();
           console.log('Availability fetch for slug:', slug, 'returned:', data);
           console.log('Number of bookings returned:', data?.length || 0);
+          console.log('🔍 RAW BOOKING DATA:', JSON.stringify(data, null, 2));
           
           // Determine if this is a multi-kennel accommodation
           const isMultiKennel = slug === 'ruffs-retreat' || slug === 'village' || slug === 'the-village';
           const totalCapacity = (slug === 'village' || slug === 'the-village') ? 6 : slug === 'ruffs-retreat' ? 12 : 1;
+          
+          console.log('🏠 Accommodation Type:', isMultiKennel ? 'Multi-Kennel' : 'Single Suite');
+          console.log('🏠 Total Capacity:', totalCapacity);
           
           // Convert booked date strings to Date objects
           const booked: Date[] = [];
@@ -395,7 +407,10 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     }
   };
 
-  const canProceedStep1 = petType && accommodationType;
+  const canProceedStep1 = petType && accommodationType && 
+    // Require specific suite selection for luxury suites and cattery
+    (accommodationType === 'luxury-suite' ? !!specificSuite : true) &&
+    (accommodationType === 'cattery' ? !!specificSuite : true);
   const canProceedStep2 = checkIn && checkOut && checkOut > checkIn && validationErrors.length === 0;
   const canProceedStep3 = formData.emergencyContactName && formData.emergencyContactNumber && 
                           formData.petName1 && formData.microchip1 && formData.breed1 && formData.age1;
@@ -496,7 +511,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                 <Label>Select Suite *</Label>
                 <Select value={specificSuite} onValueChange={setSpecificSuite}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select suite" />
+                    <SelectValue placeholder="Choose your luxury suite" />
                   </SelectTrigger>
                   <SelectContent>
                     {LUXURY_SUITES.map(suite => (
@@ -504,6 +519,28 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Each suite is individually themed and can only accommodate one booking at a time
+                </p>
+              </div>
+            )}
+
+            {accommodationType === 'cattery' && (
+              <div>
+                <Label>Select Cattery Suite *</Label>
+                <Select value={specificSuite} onValueChange={setSpecificSuite}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose your cattery suite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATTERY_SUITES.map(suite => (
+                      <SelectItem key={suite.value} value={suite.value}>{suite.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Each cattery suite is individually designed and can only accommodate one booking at a time
+                </p>
               </div>
             )}
 
@@ -1051,6 +1088,10 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
+
+
+
 
 
 

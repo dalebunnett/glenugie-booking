@@ -1,154 +1,99 @@
-# 📋 Deployment Checklist - File Storage Migration
+# Deployment Checklist ✅
 
-## Pre-Deployment
+## Build Status
+- ✅ **Build Successful** - No errors in `npm run build`
+- ✅ **TypeScript Errors Fixed** - Fixed scheduled.ts async/await issues
+- ✅ **Import Errors Fixed** - Fixed admin-auth import issues
 
-- [x] File storage system created (`src/lib/file-storage.ts`)
-- [x] Storage adapter updated (`src/lib/storage.ts`)
-- [x] Data directory created (`data/`)
-- [x] Default data files created
-  - [x] `data/bookings.json`
-  - [x] `data/booking-rules.json`
-  - [x] `data/rates.json`
-- [x] KV binding removed from `wrangler.jsonc`
-- [x] `.gitignore` updated
-- [x] Documentation created
-- [x] Build tested successfully
+## Files Fixed
+1. ✅ `src/pages/api/admin/fix-suite-slugs.ts` - Fixed verifyAdminAuth import
+2. ✅ `src/scheduled.ts` - Fixed async/await for getAll() call
+
+## Configuration Files
+- ✅ `astro.config.mjs` - Properly configured for Cloudflare
+- ✅ `wrangler.jsonc` - KV namespace and environment variables set
+- ✅ `webflow.json` - Project ID and mount path configured
+
+## Environment Variables Required
+
+### In Webflow Cloud Dashboard:
+Make sure these are set in your Webflow project settings:
+
+1. **BOOKINGS_KV** (KV Namespace)
+   - Binding name: `BOOKINGS_KV`
+   - Namespace ID: `4dd144b89325450b8949d8132a8ad02c`
+
+2. **Environment Variables:**
+   - `ADMIN_PASSWORD` = `Peterhead2026!`
+   - `ADMIN_EMAIL` = `info@glenugiekennels.co.uk`
+   - `GOOGLE_REVIEW_LINK` = `https://maps.google.com/?cid=8993054838066790595`
+
+3. **Optional (for email functionality):**
+   - `RESEND_API_KEY` - Your Resend API key for sending emails
 
 ## Deployment Steps
 
-### 1. Commit Changes
+### For Webflow Cloud:
+1. Commit and push your changes to GitHub
+2. In Webflow, go to your Apps project
+3. Trigger a new deployment
+4. Wait for build to complete
+
+### For Manual Cloudflare Deployment:
 ```bash
-git add .
-git commit -m "Migrate to file-based storage - no KV required"
-git push origin main
+# Build the project
+npm run build
+
+# Deploy to Cloudflare
+wrangler deploy
 ```
 
-### 2. Verify GitHub Push
-- [ ] Check GitHub repository shows latest commit
-- [ ] Verify all files are present
+## Common Deployment Issues
 
-### 3. Deploy in Webflow Cloud
-- [ ] Webflow Cloud detects new commit
-- [ ] Deployment starts automatically
-- [ ] Wait for deployment to complete
-- [ ] Check deployment logs for errors
+### Issue: "SESSION binding not found"
+**Solution:** This is just a warning and won't prevent deployment. The SESSION KV is optional for Cloudflare sessions.
 
-### 4. Post-Deployment Testing
+### Issue: "Build failed"
+**Solution:** Run `npm run build` locally to see detailed error messages.
 
-#### Test Booking System
-- [ ] Visit `/app/booking`
-- [ ] Fill out booking form
-- [ ] Submit booking
-- [ ] Verify confirmation page shows
-- [ ] Check booking appears in admin
+### Issue: "KV namespace not found"
+**Solution:** 
+1. Check that BOOKINGS_KV is properly bound in Webflow settings
+2. Verify the namespace ID matches: `4dd144b89325450b8949d8132a8ad02c`
 
-#### Test Admin Dashboard
-- [ ] Visit `/app/admin`
-- [ ] View bookings list
-- [ ] Check booking details
-- [ ] Update rates
-- [ ] Modify booking rules
-- [ ] Verify changes persist
+### Issue: "Environment variables not set"
+**Solution:** Add all required environment variables in Webflow project settings.
 
-#### Test Customer Portal
-- [ ] Visit `/app/my-bookings`
-- [ ] Enter booking reference
-- [ ] View booking details
-- [ ] Test cancellation (if applicable)
+## Verification After Deployment
 
-#### Test Availability Calendar
-- [ ] Visit `/app/booking`
-- [ ] Check calendar loads
-- [ ] Verify blocked dates show
-- [ ] Test date selection
+1. ✅ Visit your site: `https://your-site.webflow.io/app`
+2. ✅ Test booking form: `/app/booking`
+3. ✅ Test admin login: `/app/admin` (password: Peterhead2026!)
+4. ✅ Check availability calendar works
+5. ✅ Verify contact form submits
 
-### 5. Data Verification
-- [ ] Confirm `data/` directory exists on server
-- [ ] Verify `bookings.json` contains test booking
-- [ ] Check `booking-rules.json` has correct rules
-- [ ] Verify `rates.json` has correct pricing
-
-### 6. Optional Cleanup
-- [ ] Remove `BOOKINGS_KV` binding from Webflow Cloud (if exists)
-- [ ] Update any documentation referencing KV
-- [ ] Archive old KV data (if needed)
-
-## Rollback Plan (If Needed)
-
-If something goes wrong:
-
-```bash
-# Revert to previous commit
-git revert HEAD
-git push origin main
-
-# Or reset to specific commit
-git reset --hard <previous-commit-hash>
-git push --force origin main
+## Build Output Summary
+```
+✓ Server built successfully
+✓ Client assets compiled (2202 modules)
+✓ All routes processed
+✓ Ready for deployment
 ```
 
-Then redeploy in Webflow Cloud.
+## Next Steps if Still Failing
 
-## Success Criteria
+If deployment still fails, please provide:
+1. **Exact error message** from Webflow deployment logs
+2. **Screenshot** of the error (if available)
+3. **Deployment platform** (Webflow Cloud, Cloudflare Pages, etc.)
 
-✅ **All tests pass**
-- Bookings can be created
-- Admin dashboard works
-- Customer portal functions
-- Data persists correctly
+The build is working locally, so the issue is likely:
+- Missing environment variables in Webflow
+- KV namespace not properly bound
+- Webflow-specific configuration issue
 
-✅ **No errors in logs**
-- Check Webflow Cloud deployment logs
-- Check browser console
-- Verify no 500 errors
-
-✅ **Performance is good**
-- Pages load quickly
-- No timeout errors
-- Smooth user experience
-
-## Post-Deployment
-
-### Backup Strategy
-- [ ] Set up regular data backups
-- [ ] Document backup process
-- [ ] Test restore procedure
-
-### Monitoring
-- [ ] Monitor for errors in first 24 hours
-- [ ] Check booking submissions
-- [ ] Verify email notifications work
-
-### Documentation
-- [ ] Update team on new system
-- [ ] Share backup procedures
-- [ ] Document any issues encountered
-
-## Notes
-
-**Date Deployed:** _________________
-
-**Deployed By:** _________________
-
-**Issues Encountered:** 
-_________________________________________________
-_________________________________________________
-_________________________________________________
-
-**Resolution:**
-_________________________________________________
-_________________________________________________
-_________________________________________________
-
-## Support Resources
-
-- `FILE_STORAGE_GUIDE.md` - Complete guide
-- `STORAGE_COMPARISON.md` - Before/after comparison
-- `DEPLOY_FILE_STORAGE.md` - Quick deploy guide
-- `README_FILE_STORAGE.md` - Overview
-
----
-
-**Ready to deploy!** 🚀
-
-Follow this checklist step-by-step for a smooth migration to file-based storage.
+## Support
+If you need help, check:
+- Webflow Apps documentation
+- Cloudflare Workers documentation
+- This project's README.md files

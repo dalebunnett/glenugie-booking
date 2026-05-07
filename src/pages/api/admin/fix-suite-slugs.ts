@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { initDB } from '../../../lib/db';
-import { verifyAdminAuth } from '../../../lib/admin-auth';
+import { requireAdminAuth } from '../../../lib/admin-auth';
 
 // Mapping of old suite names to correct slugs
 const SUITE_NAME_TO_SLUG: Record<string, string> = {
@@ -60,8 +60,8 @@ const SUITE_NAME_TO_SLUG: Record<string, string> = {
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // Verify admin authentication
-    const authResult = await verifyAdminAuth(request, locals);
-    if (!authResult.authenticated) {
+    const authResult = requireAdminAuth(request);
+    if (!authResult.authorized) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
@@ -132,3 +132,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
