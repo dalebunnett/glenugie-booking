@@ -30,33 +30,34 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
     // Filter bookings for this specific kennel/suite
     const kennelBookings = activeBookings.filter(booking => {
+      // FIRST: Check if this booking has a specific suite that matches
+      if (booking.specificSuite === normalizedSlug) {
+        console.log(`[Availability API] ✓ Match on specificSuite: ${booking.specificSuite}`);
+        return true;
+      }
+      
+      // SECOND: Check for general accommodation type matches
       // For luxury-suite as accommodation type (no specific suite selected)
-      if (normalizedSlug === 'luxury-suite') {
-        return booking.accommodationType === 'luxury-suite';
+      if (normalizedSlug === 'luxury-suite' && booking.accommodationType === 'luxury-suite') {
+        console.log(`[Availability API] ✓ Match on luxury-suite type`);
+        return true;
       }
       
       // For cattery as accommodation type (no specific suite selected)
-      if (normalizedSlug === 'cattery') {
-        return booking.accommodationType === 'cattery';
-      }
-      
-      // For luxury suites, match by specific suite slug (already stored as slug)
-      if (booking.accommodationType === 'luxury-suite' && booking.specificSuite) {
-        return booking.specificSuite === normalizedSlug;
-      }
-      
-      // For cattery, match by specific suite slug (already stored as slug)
-      if (booking.accommodationType === 'cattery' && booking.specificSuite) {
-        return booking.specificSuite === normalizedSlug;
+      if (normalizedSlug === 'cattery' && booking.accommodationType === 'cattery') {
+        console.log(`[Availability API] ✓ Match on cattery type`);
+        return true;
       }
       
       // For standard kennels, match by accommodation type
-      if (normalizedSlug === 'ruffs-retreat') {
-        return booking.accommodationType === 'ruffs-retreat';
+      if (normalizedSlug === 'ruffs-retreat' && booking.accommodationType === 'ruffs-retreat') {
+        console.log(`[Availability API] ✓ Match on ruffs-retreat`);
+        return true;
       }
       
-      if (normalizedSlug === 'village') {
-        return booking.accommodationType === 'village';
+      if (normalizedSlug === 'village' && booking.accommodationType === 'village') {
+        console.log(`[Availability API] ✓ Match on village`);
+        return true;
       }
       
       return false;
