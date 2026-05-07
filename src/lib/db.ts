@@ -3,7 +3,7 @@ import { sessions } from './sessions';
 import { getStorage, initializeStorage, Storage } from './storage';
 
 // Storage instance that will be initialized with KV
-let storageInstance: Storage;
+let storageInstance: Storage | null = null;
 
 // Cache invalidation callbacks
 const cacheInvalidationCallbacks: Array<() => void> = [];
@@ -14,6 +14,14 @@ export const registerCacheInvalidation = (callback: () => void) => {
 
 const invalidateCaches = () => {
   cacheInvalidationCallbacks.forEach(cb => cb());
+};
+
+// Helper to ensure storage is initialized
+const ensureStorage = (): Storage => {
+  if (!storageInstance) {
+    throw new Error('[DB] Storage not initialized. Call initDB(locals.runtime) first.');
+  }
+  return storageInstance;
 };
 
 // Helper function to allocate kennel numbers for The Village and Ruff's Retreat
@@ -63,40 +71,40 @@ const allocateKennelNumber = (booking: Booking, allBookings: Booking[]): number 
 export const db = {
   bookings: {
     getAll: async (): Promise<Booking[]> => {
-      if (!storageInstance) storageInstance = getStorage();
-      return await storageInstance.getBookings();
+      const storage = ensureStorage();
+      return await storage.getBookings();
     },
 
     getById: async (id: string): Promise<Booking | undefined> => {
-      if (!storageInstance) storageInstance = getStorage();
-      const bookings = await storageInstance.getBookings();
+      const storage = ensureStorage();
+      const bookings = await storage.getBookings();
       return bookings.find(b => b.id === id);
     },
 
     getByEmail: async (email: string): Promise<Booking[]> => {
-      if (!storageInstance) storageInstance = getStorage();
-      const bookings = await storageInstance.getBookings();
+      const storage = ensureStorage();
+      const bookings = await storage.getBookings();
       return bookings.filter(b => b.customerEmail === email);
     },
 
     create: async (booking: Booking): Promise<Booking> => {
-      if (!storageInstance) storageInstance = getStorage();
-      const bookings = await storageInstance.getBookings();
+      const storage = ensureStorage();
+      const bookings = await storage.getBookings();
       
       // Auto-allocate kennel number for village and ruffs-retreat
       const kennelNumber = allocateKennelNumber(booking, bookings);
       const bookingWithKennel = { ...booking, kennelNumber };
       
       bookings.push(bookingWithKennel);
-      await storageInstance.saveBookings(bookings);
+      await storage.saveBookings(bookings);
       invalidateCaches();
       
       return bookingWithKennel;
     },
 
     update: async (id: string, updates: Partial<Booking>): Promise<Booking | undefined> => {
-      if (!storageInstance) storageInstance = getStorage();
-      const bookings = await storageInstance.getBookings();
+      const storage = ensureStorage();
+      const bookings = await storage.getBookings();
       const index = bookings.findIndex(b => b.id === id);
       
       if (index === -1) return undefined;
@@ -114,20 +122,20 @@ export const db = {
       }
       
       bookings[index] = updated;
-      await storageInstance.saveBookings(bookings);
+      await storage.saveBookings(bookings);
       invalidateCaches();
       
       return updated;
     },
 
     delete: async (id: string): Promise<boolean> => {
-      if (!storageInstance) storageInstance = getStorage();
-      const bookings = await storageInstance.getBookings();
+      const storage = ensureStorage();
+      const bookings = await storage.getBookings();
       const filtered = bookings.filter(b => b.id !== id);
       
       if (filtered.length === bookings.length) return false;
       
-      await storageInstance.saveBookings(filtered);
+      await storage.saveBookings(filtered);
       invalidateCaches();
       return true;
     }
@@ -137,28 +145,28 @@ export const db = {
 
   bookingRules: {
     get: async () => {
-      if (!storageInstance) storageInstance = getStorage();
-      return await storageInstance.getBookingRules();
+      const storage = ensureStorage();
+      return await storage.getBookingRules();
     },
 
     update: async (updates: any) => {
-      if (!storageInstance) storageInstance = getStorage();
-      const current = await storageInstance.getBookingRules();
+      const storage = ensureStorage();
+      const current = await storage.getBookingRules();
       const updated = { ...current, ...updates };
-      await storageInstance.saveBookingRules(updated);
+      await storage.saveBookingRules(updated);
       return updated;
     }
   },
 
   rates: {
     get: async () => {
-      if (!storageInstance) storageInstance = getStorage();
-      return await storageInstance.getRates();
+      const storage = ensureStorage();
+      return await storage.getRates();
     },
 
     update: async (updates: any) => {
-      if (!storageInstance) storageInstance = getStorage();
-      const current = await storageInstance.getRates();
+      const storage = ensureStorage();
+      const current = await storage.getRates();
       const updated = {
         ...current,
         ...updates,
@@ -168,7 +176,7 @@ export const db = {
         theVillage: updates.theVillage ? { ...current.theVillage, ...updates.theVillage } : current.theVillage,
         paymentSettings: updates.paymentSettings ? { ...current.paymentSettings, ...updates.paymentSettings } : current.paymentSettings
       };
-      await storageInstance.saveRates(updated);
+      await storage.saveRates(updated);
       return updated;
     }
   },
@@ -198,15 +206,16 @@ export const initDB = (runtime?: any) => {
   console.log('[DB] initDB called');
   console.log('[DB] Runtime provided:', !!runtime);
   console.log('[DB] Runtime.env:', !!runtime?.env);
-  console.log('[DB] Runtime.env.KV:', !!runtime?.env?.KV);
+  console.log('[DB] Runtime.env.BOOKINGS_KV:', !!runtime?.env?.BOOKINGS_KV);
   
   storageInstance = initializeStorage(runtime);
-  console.log('[DB] Initialized with runtime, KV available:', !!runtime?.env?.KV);
+  console.log('[DB] Initialized with runtime, KV available:', !!runtime?.env?.BOOKINGS_KV);
   console.log('[DB] Storage instance created:', !!storageInstance);
   
   return db;
 };
 
 console.log('[DB] Database module loaded');
+
 
 
