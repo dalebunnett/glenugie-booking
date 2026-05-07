@@ -54,6 +54,27 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleInitializeData = async () => {
+    try {
+      toast.info('Initializing data from bookings-data.json...');
+      const response = await adminPost('/api/admin/init-data');
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+      
+      const result = await response.json();
+      toast.success(`✅ Initialized with ${result.count} bookings`);
+      
+      // Reload bookings to show the new data
+      await loadBookings();
+    } catch (error) {
+      console.error('Error initializing data:', error);
+      toast.error('Failed to initialize data: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  };
+
   const handleDeleteAllBookings = async () => {
     if (!confirm('⚠️ WARNING: This will permanently delete ALL bookings!\n\nAre you absolutely sure?')) {
       return;
@@ -179,6 +200,13 @@ export default function AdminDashboard() {
               <p className="opacity-90">Manage bookings and view calendar</p>
             </div>
             <div className="flex gap-3 items-center">
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={handleInitializeData}
+              >
+                Initialize Data
+              </Button>
               <Button 
                 variant="secondary" 
                 size="sm"
@@ -351,6 +379,7 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
 
 
 
