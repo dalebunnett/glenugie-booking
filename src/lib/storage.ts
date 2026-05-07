@@ -1,4 +1,5 @@
 
+
 /**
  * Storage adapter for Cloudflare Workers
  * Uses Cloudflare KV for persistent storage
@@ -77,6 +78,8 @@ let storageInstance: Storage | null = null;
 
 export const getStorage = (kv?: KVNamespace): Storage => {
   if (!kv) {
+    console.error('[Storage] KV namespace is required but not provided');
+    console.error('[Storage] This usually means the runtime binding is not configured');
     throw new Error('[Storage] KV namespace is required');
   }
   
@@ -89,14 +92,19 @@ export const getStorage = (kv?: KVNamespace): Storage => {
  * Initialize storage with KV namespace from runtime
  */
 export const initializeStorage = (runtime: any): Storage => {
+  console.log('[Storage] Initializing storage...');
+  console.log('[Storage] Runtime provided:', !!runtime);
+  console.log('[Storage] Runtime.env:', !!runtime?.env);
+  
   const kv = runtime?.env?.BOOKINGS_KV;
   
   if (!kv) {
     console.error('[Storage] BOOKINGS_KV not found in runtime.env');
-    throw new Error('KV namespace BOOKINGS_KV is not configured');
+    console.error('[Storage] Available env keys:', runtime?.env ? Object.keys(runtime.env) : 'No env object');
+    throw new Error('KV namespace BOOKINGS_KV is not configured. Please check your Cloudflare Workers bindings.');
   }
   
-  console.log('[Storage] Initialized KV storage');
+  console.log('[Storage] Initialized KV storage successfully');
   return getStorage(kv);
 };
 
@@ -113,4 +121,5 @@ export const deleteAllBookings = async (locals: any): Promise<number> => {
   
   return count;
 };
+
 

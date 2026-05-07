@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../lib/db';
+import { db, initDB } from '../../../lib/db';
 import type { Booking } from '../../../lib/booking-types';
 
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
   const { slug } = params;
 
   if (!slug) {
@@ -13,11 +13,18 @@ export const GET: APIRoute = async ({ params }) => {
   }
 
   try {
+    // Initialize DB with runtime to use KV storage
+    initDB(locals.runtime);
+    
     const allBookings = await db.bookings.getAll();
+    console.log(`[Availability API] Total bookings in system: ${allBookings.length}`);
+    
     const activeBookings = allBookings.filter(b => b.status !== 'cancelled');
+    console.log(`[Availability API] Active bookings: ${activeBookings.length}`);
 
     // Normalize slug for village
     const normalizedSlug = slug === 'the-village' ? 'village' : slug;
+    console.log(`[Availability API] Looking for slug: ${normalizedSlug}`);
 
     // Filter bookings for this specific kennel/suite
     const kennelBookings = activeBookings.filter(booking => {
@@ -53,6 +60,16 @@ export const GET: APIRoute = async ({ params }) => {
       return false;
     });
 
+    console.log(`[Availability API] Bookings for ${normalizedSlug}: ${kennelBookings.length}`);
+    if (kennelBookings.length > 0) {
+      console.log(`[Availability API] Sample booking:`, {
+        checkIn: kennelBookings[0].checkIn,
+        checkOut: kennelBookings[0].checkOut,
+        accommodationType: kennelBookings[0].accommodationType,
+        specificSuite: kennelBookings[0].specificSuite
+      });
+    }
+
     // Return only necessary booking info (no personal details)
     const publicBookings = kennelBookings.map(booking => ({
       id: booking.id,
@@ -76,6 +93,7 @@ export const GET: APIRoute = async ({ params }) => {
     });
   }
 };
+
 
 
 
