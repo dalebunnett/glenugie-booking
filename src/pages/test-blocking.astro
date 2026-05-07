@@ -1,0 +1,127 @@
+---
+import MainLayout from '../layouts/main.astro';
+---
+
+<MainLayout title="Test Booking Blocking">
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Test Booking Blocking</h1>
+    
+    <div class="space-y-6">
+      <div class="p-4 bg-blue-50 rounded">
+        <h2 class="text-xl font-semibold mb-3">Instructions</h2>
+        <ol class="list-decimal list-inside space-y-2">
+          <li>Open browser console (F12)</li>
+          <li>Select a suite below</li>
+          <li>Check console for detailed logs</li>
+          <li>Verify booked dates are shown</li>
+        </ol>
+      </div>
+
+      <div class="p-4 border rounded">
+        <h2 class="text-xl font-semibold mb-3">Test Suite</h2>
+        <select id="suiteSelect" class="border rounded px-4 py-2 w-full">
+          <option value="">Select a suite...</option>
+          <option value="sniffany">Sniffany</option>
+          <option value="woofdorf">Woofdorf</option>
+          <option value="barkingham-palace">Barkingham Palace</option>
+          <option value="nasherville">Nasherville</option>
+          <option value="lapdog-land">Lapdog Land</option>
+          <option value="huntington-manor">Huntington Manor</option>
+          <option value="pawduree">Pawduree</option>
+          <option value="furrari">Furrari</option>
+          <option value="tail-away">Tail Away</option>
+          <option value="the-fairy-dogmother">The Fairy Dogmother</option>
+          <option value="ruffs-retreat">Ruff's Retreat</option>
+          <option value="village">The Village</option>
+          <option value="clawrence-house">Clawrence House</option>
+          <option value="twitcher">Twitcher</option>
+          <option value="pussy-porchens">Pussy Porchens</option>
+        </select>
+      </div>
+
+      <div id="results" class="p-4 border rounded hidden">
+        <h2 class="text-xl font-semibold mb-3">Results</h2>
+        <div id="resultsContent"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const select = document.getElementById('suiteSelect') as HTMLSelectElement;
+    const results = document.getElementById('results') as HTMLDivElement;
+    const resultsContent = document.getElementById('resultsContent') as HTMLDivElement;
+
+    select.addEventListener('change', async () => {
+      const suite = select.value;
+      if (!suite) {
+        results.classList.add('hidden');
+        return;
+      }
+
+      console.log('=== TESTING SUITE:', suite, '===');
+      
+      try {
+        const response = await fetch(`/api/availability/${suite}`);
+        const data = await response.json();
+        
+        console.log('API Response:', data);
+        console.log('Number of bookings:', data.bookings?.length || 0);
+        
+        if (data.bookings && data.bookings.length > 0) {
+          console.log('Bookings:', data.bookings);
+          
+          // Show what dates should be blocked
+          const blockedDates = new Set<string>();
+          data.bookings.forEach((booking: any) => {
+            const checkIn = new Date(booking.checkInDate);
+            const checkOut = new Date(booking.checkOutDate);
+            
+            checkIn.setUTCHours(0, 0, 0, 0);
+            checkOut.setUTCHours(0, 0, 0, 0);
+            
+            const current = new Date(checkIn);
+            while (current < checkOut) {
+              blockedDates.add(current.toISOString().split('T')[0]);
+              current.setUTCDate(current.getUTCDate() + 1);
+            }
+          });
+          
+          console.log('Dates that should be blocked:', Array.from(blockedDates).sort());
+          
+          resultsContent.innerHTML = `
+            <div class="space-y-4">
+              <div>
+                <strong>Total Bookings:</strong> ${data.bookings.length}
+              </div>
+              <div>
+                <strong>Dates that should be blocked:</strong>
+                <div class="mt-2 p-3 bg-red-50 rounded">
+                  ${Array.from(blockedDates).sort().join(', ')}
+                </div>
+              </div>
+              <div>
+                <strong>Booking Details:</strong>
+                ${data.bookings.map((b: any) => `
+                  <div class="mt-2 p-3 bg-gray-50 rounded text-sm">
+                    <p><strong>Check-in:</strong> ${b.checkInDate}</p>
+                    <p><strong>Check-out:</strong> ${b.checkOutDate}</p>
+                    <p><strong>Pet:</strong> ${b.petName}</p>
+                    <p><strong>Status:</strong> ${b.status}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else {
+          resultsContent.innerHTML = '<p class="text-green-600">No bookings found - all dates available!</p>';
+        }
+        
+        results.classList.remove('hidden');
+      } catch (error) {
+        console.error('Error:', error);
+        resultsContent.innerHTML = `<p class="text-red-600">Error: ${error}</p>`;
+        results.classList.remove('hidden');
+      }
+    });
+  </script>
+</MainLayout>

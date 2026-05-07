@@ -181,6 +181,12 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
             console.log('Single suite dates blocked:', booked.length, 'dates');
           }
           
+          console.log('=== ABOUT TO SET BOOKED DATES ===');
+          console.log('bookedDates array length:', booked.length);
+          console.log('bookedDates array:', booked.map(d => d.toISOString().split('T')[0]));
+          console.log('Sample booked date object:', booked[0]);
+          console.log('================================');
+          
           setBookedDates(booked);
           console.log('=== BOOKED DATES SET ===');
           console.log('Total dates blocked:', booked.length);
@@ -649,11 +655,21 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                     const checkDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
                     const checkTime = checkDate.getTime();
                     
+                    console.log('🔍 Checking date:', date.toISOString().split('T')[0]);
+                    console.log('   bookedDates.length:', bookedDates.length);
+                    console.log('   checkTime:', checkTime);
+                    
                     // Check if date is in booked dates
                     const isBooked = bookedDates.some(bookedDate => {
                       const bookedTime = new Date(Date.UTC(bookedDate.getUTCFullYear(), bookedDate.getUTCMonth(), bookedDate.getUTCDate())).getTime();
-                      return bookedTime === checkTime;
+                      const matches = bookedTime === checkTime;
+                      if (matches) {
+                        console.log('   ✅ MATCH FOUND!', bookedDate.toISOString().split('T')[0]);
+                      }
+                      return matches;
                     });
+                    
+                    console.log('   isBooked:', isBooked);
                     
                     if (isBooked) {
                       console.log('🚫 BLOCKING CHECK-IN DATE:', date.toISOString().split('T')[0]);
@@ -1110,6 +1126,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
+
 
 
 

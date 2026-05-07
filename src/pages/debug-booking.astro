@@ -1,10 +1,69 @@
 ---
 import MainLayout from '../layouts/main.astro';
-import BookingFormDebug from '../components/BookingFormDebug';
+import { db, initDB } from '../lib/db';
+
+// Initialize DB
+initDB(Astro.locals.runtime);
+
+// Get all bookings
+const allBookings = await db.bookings.getAll();
+const activeBookings = allBookings.filter(b => b.status !== 'cancelled');
+
+// Group by suite
+const suiteBookings = new Map<string, any[]>();
+activeBookings.forEach(booking => {
+  const key = booking.specificSuite || booking.accommodationType;
+  if (!suiteBookings.has(key)) {
+    suiteBookings.set(key, []);
+  }
+  suiteBookings.get(key)!.push(booking);
+});
 ---
 
-<MainLayout title="Debug Booking Calendar">
-  <main class="container mx-auto py-8">
-    <BookingFormDebug client:only="react" />
+<MainLayout title="Booking Debug">
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Booking Debug Information</h1>
+    
+    <div class="mb-8 p-4 bg-blue-50 rounded">
+      <h2 class="text-xl font-semibold mb-2">Summary</h2>
+      <p>Total Bookings: {allBookings.length}</p>
+      <p>Active Bookings: {activeBookings.length}</p>
+      <p>Cancelled Bookings: {allBookings.length - activeBookings.length}</p>
+    </div>
+
+    <div class="space-y-6">
+      {Array.from(suiteBookings.entries()).map(([suite, bookings]) => (
+        <div class="border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3 text-primary">{suite}</h3>
+          <div class="space-y-2">
+            {bookings.map(booking => (
+              <div class="bg-gray-50 p-3 rounded text-sm">
+                <p><strong>ID:</strong> {booking.id}</p>
+                <p><strong>Check-in:</strong> {booking.checkIn}</p>
+                <p><strong>Check-out:</strong> {booking.checkOut}</p>
+                <p><strong>Status:</strong> {booking.status}</p>
+                <p><strong>Pet:</strong> {booking.pets?.[0]?.name || 'N/A'}</p>
+                <p><strong>Customer:</strong> {booking.customerName}</p>
+                {booking.kennelNumber && <p><strong>Kennel #:</strong> {booking.kennelNumber}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-8 p-4 bg-yellow-50 rounded">
+      <h2 class="text-xl font-semibold mb-2">Test Availability API</h2>
+      <p class="mb-4">Open browser console and test:</p>
+      <pre class="bg-gray-800 text-white p-4 rounded overflow-x-auto"><code>// Test Sniffany availability
+fetch('/api/availability/sniffany')
+  .then(r => r.json())
+  .then(d => console.log('Sniffany bookings:', d));
+
+// Test any suite
+fetch('/api/availability/YOUR-SUITE-SLUG')
+  .then(r => r.json())
+  .then(d => console.log('Bookings:', d));</code></pre>
+    </div>
   </main>
 </MainLayout>
