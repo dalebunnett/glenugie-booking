@@ -1,0 +1,110 @@
+---
+import MainLayout from '../layouts/main.astro';
+import { baseUrl } from '../lib/base-url';
+---
+
+<MainLayout title="Debug Customer Bookings">
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Debug Customer Bookings</h1>
+    
+    <div class="space-y-4">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Storage Check</h2>
+        <button 
+          id="checkStorage" 
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+        >
+          Check Storage
+        </button>
+        <pre id="storageResult" class="mt-4 p-4 bg-gray-100 rounded overflow-auto max-h-96"></pre>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Fetch All Bookings</h2>
+        <button 
+          id="fetchBookings" 
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+        >
+          Fetch Bookings
+        </button>
+        <pre id="bookingsResult" class="mt-4 p-4 bg-gray-100 rounded overflow-auto max-h-96"></pre>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Check Session</h2>
+        <button 
+          id="checkSession" 
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+        >
+          Check Session
+        </button>
+        <pre id="sessionResult" class="mt-4 p-4 bg-gray-100 rounded overflow-auto max-h-96"></pre>
+      </div>
+    </div>
+  </main>
+</MainLayout>
+
+<script define:vars={{ baseUrl }}>
+  document.getElementById('checkStorage')?.addEventListener('click', async () => {
+    const result = document.getElementById('storageResult');
+    if (!result) return;
+    
+    result.textContent = 'Loading...';
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/debug/storage-check`);
+      const data = await response.json();
+      result.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      result.textContent = `Error: ${err.message}`;
+    }
+  });
+
+  document.getElementById('fetchBookings')?.addEventListener('click', async () => {
+    const result = document.getElementById('bookingsResult');
+    if (!result) return;
+    
+    result.textContent = 'Loading...';
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/bookings`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        result.textContent = `Error ${response.status}: ${errorText}`;
+        return;
+      }
+      
+      const data = await response.json();
+      result.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      result.textContent = `Error: ${err.message}`;
+    }
+  });
+
+  document.getElementById('checkSession')?.addEventListener('click', async () => {
+    const result = document.getElementById('sessionResult');
+    if (!result) return;
+    
+    result.textContent = 'Loading...';
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/customer/profile`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        result.textContent = `No session (${response.status})`;
+        return;
+      }
+      
+      const data = await response.json();
+      result.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      result.textContent = `Error: ${err.message}`;
+    }
+  });
+</script>
+</MainLayout>

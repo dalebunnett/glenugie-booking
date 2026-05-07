@@ -68,20 +68,36 @@ export default function CustomerPortal() {
     if (!session) return;
 
     try {
+      console.log('[CustomerPortal] Fetching bookings for:', session.customer.email);
+      
       const response = await fetch(`${baseUrl}/api/bookings`, {
         credentials: 'include'
       });
 
-      if (response.ok) {
-        const allBookings = await response.json();
-        // Filter bookings by customer email
-        const customerBookings = allBookings.filter(
-          (b: Booking) => b.customerEmail === session.customer.email
-        );
-        setBookings(customerBookings);
+      console.log('[CustomerPortal] Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[CustomerPortal] Error response:', errorText);
+        setError(`Failed to load bookings: ${response.status} ${response.statusText}`);
+        return;
       }
+
+      const allBookings = await response.json();
+      console.log('[CustomerPortal] All bookings count:', allBookings.length);
+      
+      // Filter bookings by customer email
+      const customerBookings = allBookings.filter(
+        (b: Booking) => b.customerEmail === session.customer.email
+      );
+      
+      console.log('[CustomerPortal] Customer bookings count:', customerBookings.length);
+      console.log('[CustomerPortal] Customer email:', session.customer.email);
+      
+      setBookings(customerBookings);
     } catch (err) {
-      console.error('Failed to load bookings:', err);
+      console.error('[CustomerPortal] Failed to load bookings:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load bookings');
     }
   };
 
@@ -288,6 +304,31 @@ export default function CustomerPortal() {
 
           {/* Bookings Tab */}
           <TabsContent value="bookings" className="space-y-4">
+            {error && (
+              <Card className="border-destructive">
+                <CardContent className="py-4">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-semibold">Error loading bookings</span>
+                  </div>
+                  <p className="mt-2 text-sm">{error}</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-3"
+                    onClick={() => {
+                      setError('');
+                      loadBookings();
+                    }}
+                  >
+                    Try Again
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            
             {bookings.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
@@ -425,3 +466,5 @@ export default function CustomerPortal() {
     </div>
   );
 }
+
+
