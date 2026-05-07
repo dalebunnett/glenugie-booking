@@ -45,7 +45,7 @@ const emailStyles = `
     }
     .header { 
       background: linear-gradient(135deg, #83C8E8 0%, #5BB5DC 100%); 
-      color: white; 
+      color: #ffffff; 
       padding: 40px 20px; 
       text-align: center; 
     }
@@ -60,6 +60,10 @@ const emailStyles = `
       font-family: 'Great Vibes', cursive; 
       font-size: 42px; 
       font-weight: normal;
+      color: #ffffff;
+    }
+    .header p {
+      color: #ffffff;
     }
     .content { 
       padding: 30px; 
@@ -1325,6 +1329,7 @@ export async function sendDailyThankYous(allBookings: Booking[], env?: any): Pro
     await sendThankYouReview(booking, env);
   }
 }
+
 
 
 

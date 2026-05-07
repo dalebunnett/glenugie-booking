@@ -16,36 +16,37 @@ export const GET: APIRoute = async ({ params }) => {
     const allBookings = await db.bookings.getAll();
     const activeBookings = allBookings.filter(b => b.status !== 'cancelled');
 
+    // Normalize slug for village
+    const normalizedSlug = slug === 'the-village' ? 'village' : slug;
+
     // Filter bookings for this specific kennel/suite
     const kennelBookings = activeBookings.filter(booking => {
       // For luxury-suite as accommodation type (no specific suite selected)
-      if (slug === 'luxury-suite') {
+      if (normalizedSlug === 'luxury-suite') {
         return booking.accommodationType === 'luxury-suite';
       }
       
       // For cattery as accommodation type (no specific suite selected)
-      if (slug === 'cattery') {
+      if (normalizedSlug === 'cattery') {
         return booking.accommodationType === 'cattery';
       }
       
-      // For luxury suites, match by specific suite slug
+      // For luxury suites, match by specific suite slug (already stored as slug)
       if (booking.accommodationType === 'luxury-suite' && booking.specificSuite) {
-        const suiteSlug = booking.specificSuite.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
-        return suiteSlug === slug;
+        return booking.specificSuite === normalizedSlug;
       }
       
-      // For cattery, match by specific suite slug
+      // For cattery, match by specific suite slug (already stored as slug)
       if (booking.accommodationType === 'cattery' && booking.specificSuite) {
-        const suiteSlug = booking.specificSuite.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
-        return suiteSlug === slug;
+        return booking.specificSuite === normalizedSlug;
       }
       
       // For standard kennels, match by accommodation type
-      if (slug === 'ruffs-retreat') {
+      if (normalizedSlug === 'ruffs-retreat') {
         return booking.accommodationType === 'ruffs-retreat';
       }
       
-      if (slug === 'the-village' || slug === 'village') {
+      if (normalizedSlug === 'village') {
         return booking.accommodationType === 'village';
       }
       
@@ -59,7 +60,8 @@ export const GET: APIRoute = async ({ params }) => {
       checkOut: booking.checkOut,
       numberOfNights: booking.numberOfNights,
       status: booking.status,
-      petCount: booking.pets.length
+      petCount: booking.pets.length,
+      kennelNumber: booking.kennelNumber // Include kennel number for multi-kennel types
     }));
 
     return new Response(JSON.stringify(publicBookings), {
@@ -74,5 +76,7 @@ export const GET: APIRoute = async ({ params }) => {
     });
   }
 };
+
+
 
 

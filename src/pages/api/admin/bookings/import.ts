@@ -1,11 +1,12 @@
 import type { APIRoute } from 'astro';
 import { db, initDB } from '../../../../lib/db';
 
+// Process bookings in smaller batches to avoid timeout
+const BATCH_SIZE = 50;
+
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     console.log('[Import] Starting import process');
-    console.log('[Import] Locals available:', !!locals);
-    console.log('[Import] Locals.runtime:', !!locals?.runtime);
     
     // Initialize storage with KV binding
     initDB(locals.runtime);
@@ -21,42 +22,57 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
+    // Limit total bookings to prevent timeout
+    if (bookings.length > 500) {
+      return new Response(JSON.stringify({ 
+        error: 'Too many bookings. Please import in batches of 500 or fewer.' 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const imported: any[] = [];
     const errors: any[] = [];
 
-    for (const booking of bookings) {
-      try {
-        // Validate booking has required fields
-        if (!booking.checkIn || !booking.checkOut || !booking.accommodationType) {
+    // Process in batches
+    for (let i = 0; i < bookings.length; i += BATCH_SIZE) {
+      const batch = bookings.slice(i, i + BATCH_SIZE);
+      console.log(`[Import] Processing batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length} bookings)`);
+      
+      // Process batch in parallel for speed
+      const batchResults = await Promise.allSettled(
+        batch.map(async (booking) => {
+          // Validate booking has required fields
+          if (!booking.checkIn || !booking.checkOut || !booking.accommodationType) {
+            throw new Error('Missing required fields (checkIn, checkOut, accommodationType)');
+          }
+
+          // Generate ID if not provided
+          if (!booking.id) {
+            booking.id = `booking-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+          }
+
+          // Set timestamps
+          booking.createdAt = booking.createdAt || new Date().toISOString();
+          booking.updatedAt = new Date().toISOString();
+
+          // Create booking
+          return await db.bookings.create(booking);
+        })
+      );
+
+      // Collect results
+      batchResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          imported.push(result.value);
+        } else {
           errors.push({
-            booking,
-            error: 'Missing required fields (checkIn, checkOut, accommodationType)'
+            booking: batch[index],
+            error: result.reason?.message || 'Unknown error'
           });
-          continue;
         }
-
-        // Generate ID if not provided
-        if (!booking.id) {
-          booking.id = `booking-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-        }
-
-        // Set timestamps
-        booking.createdAt = booking.createdAt || new Date().toISOString();
-        booking.updatedAt = new Date().toISOString();
-
-        console.log('[Import] Creating booking:', booking.id);
-        
-        // Create booking (now async)
-        const created = await db.bookings.create(booking);
-        console.log('[Import] Booking created successfully:', created.id);
-        imported.push(created);
-      } catch (error) {
-        console.error('[Import] Error creating booking:', error);
-        errors.push({
-          booking,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
+      });
     }
 
     console.log('[Import] Import complete. Imported:', imported.length, 'Errors:', errors.length);
@@ -70,7 +86,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       imported: imported.length,
       errors: errors.length,
       totalBookingsInDB: allBookings.length,
-      details: { imported, errors }
+      details: { 
+        imported: imported.slice(0, 10), // Only return first 10 for preview
+        errors: errors.slice(0, 10) // Only return first 10 errors
+      }
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -86,10 +105,3 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
-
-
-
-
-
-
-

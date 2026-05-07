@@ -5,16 +5,19 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
+import { Badge } from '../ui/badge';
 import { toast } from 'sonner';
 import { adminGet, adminPost } from '../../lib/admin-fetch';
 import type { BookingRules } from '../../lib/booking-rules';
 import { format } from 'date-fns';
+import { baseUrl } from '../../lib/base-url';
 
 export default function BookingRulesManager() {
   const [rules, setRules] = useState<BookingRules | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editingGeneral, setEditingGeneral] = useState(false);
   
   const [generalValues, setGeneralValues] = useState({
     minAdvanceBookingDays: 1,
@@ -415,6 +418,8 @@ export default function BookingRulesManager() {
     </div>
   );
 }
+
+
 
 
 

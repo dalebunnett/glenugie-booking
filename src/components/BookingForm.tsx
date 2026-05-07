@@ -88,22 +88,64 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
           const response = await fetch(`${baseUrl}/api/availability/${slug}`);
           if (response.ok) {
             const data = await response.json();
+            console.log('Availability fetch for slug:', slug, 'returned:', data);
+            
+            // Determine if this is a multi-kennel accommodation
+            const isMultiKennel = slug === 'ruffs-retreat' || slug === 'village' || slug === 'the-village';
+            const totalCapacity = (slug === 'village' || slug === 'the-village') ? 6 : slug === 'ruffs-retreat' ? 12 : 1;
             
             // Convert booked date strings to Date objects
             const booked: Date[] = [];
-            data?.forEach((booking: any) => {
-              const checkIn = new Date(booking.checkIn);
-              const checkOut = new Date(booking.checkOut);
+            
+            if (isMultiKennel) {
+              // For multi-kennel accommodations, only block dates when ALL kennels are occupied
+              // Group bookings by date and count occupied kennels
+              const dateOccupancy = new Map<string, Set<number>>();
               
-              // Add all dates between check-in and check-out
-              const current = new Date(checkIn);
-              while (current < checkOut) {
-                booked.push(new Date(current));
-                current.setDate(current.getDate() + 1);
-              }
-            });
+              data?.forEach((booking: any) => {
+                const checkIn = new Date(booking.checkIn);
+                const checkOut = new Date(booking.checkOut);
+                const kennelNum = booking.kennelNumber;
+                
+                // Add all dates between check-in and check-out
+                const current = new Date(checkIn);
+                while (current < checkOut) {
+                  const dateKey = current.toISOString().split('T')[0];
+                  if (!dateOccupancy.has(dateKey)) {
+                    dateOccupancy.set(dateKey, new Set());
+                  }
+                  if (kennelNum) {
+                    dateOccupancy.get(dateKey)!.add(kennelNum);
+                  }
+                  current.setDate(current.getDate() + 1);
+                }
+              });
+              
+              // Only mark dates as booked if ALL kennels are occupied
+              dateOccupancy.forEach((occupiedKennels, dateKey) => {
+                if (occupiedKennels.size >= totalCapacity) {
+                  booked.push(new Date(dateKey));
+                }
+              });
+              console.log('Multi-kennel dates blocked:', booked.length, 'dates');
+            } else {
+              // For single suites, block all dates in any booking
+              data?.forEach((booking: any) => {
+                const checkIn = new Date(booking.checkIn);
+                const checkOut = new Date(booking.checkOut);
+                
+                // Add all dates between check-in and check-out
+                const current = new Date(checkIn);
+                while (current < checkOut) {
+                  booked.push(new Date(current));
+                  current.setDate(current.getDate() + 1);
+                }
+              });
+              console.log('Single suite dates blocked:', booked.length, 'dates');
+            }
             
             setBookedDates(booked);
+            console.log('Booked dates set:', booked);
           }
         } catch (error) {
           console.error('Failed to fetch availability:', error);
@@ -273,7 +315,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
       }
 
       const totalPrice = calculatePrice();
-      const depositAmount = totalPrice; // Full payment for now
+      const depositAmount = 20; // £20 deposit
       
       // Handle vaccination certificate upload
       let vaccinationCertData = null;
@@ -964,6 +1006,11 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
+
+
+
+
 
 
 

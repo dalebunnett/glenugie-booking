@@ -105,7 +105,13 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
     });
 
     // Standard Kennels - Ruffs Retreat (12 kennels)
-    const ruffsBooked = bookedAccommodations['ruffs-retreat'] || 0;
+    // Count unique kennel numbers that are occupied
+    const ruffsOccupiedKennels = new Set(
+      todayBookings
+        .filter(b => b.accommodationType === 'ruffs-retreat' && b.kennelNumber)
+        .map(b => b.kennelNumber)
+    );
+    const ruffsBooked = ruffsOccupiedKennels.size;
     availability.push({
       name: "Ruff's Retreat",
       type: 'Standard Kennels',
@@ -115,7 +121,13 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
     });
 
     // Standard Kennels - Village (6 kennels)
-    const villageBooked = bookedAccommodations['village'] || 0;
+    // Count unique kennel numbers that are occupied
+    const villageOccupiedKennels = new Set(
+      todayBookings
+        .filter(b => b.accommodationType === 'village' && b.kennelNumber)
+        .map(b => b.kennelNumber)
+    );
+    const villageBooked = villageOccupiedKennels.size;
     availability.push({
       name: 'The Village',
       type: 'Standard Kennels',
@@ -301,6 +313,7 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
     </div>
   );
 }
+
 
 
 

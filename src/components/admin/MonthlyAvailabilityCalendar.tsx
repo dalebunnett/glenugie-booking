@@ -1,3 +1,5 @@
+
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
@@ -52,12 +54,12 @@ const ACCOMMODATIONS: AccommodationAvailability[] = [
     capacity: 1,
     kennelNumber: i + 1
   })),
-  // The Village - Individual Kennels 13-18
+  // The Village - Individual Kennels 1-6
   ...Array.from({ length: 6 }, (_, i) => ({
-    name: `The Village #${i + 13}`,
+    name: `The Village #${i + 1}`,
     type: 'village',
     capacity: 1,
-    kennelNumber: i + 13
+    kennelNumber: i + 1
   }))
 ];
 
@@ -109,15 +111,24 @@ export default function MonthlyAvailabilityCalendar({ bookings }: MonthlyAvailab
                        isSameDay(date, checkIn);
 
       // Check if booking matches this accommodation
-      if (accommodation.capacity === 1) {
-        // Individual suites
+      if (accommodation.type === 'ruffs-retreat' || accommodation.type === 'village') {
+        // For multi-kennel accommodations, check both type and kennel number
+        return isInRange && 
+               booking.accommodationType === accommodation.type && 
+               booking.kennelNumber === accommodation.kennelNumber;
+      } else if (accommodation.type === 'luxury-suite') {
+        // For luxury suites, match by specificSuite
         const suiteSlug = accommodation.name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-').replace(/#/g, '');
         const bookingSuite = booking.specificSuite?.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-').replace(/#/g, '');
         return isInRange && bookingSuite === suiteSlug;
-      } else {
-        // Standard kennels (Ruffs or Village)
-        return isInRange && booking.accommodationType === accommodation.type;
+      } else if (accommodation.type === 'cattery') {
+        // For cattery suites, match by specificSuite
+        const suiteSlug = accommodation.name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-').replace(/#/g, '');
+        const bookingSuite = booking.specificSuite?.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-').replace(/#/g, '');
+        return isInRange && bookingSuite === suiteSlug;
       }
+      
+      return false;
     });
   };
 
@@ -340,7 +351,7 @@ export default function MonthlyAvailabilityCalendar({ bookings }: MonthlyAvailab
               {/* The Village Section */}
               <div className="bg-green-50/30">
                 <div className="p-2 font-semibold text-sm border-b-2 border-border bg-green-50 sticky left-0 z-10">
-                  The Village (Kennels 13-18)
+                  The Village (Kennels 1-6)
                 </div>
                 {ACCOMMODATIONS.filter(a => a.type === 'village').map((accommodation) => (
                   <div 
@@ -406,5 +417,8 @@ export default function MonthlyAvailabilityCalendar({ bookings }: MonthlyAvailab
     </Card>
   );
 }
+
+
+
 
 

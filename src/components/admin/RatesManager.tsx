@@ -6,6 +6,7 @@ import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { adminGet, adminPost } from '../../lib/admin-fetch';
+import { baseUrl } from '../../lib/base-url';
 
 interface RateCategory {
   basePrice: number;
@@ -517,6 +518,7 @@ export default function RatesManager() {
     </div>
   );
 }
+
 
 
 
