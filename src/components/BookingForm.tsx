@@ -75,6 +75,11 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
       if (step < 2) return;
       if (!accommodationType && !specificSuite) return;
       
+      console.log('=== FETCH AVAILABILITY DEBUG ===');
+      console.log('accommodationType:', accommodationType);
+      console.log('specificSuite:', specificSuite);
+      console.log('step:', step);
+      
       // Clear any existing timeout
       if (fetchTimeout) {
         clearTimeout(fetchTimeout);
@@ -85,10 +90,16 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
         setLoadingAvailability(true);
         try {
           const slug = specificSuite || accommodationType;
+          console.log('Fetching availability for slug:', slug);
+          console.log('Full URL:', `${baseUrl}/api/availability/${slug}`);
+          
           const response = await fetch(`${baseUrl}/api/availability/${slug}`);
+          console.log('Response status:', response.status);
+          
           if (response.ok) {
             const data = await response.json();
             console.log('Availability fetch for slug:', slug, 'returned:', data);
+            console.log('Number of bookings returned:', data?.length || 0);
             
             // Determine if this is a multi-kennel accommodation
             const isMultiKennel = slug === 'ruffs-retreat' || slug === 'village' || slug === 'the-village';
@@ -148,7 +159,12 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
             }
             
             setBookedDates(booked);
-            console.log('Booked dates set:', booked.map(d => d.toISOString().split('T')[0]));
+            console.log('=== BOOKED DATES SET ===');
+            console.log('Total dates blocked:', booked.length);
+            console.log('Blocked dates:', booked.map(d => d.toISOString().split('T')[0]).join(', '));
+            console.log('========================');
+          } else {
+            console.error('Failed to fetch availability, status:', response.status);
           }
         } catch (error) {
           console.error('Failed to fetch availability:', error);
@@ -1047,6 +1063,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
+
 
 
 
