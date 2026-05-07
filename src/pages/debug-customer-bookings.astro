@@ -1,3 +1,4 @@
+
 ---
 import MainLayout from '../layouts/main.astro';
 import { baseUrl } from '../lib/base-url';
@@ -39,6 +40,36 @@ import { baseUrl } from '../lib/base-url';
           Check Session
         </button>
         <pre id="sessionResult" class="mt-4 p-4 bg-gray-100 rounded overflow-auto max-h-96"></pre>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Check Availability API</h2>
+        <div class="space-y-2 mb-4">
+          <label class="block text-sm font-medium">Kennel Slug:</label>
+          <select id="kennelSlug" class="w-full border rounded px-3 py-2">
+            <option value="luxury-suite">All Luxury Suites</option>
+            <option value="sniffany">Sniffany</option>
+            <option value="woofdorf">Woofdorf</option>
+            <option value="barkingham-palace">Barkingham Palace</option>
+            <option value="nasherville">Nasherville</option>
+            <option value="lapdog-land">Lapdog Land</option>
+            <option value="huntington-manor">Huntington Manor</option>
+            <option value="pawduree">Pawduree</option>
+            <option value="furrari">Furrari</option>
+            <option value="tail-away">Tail Away</option>
+            <option value="fairy-dogmother">Fairy Dogmother</option>
+            <option value="ruffs-retreat">Ruff's Retreat</option>
+            <option value="village">The Village</option>
+            <option value="cattery">All Cattery Suites</option>
+          </select>
+        </div>
+        <button 
+          id="checkAvailability" 
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+        >
+          Check Availability
+        </button>
+        <pre id="availabilityResult" class="mt-4 p-4 bg-gray-100 rounded overflow-auto max-h-96"></pre>
       </div>
     </div>
   </main>
@@ -106,5 +137,22 @@ import { baseUrl } from '../lib/base-url';
       result.textContent = `Error: ${err.message}`;
     }
   });
+
+  document.getElementById('checkAvailability')?.addEventListener('click', async () => {
+    const result = document.getElementById('availabilityResult');
+    const select = document.getElementById('kennelSlug') as HTMLSelectElement;
+    if (!result || !select) return;
+    
+    const slug = select.value;
+    result.textContent = 'Loading...';
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/debug/availability-check?slug=${slug}`);
+      const data = await response.json();
+      result.textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      result.textContent = `Error: ${err.message}`;
+    }
+  });
 </script>
-</MainLayout>
+

@@ -25,6 +25,7 @@ export default function KennelAvailabilityCalendar({ kennelSlug, kennelName, acc
   const [bookings, setBookings] = useState<PublicBooking[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   // Define capacity for multi-kennel types
   const isMultiKennel = accommodationType === 'ruffs-retreat' || accommodationType === 'village';
@@ -37,16 +38,31 @@ export default function KennelAvailabilityCalendar({ kennelSlug, kennelName, acc
   const loadBookings = async () => {
     try {
       setLoading(true);
+      setError('');
+      
+      console.log('[AvailabilityCalendar] Fetching bookings for:', kennelSlug);
+      console.log('[AvailabilityCalendar] Accommodation type:', accommodationType);
+      
       const response = await fetch(`${baseUrl}/api/availability/${kennelSlug}`);
       
-      if (response.ok) {
-        const data = await response.json() as PublicBooking[];
-        setBookings(data);
-      } else {
+      console.log('[AvailabilityCalendar] Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[AvailabilityCalendar] Error response:', errorText);
+        setError(`Failed to load availability: ${response.status} ${response.statusText}`);
         setBookings([]);
+        return;
       }
+      
+      const data = await response.json() as PublicBooking[];
+      console.log('[AvailabilityCalendar] Bookings loaded:', data.length);
+      console.log('[AvailabilityCalendar] Bookings:', data);
+      
+      setBookings(data);
     } catch (error) {
-      console.error('Failed to load bookings:', error);
+      console.error('[AvailabilityCalendar] Failed to load bookings:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load availability');
       setBookings([]);
     } finally {
       setLoading(false);
@@ -131,6 +147,22 @@ export default function KennelAvailabilityCalendar({ kennelSlug, kennelName, acc
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-destructive mb-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="font-semibold">Error loading availability</span>
+            </div>
+            <p className="text-sm text-destructive/80">{error}</p>
+            <button 
+              onClick={() => loadBookings()}
+              className="mt-3 text-sm bg-destructive/20 hover:bg-destructive/30 px-3 py-1.5 rounded transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         ) : (
           <div className="space-y-6">
@@ -258,3 +290,5 @@ export default function KennelAvailabilityCalendar({ kennelSlug, kennelName, acc
     </Card>
   );
 }
+
+
