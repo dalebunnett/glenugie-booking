@@ -124,7 +124,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
               // Only mark dates as booked if ALL kennels are occupied
               dateOccupancy.forEach((occupiedKennels, dateKey) => {
                 if (occupiedKennels.size >= totalCapacity) {
-                  booked.push(new Date(dateKey));
+                  const date = new Date(dateKey + 'T00:00:00');
+                  booked.push(date);
                 }
               });
               console.log('Multi-kennel dates blocked:', booked.length, 'dates');
@@ -137,7 +138,9 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                 // Add all dates between check-in and check-out
                 const current = new Date(checkIn);
                 while (current < checkOut) {
-                  booked.push(new Date(current));
+                  const date = new Date(current);
+                  date.setHours(0, 0, 0, 0);
+                  booked.push(date);
                   current.setDate(current.getDate() + 1);
                 }
               });
@@ -145,7 +148,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
             }
             
             setBookedDates(booked);
-            console.log('Booked dates set:', booked);
+            console.log('Booked dates set:', booked.map(d => d.toISOString().split('T')[0]));
           }
         } catch (error) {
           console.error('Failed to fetch availability:', error);
@@ -575,15 +578,36 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                   selected={checkIn} 
                   onSelect={setCheckIn} 
                   disabled={(date) => {
-                    // Use centralized disabled dates logic
-                    const allDisabledDates = getDisabledDates(bookedDates, bookingRules);
-                    return allDisabledDates.some(disabledDate => 
-                      disabledDate.toDateString() === date.toDateString()
-                    );
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Disable past dates
+                    if (date < today) return true;
+                    
+                    // Disable dates beyond max advance booking
+                    const maxDate = new Date(today);
+                    maxDate.setDate(maxDate.getDate() + bookingRules.maxAdvanceBookingDays);
+                    if (date > maxDate) return true;
+                    
+                    // Check if date is in blocked dates from rules
+                    if (isDateBlocked(date, bookingRules)) return true;
+                    
+                    // Check if date is in booked dates
+                    const dateStr = date.toISOString().split('T')[0];
+                    const isBooked = bookedDates.some(bookedDate => {
+                      const bookedStr = bookedDate.toISOString().split('T')[0];
+                      return bookedStr === dateStr;
+                    });
+                    
+                    if (isBooked) {
+                      console.log('Date blocked:', dateStr, 'is in booked dates');
+                    }
+                    
+                    return isBooked;
                   }}
                   modifiers={{
                     booked: bookedDates,
-                    blocked: bookingRules.blockedDates
+                    blocked: bookingRules.blockedDates.map(d => new Date(d))
                   }}
                   modifiersClassNames={{
                     booked: 'bg-destructive/20 text-destructive line-through',
@@ -611,15 +635,32 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                     // Must be after check-in
                     if (date <= checkIn) return true;
                     
-                    // Use centralized disabled dates logic
-                    const allDisabledDates = getDisabledDates(bookedDates, bookingRules);
-                    return allDisabledDates.some(disabledDate => 
-                      disabledDate.toDateString() === date.toDateString()
-                    );
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Disable past dates
+                    if (date < today) return true;
+                    
+                    // Disable dates beyond max advance booking
+                    const maxDate = new Date(today);
+                    maxDate.setDate(maxDate.getDate() + bookingRules.maxAdvanceBookingDays);
+                    if (date > maxDate) return true;
+                    
+                    // Check if date is in blocked dates from rules
+                    if (isDateBlocked(date, bookingRules)) return true;
+                    
+                    // Check if date is in booked dates
+                    const dateStr = date.toISOString().split('T')[0];
+                    const isBooked = bookedDates.some(bookedDate => {
+                      const bookedStr = bookedDate.toISOString().split('T')[0];
+                      return bookedStr === dateStr;
+                    });
+                    
+                    return isBooked;
                   }}
                   modifiers={{
                     booked: bookedDates,
-                    blocked: bookingRules.blockedDates
+                    blocked: bookingRules.blockedDates.map(d => new Date(d))
                   }}
                   modifiersClassNames={{
                     booked: 'bg-destructive/20 text-destructive line-through',
@@ -1006,6 +1047,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
 
 
 
