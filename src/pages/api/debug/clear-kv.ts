@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-export const POST: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ locals }) => {
   try {
     const kv = locals?.runtime?.env?.BOOKINGS_KV;
     
@@ -38,5 +38,4 @@ export const POST: APIRoute = async ({ locals }) => {
   }
 };
 
-export const GET: APIRoute = POST;
 
