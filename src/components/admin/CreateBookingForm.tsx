@@ -586,9 +586,8 @@ export default function CreateBookingForm({ onSuccess }: CreateBookingFormProps)
             />
           </div>
           <div>
-            <Label>Microchip *</Label>
+            <Label>Microchip (Optional)</Label>
             <Input
-              required
               value={formData.microchip1}
               onChange={(e) => setFormData({ ...formData, microchip1: e.target.value })}
             />
@@ -821,6 +820,7 @@ export default function CreateBookingForm({ onSuccess }: CreateBookingFormProps)
     </form>
   );
 }
+
 
 
 

@@ -419,7 +419,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     (accommodationType === 'cattery' ? !!specificSuite : true);
   const canProceedStep2 = checkIn && checkOut && checkOut > checkIn && validationErrors.length === 0;
   const canProceedStep3 = formData.emergencyContactName && formData.emergencyContactNumber && 
-                          formData.petName1 && formData.microchip1 && formData.breed1 && formData.age1;
+                          formData.petName1 && formData.breed1 && formData.age1;
   const canProceedStep4 = formData.firstName && formData.lastName && formData.email && formData.phone;
   const canSubmit = canProceedStep4 && formData.agreedToTerms;
 
@@ -787,8 +787,8 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
                   <Input value={formData.petName1} onChange={(e) => updateFormData('petName1', e.target.value)} required />
                 </div>
                 <div>
-                  <Label>Microchip Number *</Label>
-                  <Input value={formData.microchip1} onChange={(e) => updateFormData('microchip1', e.target.value)} required />
+                  <Label>Microchip Number (Optional)</Label>
+                  <Input value={formData.microchip1} onChange={(e) => updateFormData('microchip1', e.target.value)} />
                 </div>
                 <div>
                   <Label>Breed *</Label>
@@ -1102,6 +1102,7 @@ export default function BookingForm({ preSelectedSuite, preSelectedType, preSele
     </div>
   );
 }
+
 
 
 
