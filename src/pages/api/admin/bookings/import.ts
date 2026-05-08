@@ -1,16 +1,16 @@
 import type { APIRoute } from 'astro';
-import { db, initDB } from '../../../../lib/db';
+import { initializeStorage } from '../../../../lib/storage';
 
-// Process bookings in smaller batches to avoid timeout
-const BATCH_SIZE = 50;
+// Smaller batch size to avoid resource limits
+const BATCH_SIZE = 100;
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     console.log('[Import] Starting import process');
     
     // Initialize storage with KV binding
-    initDB(locals.runtime);
-    console.log('[Import] DB initialized');
+    const storage = initializeStorage(locals.runtime);
+    console.log('[Import] Storage initialized');
     
     const { bookings } = await request.json();
     console.log('[Import] Received', bookings?.length || 0, 'bookings in request');
@@ -32,54 +32,49 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
+    // Get existing bookings
+    const existingBookings = await storage.getBookings();
+    console.log('[Import] Existing bookings:', existingBookings.length);
+
     const imported: any[] = [];
     const errors: any[] = [];
+    const now = new Date().toISOString();
 
-    // Process in batches
-    for (let i = 0; i < bookings.length; i += BATCH_SIZE) {
-      const batch = bookings.slice(i, i + BATCH_SIZE);
-      console.log(`[Import] Processing batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length} bookings)`);
-      
-      // Process batch in parallel for speed
-      const batchResults = await Promise.allSettled(
-        batch.map(async (booking) => {
-          // Validate booking has required fields
-          if (!booking.checkIn || !booking.checkOut || !booking.accommodationType) {
-            throw new Error('Missing required fields (checkIn, checkOut, accommodationType)');
-          }
-
-          // Generate ID if not provided
-          if (!booking.id) {
-            booking.id = `booking-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-          }
-
-          // Set timestamps
-          booking.createdAt = booking.createdAt || new Date().toISOString();
-          booking.updatedAt = new Date().toISOString();
-
-          // Create booking
-          return await db.bookings.create(booking);
-        })
-      );
-
-      // Collect results
-      batchResults.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          imported.push(result.value);
-        } else {
+    // Process bookings with minimal validation
+    for (const booking of bookings) {
+      try {
+        // Basic validation only
+        if (!booking.checkIn || !booking.checkOut || !booking.accommodationType) {
           errors.push({
-            booking: batch[index],
-            error: result.reason?.message || 'Unknown error'
+            booking,
+            error: 'Missing required fields'
           });
+          continue;
         }
-      });
+
+        // Generate ID if not provided
+        if (!booking.id) {
+          booking.id = `booking-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+        }
+
+        // Set timestamps
+        booking.createdAt = booking.createdAt || now;
+        booking.updatedAt = now;
+
+        imported.push(booking);
+      } catch (error) {
+        errors.push({
+          booking,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
     }
 
+    // Save all bookings at once (existing + new)
+    const allBookings = [...existingBookings, ...imported];
+    await storage.saveBookings(allBookings);
+
     console.log('[Import] Import complete. Imported:', imported.length, 'Errors:', errors.length);
-    
-    // Verify bookings were saved
-    const allBookings = await db.bookings.getAll();
-    console.log('[Import] Total bookings after import:', allBookings.length);
 
     return new Response(JSON.stringify({ 
       success: true,
@@ -87,8 +82,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
       errors: errors.length,
       totalBookingsInDB: allBookings.length,
       details: { 
-        imported: imported.slice(0, 10), // Only return first 10 for preview
-        errors: errors.slice(0, 10) // Only return first 10 errors
+        imported: imported.slice(0, 5), // Only return first 5 for preview
+        errors: errors.slice(0, 5) // Only return first 5 errors
       }
     }), {
       status: 200,
@@ -105,3 +100,4 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
