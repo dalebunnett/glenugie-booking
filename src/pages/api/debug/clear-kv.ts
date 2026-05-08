@@ -14,13 +14,16 @@ export const GET: APIRoute = async ({ locals }) => {
       });
     }
 
-    // Delete the old individual booking keys
+    // Delete the main bookings key
+    await kv.delete('bookings');
+    
+    // Also delete old individual booking keys if they exist
     await kv.delete('booking:jan-booking-1');
     await kv.delete('booking:jan-booking-2');
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: 'Cleared old booking keys'
+      message: 'Cleared all bookings from KV'
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -37,5 +40,6 @@ export const GET: APIRoute = async ({ locals }) => {
     });
   }
 };
+
 
 
