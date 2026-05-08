@@ -316,7 +316,6 @@ export default function KennelAvailabilityCalendar({
                     </p>
                     {selectedDateBookings.map((booking, idx) => (
                       <div key={idx} className="text-sm bg-white p-2 rounded border">
-                        <p><strong>Guest:</strong> {booking.petName}</p>
                         <p><strong>Check-in:</strong> {new Date(booking.checkInDate).toLocaleDateString('en-GB')}</p>
                         <p><strong>Check-out:</strong> {new Date(booking.checkOutDate).toLocaleDateString('en-GB')}</p>
                         <p><strong>Status:</strong> {booking.status}</p>
@@ -336,3 +335,4 @@ export default function KennelAvailabilityCalendar({
     </Card>
   );
 }
+
