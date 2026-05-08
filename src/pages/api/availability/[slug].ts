@@ -1,6 +1,14 @@
 import type { APIRoute } from 'astro';
 import { db, initDB } from '../../../lib/db';
 
+// Helper function to normalize suite names to slugs
+function normalizeToSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export const GET: APIRoute = async ({ params, locals }) => {
   const { slug } = params;
 
@@ -24,39 +32,30 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const activeBookings = allBookings.filter(b => b.status !== 'cancelled');
     console.log(`[Availability API] Active bookings: ${activeBookings.length}`);
 
-    // Normalize slug for village
-    const normalizedSlug = slug === 'the-village' ? 'village' : slug;
-    console.log(`[Availability API] Looking for slug: ${normalizedSlug}`);
+    // Normalize slug for comparison
+    const normalizedSlug = normalizeToSlug(slug);
+    console.log(`[Availability API] Looking for normalized slug: ${normalizedSlug}`);
 
     // Filter bookings for this specific kennel/suite
     const kennelBookings = activeBookings.filter(booking => {
+      // Normalize the booking's specific suite for comparison
+      const bookingSpecificSuite = booking.specificSuite 
+        ? normalizeToSlug(booking.specificSuite)
+        : null;
+      
+      const bookingAccommodationType = booking.accommodationType 
+        ? normalizeToSlug(booking.accommodationType)
+        : null;
+
       // FIRST: Check if this booking has a specific suite that matches
-      if (booking.specificSuite === normalizedSlug) {
-        console.log(`[Availability API] ✓ Match on specificSuite: ${booking.specificSuite}`);
+      if (bookingSpecificSuite === normalizedSlug) {
+        console.log(`[Availability API] ✓ Match on specificSuite: ${booking.specificSuite} -> ${bookingSpecificSuite}`);
         return true;
       }
       
       // SECOND: Check for general accommodation type matches
-      // For luxury-suite as accommodation type (no specific suite selected)
-      if (normalizedSlug === 'luxury-suite' && booking.accommodationType === 'luxury-suite') {
-        console.log(`[Availability API] ✓ Match on luxury-suite type`);
-        return true;
-      }
-      
-      // For cattery as accommodation type (no specific suite selected)
-      if (normalizedSlug === 'cattery' && booking.accommodationType === 'cattery') {
-        console.log(`[Availability API] ✓ Match on cattery type`);
-        return true;
-      }
-      
-      // For standard kennels, match by accommodation type
-      if (normalizedSlug === 'ruffs-retreat' && booking.accommodationType === 'ruffs-retreat') {
-        console.log(`[Availability API] ✓ Match on ruffs-retreat`);
-        return true;
-      }
-      
-      if (normalizedSlug === 'village' && booking.accommodationType === 'village') {
-        console.log(`[Availability API] ✓ Match on village`);
+      if (bookingAccommodationType === normalizedSlug) {
+        console.log(`[Availability API] ✓ Match on accommodationType: ${booking.accommodationType} -> ${bookingAccommodationType}`);
         return true;
       }
       
@@ -107,3 +106,4 @@ export const GET: APIRoute = async ({ params, locals }) => {
     });
   }
 };
+
