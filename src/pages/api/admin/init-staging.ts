@@ -15,17 +15,13 @@ export const POST: APIRoute = async ({ locals }) => {
       });
     }
 
-    // Load all bookings
-    let loaded = 0;
-    for (const booking of bookingsData) {
-      await kv.put(`booking:${booking.id}`, JSON.stringify(booking));
-      loaded++;
-    }
+    // Store all bookings as a single array under 'bookings' key
+    await kv.put('bookings', JSON.stringify(bookingsData));
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: `Loaded ${loaded} bookings into KV storage`,
-      count: loaded
+      message: `Loaded ${bookingsData.length} bookings into KV storage`,
+      count: bookingsData.length
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
@@ -47,4 +43,5 @@ export const GET: APIRoute = async ({ locals }) => {
   // Allow GET for easy browser access
   return POST({ locals } as any);
 };
+
 
