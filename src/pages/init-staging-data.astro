@@ -1,0 +1,138 @@
+---
+import { db, initDB } from '../lib/db';
+
+let result = { success: false, message: '', bookingsLoaded: 0 };
+
+// Only allow this in staging/development
+const isProduction = import.meta.env.PROD && !import.meta.env.PUBLIC_STAGING;
+
+if (isProduction) {
+  result.message = 'This endpoint is disabled in production';
+} else if (Astro.request.method === 'POST') {
+  try {
+    // Initialize DB with runtime
+    initDB(Astro.locals.runtime);
+    
+    // Load bookings from JSON file
+    const bookingsData = await import('../../data/bookings.json');
+    const bookings = bookingsData.default || bookingsData;
+    
+    console.log('[Init] Loading bookings:', bookings.length);
+    
+    // Save each booking
+    for (const booking of bookings) {
+      await db.bookings.create(booking);
+    }
+    
+    result = {
+      success: true,
+      message: 'Data initialized successfully',
+      bookingsLoaded: bookings.length
+    };
+  } catch (error) {
+    result = {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      bookingsLoaded: 0
+    };
+  }
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Initialize Staging Data</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-top: 0;
+      color: #333;
+    }
+    .button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+    .button:hover {
+      background: #0052a3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔧 Initialize Staging Data</h1>
+    
+    {isProduction ? (
+      <div class="result error">
+        <strong>Error:</strong> This endpoint is disabled in production for security.
+      </div>
+    ) : (
+      <>
+        <p>This will load all bookings from the JSON file into your staging KV storage.</p>
+        
+        <form method="POST">
+          <button type="submit" class="button">
+            Initialize Data
+          </button>
+        </form>
+
+        {result.message && (
+          <div class={`result ${result.success ? 'success' : 'error'}`}>
+            <strong>{result.success ? 'Success!' : 'Error:'}</strong> {result.message}
+            {result.success && (
+              <p style="margin-top: 10px;">
+                Loaded {result.bookingsLoaded} bookings into staging KV.
+              </p>
+            )}
+          </div>
+        )}
+
+        <div class="result warning" style="margin-top: 20px;">
+          <strong>Note:</strong> This will overwrite any existing bookings in staging.
+        </div>
+      </>
+    )}
+  </div>
+</body>
+</html>
