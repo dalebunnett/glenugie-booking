@@ -163,12 +163,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
       checkOut: data.checkOut,
       numberOfNights: data.numberOfNights,
       
-      // Payment
+      // Payment - FIX: Set paidAmount to depositAmount
       totalPrice: data.totalPrice,
       depositAmount: data.depositAmount,
-      paidAmount: 0,
-      totalDue: data.totalPrice,
-      paymentStatus: 'pending',
+      paidAmount: data.depositAmount, // Changed from 0 to depositAmount
+      totalDue: data.totalPrice - data.depositAmount, // Calculate remaining balance
+      paymentStatus: 'partial', // Changed from 'pending' since deposit is paid
       
       // Special Requests
       specialRequests: data.specialRequests || '',
@@ -180,7 +180,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       agreedToTerms: data.agreedToTerms,
       
       // Status & Metadata
-      status: 'pending',
+      status: 'confirmed', // Changed from 'pending' since deposit is paid
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -188,11 +188,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Save booking to database (now async)
     await db.bookings.create(booking);
 
-    // Send confirmation emails
+    // Send confirmation emails - FIX: Pass runtime env for email API key
     try {
-      await sendBookingConfirmation(booking);
+      await sendBookingConfirmation(booking, false, locals.runtime?.env);
+      console.log('✅ Confirmation emails sent successfully');
     } catch (emailError) {
-      console.error('Failed to send confirmation emails:', emailError);
+      console.error('❌ Failed to send confirmation emails:', emailError);
       // Don't fail the booking if email fails
     }
 
@@ -287,3 +288,4 @@ export const GET: APIRoute = async ({ locals }) => {
     });
   }
 };
+
