@@ -42,3 +42,9 @@ export const POST: APIRoute = async ({ locals }) => {
     });
   }
 };
+
+export const GET: APIRoute = async ({ locals }) => {
+  // Allow GET for easy browser access
+  return POST({ locals } as any);
+};
+
