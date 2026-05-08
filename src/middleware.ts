@@ -13,7 +13,8 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
     // Skip auth check for these specific endpoints
     if (pathname.includes('/api/admin/auth') || 
         pathname.includes('/api/admin/debug') || 
-        pathname.includes('/api/admin/test-')) {
+        pathname.includes('/api/admin/test-') ||
+        pathname.includes('/api/admin/init-staging')) {
       console.log('[middleware] ⏭️ Skipping auth check for:', pathname);
       return next();
     }
@@ -46,6 +47,7 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
 
   return next();
 };
+
 
 
 
