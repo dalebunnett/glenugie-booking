@@ -38,6 +38,5 @@ export const POST: APIRoute = async ({ locals }) => {
   }
 };
 
-export const GET: APIRoute = async ({ locals }) => {
-  return POST({ locals } as any);
-};
+export const GET: APIRoute = POST;
+
