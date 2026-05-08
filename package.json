@@ -1,3 +1,4 @@
+
 {
   "name": "astro",
   "type": "module",
@@ -5,7 +6,7 @@
   "scripts": {
     "predev": "npx kill-port 3000 || true",
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && cp .assetsignore dist/.assetsignore",
     "preview": "astro build && wrangler dev",
     "astro": "astro",
     "cf-typegen": "wrangler types"
@@ -75,3 +76,4 @@
     "wrangler": "4.26.1"
   }
 }
+
