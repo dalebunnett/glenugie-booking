@@ -8,13 +8,18 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
 
   console.log('[middleware] 🔍 Checking path:', pathname);
   
+  // Allow init-staging endpoint without auth (for staging setup)
+  if (pathname.includes('/api/admin/init-staging')) {
+    console.log('[middleware] ⏭️ Skipping auth for init-staging');
+    return next();
+  }
+  
   // ONLY protect /api/admin/* routes (NOT /api/debug-cookies)
   if (pathname.includes('/api/admin')) {
     // Skip auth check for these specific endpoints
     if (pathname.includes('/api/admin/auth') || 
         pathname.includes('/api/admin/debug') || 
-        pathname.includes('/api/admin/test-') ||
-        pathname.includes('/api/admin/init-staging')) {
+        pathname.includes('/api/admin/test-')) {
       console.log('[middleware] ⏭️ Skipping auth check for:', pathname);
       return next();
     }
@@ -47,6 +52,7 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
 
   return next();
 };
+
 
 
 
