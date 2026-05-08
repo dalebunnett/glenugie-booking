@@ -1,3 +1,4 @@
+
 ---
 import { db, initDB } from '../lib/db';
 
@@ -140,5 +141,40 @@ try {
       </div>
     )}
   </div>
+
+  <script>
+    import { baseUrl } from '../lib/base-url';
+    
+    async function initData() {
+      const btn = document.getElementById('init-btn');
+      if (!btn) return;
+      
+      btn.textContent = 'Loading...';
+      btn.disabled = true;
+      
+      try {
+        const response = await fetch(`${baseUrl}/api/admin/init-staging`, {
+          method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          alert(`✅ Success! Loaded ${data.count} bookings. Refresh the page to see the count.`);
+          window.location.reload();
+        } else {
+          alert(`❌ Error: ${data.error}`);
+          btn.textContent = 'Initialize Data';
+          btn.disabled = false;
+        }
+      } catch (error) {
+        alert(`❌ Error: ${error.message}`);
+        btn.textContent = 'Initialize Data';
+        btn.disabled = false;
+      }
+    }
+    
+    document.getElementById('init-btn')?.addEventListener('click', initData);
+  </script>
 </body>
 </html>
+
