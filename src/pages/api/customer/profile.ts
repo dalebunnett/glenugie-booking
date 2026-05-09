@@ -1,69 +1,38 @@
 import type { APIRoute } from 'astro';
-import { db } from '../../../lib/db';
+import { getStorage } from '../../../lib/storage';
 
 // Get customer profile
-export const GET: APIRoute = async ({ request }) => {
-  try {
-    const authHeader = request.headers.get('authorization') || '';
-    const headerSessionId = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
-    
-    const cookies = request.headers.get('cookie') || '';
-    const sessionMatch = cookies.match(/customer_session=([^;]+)/);
-    const cookieSessionId = sessionMatch ? sessionMatch[1] : null;
-    
-    const sessionId = headerSessionId || cookieSessionId;
-
-    if (!sessionId) {
-      return new Response(JSON.stringify({ error: 'Not authenticated' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    const session = db.customerSessions.get(sessionId);
-    if (!session) {
-      return new Response(JSON.stringify({ error: 'Invalid or expired session' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    const customer = db.customers.getById(session.customerId);
-    if (!customer) {
-      return new Response(JSON.stringify({ error: 'Customer not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Return customer without password hash
-    const { passwordHash, ...customerData } = customer;
-
-    return new Response(JSON.stringify(customerData), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    console.error('Get profile error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to get profile' }), {
-      status: 500,
+export const GET: APIRoute = async ({ cookies, locals }) => {
+  const sessionId = cookies.get('customer_session')?.value;
+  
+  if (!sessionId) {
+    return new Response(JSON.stringify({ error: 'Not authenticated' }), {
+      status: 401,
       headers: { 'Content-Type': 'application/json' }
     });
   }
+
+  const storage = getStorage(locals?.runtime?.env);
+  const session = await storage.sessions.get(sessionId);
+  
+  if (!session) {
+    return new Response(JSON.stringify({ error: 'Invalid session' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  return new Response(JSON.stringify(session.customer), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 };
 
-// Update customer profile
-export const PATCH: APIRoute = async ({ request }) => {
+// PATCH - Update customer profile
+export const PATCH: APIRoute = async ({ request, cookies, locals }) => {
   try {
-    const authHeader = request.headers.get('authorization') || '';
-    const headerSessionId = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const sessionId = cookies.get('customer_session')?.value;
     
-    const cookies = request.headers.get('cookie') || '';
-    const sessionMatch = cookies.match(/customer_session=([^;]+)/);
-    const cookieSessionId = sessionMatch ? sessionMatch[1] : null;
-    
-    const sessionId = headerSessionId || cookieSessionId;
-
     if (!sessionId) {
       return new Response(JSON.stringify({ error: 'Not authenticated' }), {
         status: 401,
@@ -71,47 +40,64 @@ export const PATCH: APIRoute = async ({ request }) => {
       });
     }
 
-    const session = db.customerSessions.get(sessionId);
+    const storage = getStorage(locals?.runtime?.env);
+    const session = await storage.sessions.get(sessionId);
+    
     if (!session) {
-      return new Response(JSON.stringify({ error: 'Invalid or expired session' }), {
+      return new Response(JSON.stringify({ error: 'Invalid session' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const body = await request.json();
-    const { name, phone, address, city, county, postcode, country, emergencyContactName, emergencyContactNumber } = body;
+    const updates = await request.json();
 
-    const updates: any = {};
-    if (name !== undefined) updates.name = name;
-    if (phone !== undefined) updates.phone = phone;
-    if (address !== undefined) updates.address = address;
-    if (city !== undefined) updates.city = city;
-    if (county !== undefined) updates.county = county;
-    if (postcode !== undefined) updates.postcode = postcode;
-    if (country !== undefined) updates.country = country;
-    if (emergencyContactName !== undefined) updates.emergencyContactName = emergencyContactName;
-    if (emergencyContactNumber !== undefined) updates.emergencyContactNumber = emergencyContactNumber;
+    // Update customer information
+    const updatedCustomer = {
+      ...session.customer,
+      ...updates,
+      // Don't allow changing email or id
+      id: session.customer.id,
+      email: session.customer.email
+    };
 
-    const updatedCustomer = db.customers.update(session.customerId, updates);
-    if (!updatedCustomer) {
-      return new Response(JSON.stringify({ error: 'Failed to update profile' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
+    // Update session
+    const updatedSession = {
+      ...session,
+      customer: updatedCustomer
+    };
+
+    await storage.sessions.set(sessionId, updatedSession);
+
+    // Also update all bookings with this customer's email
+    const allBookings = await storage.bookings.getAll();
+    const customerBookings = allBookings.filter(b => b.customerEmail === session.customer.email);
+    
+    for (const booking of customerBookings) {
+      await storage.bookings.update(booking.id, {
+        ...booking,
+        customerName: updatedCustomer.name || booking.customerName,
+        customerPhone: updatedCustomer.phone || booking.customerPhone,
+        customerAddress: updatedCustomer.address || booking.customerAddress,
+        customerCity: updatedCustomer.city || booking.customerCity,
+        customerCounty: updatedCustomer.county || booking.customerCounty,
+        customerPostcode: updatedCustomer.postcode || booking.customerPostcode,
+        customerCountry: updatedCustomer.country || booking.customerCountry,
+        updatedAt: new Date().toISOString()
       });
     }
 
-    const { passwordHash, ...customerData } = updatedCustomer;
-
-    return new Response(JSON.stringify(customerData), {
+    return new Response(JSON.stringify(updatedCustomer), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    console.error('Error updating profile:', error);
     return new Response(JSON.stringify({ error: 'Failed to update profile' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
   }
 };
+
+

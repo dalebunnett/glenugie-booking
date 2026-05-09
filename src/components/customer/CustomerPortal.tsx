@@ -6,6 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { baseUrl } from '../../lib/base-url';
 import type { Booking } from '../../lib/booking-types';
+import EditProfileDialog from './EditProfileDialog';
+import EditBookingDialog from './EditBookingDialog';
+import EditPetsDialog from './EditPetsDialog';
+import CancelBookingDialog from './CancelBookingDialog';
 
 interface CustomerSession {
   sessionId: string;
@@ -23,7 +27,14 @@ export default function CustomerPortal() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Login/Register Form States
+  // Dialog states
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [editBookingOpen, setEditBookingOpen] = useState(false);
+  const [editPetsOpen, setEditPetsOpen] = useState(false);
+  const [cancelBookingOpen, setCancelBookingOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+
+  // Login/Register Form states
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
@@ -423,6 +434,42 @@ export default function CustomerPortal() {
                         <div className="text-sm">{booking.specialRequirements}</div>
                       </div>
                     )}
+
+                    {/* Action Buttons */}
+                    {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                      <div className="flex flex-wrap gap-2 pt-4 border-t">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setEditBookingOpen(true);
+                          }}
+                        >
+                          Edit Dates
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setEditPetsOpen(true);
+                          }}
+                        >
+                          Edit Pets
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setCancelBookingOpen(true);
+                          }}
+                        >
+                          Cancel Booking
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))
@@ -454,17 +501,73 @@ export default function CustomerPortal() {
                   </div>
                 </div>
                 <div className="pt-4">
-                  <p className="text-sm text-muted-foreground">
-                    To update your profile information, please contact us.
-                  </p>
+                  <Button onClick={() => setEditProfileOpen(true)}>
+                    Edit Profile
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Dialogs */}
+        {session && (
+          <>
+            <EditProfileDialog
+              customer={session.customer}
+              open={editProfileOpen}
+              onOpenChange={setEditProfileOpen}
+              onSuccess={(updatedCustomer) => {
+                setSession({ ...session, customer: updatedCustomer });
+              }}
+            />
+
+            {selectedBooking && (
+              <>
+                <EditBookingDialog
+                  booking={selectedBooking}
+                  open={editBookingOpen}
+                  onOpenChange={setEditBookingOpen}
+                  onSuccess={(updatedBooking) => {
+                    setBookings(bookings.map(b => 
+                      b.id === updatedBooking.id ? updatedBooking : b
+                    ));
+                    setSelectedBooking(null);
+                  }}
+                />
+
+                <EditPetsDialog
+                  booking={selectedBooking}
+                  open={editPetsOpen}
+                  onOpenChange={setEditPetsOpen}
+                  onSuccess={(updatedBooking) => {
+                    setBookings(bookings.map(b => 
+                      b.id === updatedBooking.id ? updatedBooking : b
+                    ));
+                    setSelectedBooking(null);
+                  }}
+                />
+
+                <CancelBookingDialog
+                  booking={selectedBooking}
+                  open={cancelBookingOpen}
+                  onOpenChange={setCancelBookingOpen}
+                  onSuccess={() => {
+                    loadBookings();
+                    setSelectedBooking(null);
+                  }}
+                />
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
 }
+
+
+
+
 
 

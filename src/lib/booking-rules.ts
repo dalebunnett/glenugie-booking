@@ -12,6 +12,9 @@ export interface BookingRules {
   peakSeasonDates: { start: string; end: string; minNights?: number }[];
   allowSameDayCheckInOut: boolean;
   cutoffTimeForSameDayBooking: number;
+  fullRefundDays: number;
+  partialRefundDays: number;
+  partialRefundPercentage: number;
 }
 
 // Default booking rules
@@ -44,7 +47,10 @@ let currentRules: BookingRules = {
     }
   ],
   allowSameDayCheckInOut: false,
-  cutoffTimeForSameDayBooking: 14
+  cutoffTimeForSameDayBooking: 14,
+  fullRefundDays: 14,
+  partialRefundDays: 7,
+  partialRefundPercentage: 50
 };
 
 export const bookingRulesStore = {
@@ -211,4 +217,5 @@ export function validateBooking(
     errors
   };
 }
+
 
