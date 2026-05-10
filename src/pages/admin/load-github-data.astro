@@ -1,0 +1,133 @@
+---
+import MainLayout from '../../layouts/main.astro';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+---
+
+<MainLayout title="Load GitHub Data - Admin">
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <Card>
+      <CardHeader>
+        <CardTitle>Load Data from GitHub Repository</CardTitle>
+        <CardDescription>
+          This will load all data from your local GitHub repository files into KV storage.
+          All kennel/suite slugs will be normalized to lowercase.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div id="status" class="mb-4 p-4 rounded-lg bg-muted hidden">
+          <p id="status-message" class="text-sm"></p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h3 class="font-semibold text-blue-900 mb-2">What will be loaded:</h3>
+            <ul class="text-sm text-blue-800 space-y-1">
+              <li>✅ All rates (kennels and suites) with lowercase slugs</li>
+              <li>✅ All booking rules with normalized accommodation names</li>
+              <li>✅ All existing bookings with normalized suite names</li>
+            </ul>
+          </div>
+
+          <Button id="load-btn" size="lg" class="w-full">
+            Load Data from GitHub
+          </Button>
+
+          <div id="results" class="hidden mt-6 space-y-4">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p class="text-sm text-green-600 mb-1">Rates Loaded</p>
+                <p id="rates-count" class="text-3xl font-bold text-green-900">0</p>
+              </div>
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-600 mb-1">Rules Loaded</p>
+                <p id="rules-count" class="text-3xl font-bold text-blue-900">0</p>
+              </div>
+              <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <p class="text-sm text-purple-600 mb-1">Bookings Loaded</p>
+                <p id="bookings-count" class="text-3xl font-bold text-purple-900">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+
+  <script>
+    import { baseUrl } from '../../lib/base-url';
+
+    const loadBtn = document.getElementById('load-btn') as HTMLButtonElement;
+    const statusDiv = document.getElementById('status') as HTMLDivElement;
+    const statusMessage = document.getElementById('status-message') as HTMLParagraphElement;
+    const resultsDiv = document.getElementById('results') as HTMLDivElement;
+    const ratesCount = document.getElementById('rates-count') as HTMLParagraphElement;
+    const rulesCount = document.getElementById('rules-count') as HTMLParagraphElement;
+    const bookingsCount = document.getElementById('bookings-count') as HTMLParagraphElement;
+
+    function showStatus(message: string, type: 'info' | 'success' | 'error') {
+      statusDiv.classList.remove('hidden', 'bg-blue-50', 'bg-green-50', 'bg-red-50', 'border-blue-200', 'border-green-200', 'border-red-200');
+      statusMessage.classList.remove('text-blue-800', 'text-green-800', 'text-red-800');
+      
+      if (type === 'info') {
+        statusDiv.classList.add('bg-blue-50', 'border-blue-200');
+        statusMessage.classList.add('text-blue-800');
+      } else if (type === 'success') {
+        statusDiv.classList.add('bg-green-50', 'border-green-200');
+        statusMessage.classList.add('text-green-800');
+      } else {
+        statusDiv.classList.add('bg-red-50', 'border-red-200');
+        statusMessage.classList.add('text-red-800');
+      }
+      
+      statusDiv.classList.add('border');
+      statusMessage.textContent = message;
+    }
+
+    loadBtn.addEventListener('click', async () => {
+      if (!confirm('This will load all data from GitHub repository files. Continue?')) {
+        return;
+      }
+
+      loadBtn.disabled = true;
+      loadBtn.textContent = 'Loading...';
+      showStatus('Loading data from GitHub repository...', 'info');
+      resultsDiv.classList.add('hidden');
+
+      try {
+        const sessionId = localStorage.getItem('admin_session');
+        const response = await fetch(`${baseUrl}/api/admin/load-from-github`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionId || ''}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to load data');
+        }
+
+        const result = await response.json();
+        
+        showStatus('✅ Data loaded successfully!', 'success');
+        
+        ratesCount.textContent = result.summary.rates.toString();
+        rulesCount.textContent = result.summary.bookingRules.toString();
+        bookingsCount.textContent = result.summary.bookings.toString();
+        
+        resultsDiv.classList.remove('hidden');
+        
+        loadBtn.textContent = 'Load Data from GitHub';
+      } catch (error) {
+        console.error('Load error:', error);
+        showStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+        loadBtn.textContent = 'Load Data from GitHub';
+      } finally {
+        loadBtn.disabled = false;
+      }
+    });
+  </script>
+</MainLayout>

@@ -59,6 +59,8 @@ export default function BookingRulesManager() {
     partialRefundDays: 7,
     partialRefundPercentage: 50
   });
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 2;
 
   useEffect(() => {
     loadRules();
@@ -81,29 +83,38 @@ export default function BookingRulesManager() {
       const data = await response.json();
       console.log('[BookingRulesManager] Rules loaded:', data);
       setRules(data);
+      setRetryCount(0); // Reset retry count on success
     } catch (err: any) {
       console.error('[BookingRulesManager] Error loading rules:', err);
       setError(err.message || 'Failed to load booking rules');
       
-      // Try to initialize if rules are missing
-      console.log('[BookingRulesManager] Attempting to initialize KV storage...');
-      try {
-        const initResponse = await fetch(`${baseUrl}/api/admin/init-kv`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('admin_session')}`
+      // Only try to initialize once, don't retry infinitely
+      if (retryCount < MAX_RETRIES) {
+        console.log('[BookingRulesManager] Attempting to initialize KV storage... (attempt', retryCount + 1, 'of', MAX_RETRIES, ')');
+        try {
+          const initResponse = await fetch(`${baseUrl}/api/admin/init-kv`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('admin_session')}`
+            }
+          });
+          
+          if (initResponse.ok) {
+            console.log('[BookingRulesManager] KV initialized, retrying...');
+            setRetryCount(prev => prev + 1);
+            // Retry loading rules after a delay
+            setTimeout(() => loadRules(), 1000);
+          } else {
+            console.error('[BookingRulesManager] Failed to initialize KV');
           }
-        });
-        
-        if (initResponse.ok) {
-          console.log('[BookingRulesManager] KV initialized, retrying...');
-          // Retry loading rules
-          setTimeout(() => loadRules(), 1000);
+        } catch (initErr) {
+          console.error('[BookingRulesManager] Failed to initialize KV:', initErr);
         }
-      } catch (initErr) {
-        console.error('[BookingRulesManager] Failed to initialize KV:', initErr);
+      } else {
+        console.error('[BookingRulesManager] Max retries reached, giving up');
+        toast.error('Failed to load booking rules. Please refresh the page.');
       }
     } finally {
       setLoading(false);
@@ -1075,6 +1086,7 @@ export default function BookingRulesManager() {
     </div>
   );
 }
+
 
 
 

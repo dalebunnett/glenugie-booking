@@ -66,6 +66,21 @@
 	},
 
 	/**
+	 * Routes - Deploy to custom domain
+	 * https://developers.cloudflare.com/workers/configuration/routing/routes/
+	 */
+	"routes": [
+		{
+			"pattern": "glenugiekennels.co.uk/app/*",
+			"zone_name": "glenugiekennels.co.uk"
+		},
+		{
+			"pattern": "www.glenugiekennels.co.uk/app/*",
+			"zone_name": "glenugiekennels.co.uk"
+		}
+	],
+
+	/**
 	 * Static Assets
 	 * https://developers.cloudflare.com/workers/static-assets/binding/
 	 */
@@ -77,6 +92,8 @@
 	 */
 	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
 }
+
+
 
 
 

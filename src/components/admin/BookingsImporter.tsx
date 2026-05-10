@@ -110,6 +110,43 @@ function mapAccommodationType(accommodation: string): string {
   return 'luxury-suite'; // Default
 }
 
+// Map accommodation name to slug
+function mapAccommodationSlug(accommodation: string): string {
+  const name = accommodation.toLowerCase();
+  
+  // Luxury dog suites
+  if (name.includes('sniffany')) return 'sniffany-suite';
+  if (name.includes('woofdorf')) return 'woofdorf';
+  if (name.includes('barkingham')) return 'barkingham-palace';
+  if (name.includes('nasherville')) return 'nasherville';
+  if (name.includes('lapdog')) return 'lapdog-land';
+  if (name.includes('huntington')) return 'huntington-manor';
+  if (name.includes('pawduree')) return 'pawduree';
+  if (name.includes('furrari')) return 'furrari';
+  if (name.includes('tail away')) return 'tail-away';
+  if (name.includes('fairy dogmother')) return 'the-fairy-dogmother';
+  
+  // Cattery suites
+  if (name.includes('clawrence')) return 'clawrence-house';
+  if (name.includes('twitcher')) return 'twitcher';
+  if (name.includes('pussy porchens')) return 'pussy-porchens';
+  if (name.includes('ragdoll')) return 'ragdoll-ranch';
+  if (name.includes('bengal')) return 'bengal-bay';
+  if (name.includes('paws palace')) return 'paws-palace';
+  if (name.includes('octopussy')) return 'octopussy';
+  if (name.includes('catsby')) return 'catsby';
+  if (name.includes('whiskers')) return 'whiskers-lounge';
+  if (name.includes('hairy potter')) return 'hairy-potter';
+  if (name.includes('chalet cat')) return 'chalet-cat';
+  if (name.includes('cleocatara')) return 'cleocatara';
+  
+  // Standard kennels
+  if (name.includes('ruff')) return 'ruffs-retreat';
+  if (name.includes('village')) return 'village';
+  
+  return accommodation.toLowerCase().replace(/\s+/g, '-');
+}
+
 export default function BookingsImporter({ onImportComplete }: { onImportComplete?: () => void }) {
   const [csvData, setCsvData] = useState('');
   const [isImporting, setIsImporting] = useState(false);
@@ -185,6 +222,7 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
           // Extract accommodation info
           const accommodation = getValue(['accommodation', 'accommodation type', 'kennel', 'suite']);
           const accommodationType = mapAccommodationType(accommodation);
+          const specificSuite = mapAccommodationSlug(accommodation);
 
           // Extract customer info
           const firstName = getValue(['first name', 'firstname', 'first_name']);
@@ -309,8 +347,8 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
             triesEscape,
             escapeDetails: triesEscape ? escapeInfo : '',
             additionalNotes: getValue(['customer note', 'notes', 'comments']),
-            accommodationType,
-            specificSuite: accommodation,
+            accommodationType: accommodationType.toLowerCase(),
+            specificSuite: specificSuite.toLowerCase(),
             checkIn,
             checkOut,
             numberOfNights,
@@ -572,6 +610,7 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
     </div>
   );
 }
+
 
 
 

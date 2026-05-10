@@ -31,6 +31,7 @@ export default function AdminDashboard() {
     totalRevenue: 0,
     pendingRevenue: 0
   });
+  const [isLoadingFromGitHub, setIsLoadingFromGitHub] = useState(false);
 
   // Log build version to verify we're using the latest code
   console.log('🏗️ AdminDashboard Build Version:', BUILD_VERSION);
@@ -157,6 +158,37 @@ export default function AdminDashboard() {
     setActiveTab('bookings'); // Switch to bookings tab to show details
   };
 
+  const handleLoadFromGitHub = async () => {
+    if (!confirm('This will load all data from the GitHub repository files (rates, booking rules, and bookings) into KV storage. All slugs will be normalized to lowercase. Continue?')) {
+      return;
+    }
+
+    setIsLoadingFromGitHub(true);
+    try {
+      const sessionId = localStorage.getItem('admin_session');
+      const response = await fetch(`${baseUrl}/api/admin/load-from-github`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${sessionId || ''}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to load data from GitHub');
+      }
+
+      const result = await response.json();
+      toast.success(`Successfully loaded: ${result.summary.rates} rates, ${result.summary.bookingRules} rules, ${result.summary.bookings} bookings`);
+    } catch (error) {
+      console.error('Load from GitHub error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to load data');
+    } finally {
+      setIsLoadingFromGitHub(false);
+    }
+  };
+
   useEffect(() => {
     loadBookings();
   }, []);
@@ -206,6 +238,14 @@ export default function AdminDashboard() {
                 onClick={handleInitializeData}
               >
                 Initialize Data
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={handleLoadFromGitHub}
+                disabled={isLoadingFromGitHub}
+              >
+                {isLoadingFromGitHub ? 'Loading...' : 'Load Data from GitHub'}
               </Button>
               <Button 
                 variant="secondary" 
@@ -379,6 +419,7 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
 
 
 
