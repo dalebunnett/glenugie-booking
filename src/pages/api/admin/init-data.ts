@@ -7,11 +7,11 @@ import { initializeStorage } from '../../../lib/storage';
 import bookingsData from '../../../../bookings-data.json';
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  // DISABLED: This endpoint is deprecated and should not be used
-  // The old cached frontend code was calling this automatically on login
-  // which was re-loading 498 bookings every time
+  // DISABLED IMMEDIATELY: Return error before doing anything
+  // This prevents the old cached frontend from reloading bookings on login
+  console.log('[Init-Data] BLOCKED: This endpoint is disabled');
   return new Response(JSON.stringify({ 
-    error: 'This endpoint is disabled. Please use the manual "Load Test Data" button instead.',
+    error: 'This endpoint is disabled. Bookings will NOT be reloaded.',
     success: false,
     count: 0
   }), {
@@ -25,6 +25,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
   });
   
+  // OLD CODE BELOW - NEVER REACHED
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
@@ -70,6 +71,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
 
 
 
