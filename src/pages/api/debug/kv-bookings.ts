@@ -6,7 +6,7 @@ export const GET: APIRoute = async ({ locals }) => {
     console.log('[Debug KV] Checking KV storage...');
     console.log('[Debug KV] Runtime:', !!locals.runtime);
     console.log('[Debug KV] Runtime.env:', !!locals.runtime?.env);
-    console.log('[Debug KV] BOOKINGS_KV:', !!locals.runtime?.env?.BOOKINGS_KV);
+    console.log('[Debug KV] booking_kv:', !!locals.runtime?.env?.booking_kv);
     
     // Initialize DB with runtime
     const database = initDB(locals.runtime);
@@ -31,7 +31,7 @@ export const GET: APIRoute = async ({ locals }) => {
       success: true,
       totalBookings: bookings.length,
       sampleBookings,
-      kvAvailable: !!locals.runtime?.env?.BOOKINGS_KV,
+      kvAvailable: !!locals.runtime?.env?.booking_kv,
       runtimeAvailable: !!locals.runtime
     }, null, 2), {
       status: 200,
@@ -43,7 +43,7 @@ export const GET: APIRoute = async ({ locals }) => {
       success: false,
       error: error.message,
       stack: error.stack,
-      kvAvailable: !!locals.runtime?.env?.BOOKINGS_KV,
+      kvAvailable: !!locals.runtime?.env?.booking_kv,
       runtimeAvailable: !!locals.runtime
     }, null, 2), {
       status: 500,

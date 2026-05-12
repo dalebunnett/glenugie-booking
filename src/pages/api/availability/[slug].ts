@@ -47,6 +47,11 @@ export const GET: APIRoute = async ({ params, locals }) => {
         ? normalizeToSlug(booking.accommodationType)
         : null;
 
+      console.log(`[Availability API] Checking booking ${booking.id}:`);
+      console.log(`  - booking.specificSuite: "${booking.specificSuite}" -> normalized: "${bookingSpecificSuite}"`);
+      console.log(`  - booking.accommodationType: "${booking.accommodationType}" -> normalized: "${bookingAccommodationType}"`);
+      console.log(`  - looking for slug: "${normalizedSlug}"`);
+
       // FIRST: Check if this booking has a specific suite that matches
       if (bookingSpecificSuite === normalizedSlug) {
         console.log(`[Availability API] ✓ Match on specificSuite: ${booking.specificSuite} -> ${bookingSpecificSuite}`);
@@ -59,6 +64,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
         return true;
       }
       
+      console.log(`[Availability API] ✗ No match for booking ${booking.id}`);
       return false;
     });
 
@@ -106,4 +112,5 @@ export const GET: APIRoute = async ({ params, locals }) => {
     });
   }
 };
+
 

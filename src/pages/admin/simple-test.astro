@@ -1,0 +1,130 @@
+---
+// Simple test page to verify KV storage works
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple KV Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #0052a3;
+    }
+    button.danger {
+      background: #dc2626;
+    }
+    button.danger:hover {
+      background: #b91c1c;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🧪 Simple KV Storage Test</h1>
+    <p>This page bypasses all caching to test KV storage directly.</p>
+    
+    <div>
+      <button onclick="clearEverything()">🗑️ Clear Everything</button>
+      <button onclick="checkKV()">🔍 Check KV</button>
+      <button onclick="loadTestData()">📦 Load Test Data</button>
+      <button onclick="getBookings()">📋 Get Bookings</button>
+    </div>
+    
+    <div id="result">Click a button to test...</div>
+  </div>
+
+  <script>
+    const baseUrl = '/app';
+    const token = localStorage.getItem('admin_session') || prompt('Enter admin token:');
+    
+    if (token) {
+      localStorage.setItem('admin_session', token);
+    }
+
+    async function apiCall(endpoint, method = 'GET') {
+      const result = document.getElementById('result');
+      result.textContent = `Calling ${method} ${endpoint}...`;
+      
+      try {
+        const response = await fetch(`${baseUrl}${endpoint}`, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        result.textContent = `Status: ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        result.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    function clearEverything() {
+      if (confirm('Clear ALL data from KV storage?')) {
+        apiCall('/api/admin/clear-everything', 'POST');
+      }
+    }
+
+    function checkKV() {
+      apiCall('/api/admin/debug-kv-bookings');
+    }
+
+    function loadTestData() {
+      if (confirm('Load test bookings from data/bookings.json?')) {
+        apiCall('/api/admin/load-test-data', 'POST');
+      }
+    }
+
+    function getBookings() {
+      apiCall('/api/admin/bookings');
+    }
+  </script>
+</body>
+</html>

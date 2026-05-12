@@ -7,6 +7,24 @@ import { initializeStorage } from '../../../lib/storage';
 import bookingsData from '../../../../bookings-data.json';
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  // DISABLED: This endpoint is deprecated and should not be used
+  // The old cached frontend code was calling this automatically on login
+  // which was re-loading 498 bookings every time
+  return new Response(JSON.stringify({ 
+    error: 'This endpoint is disabled. Please use the manual "Load Test Data" button instead.',
+    success: false,
+    count: 0
+  }), {
+    status: 410, // Gone
+    headers: { 
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Surrogate-Control': 'no-store'
+    }
+  });
+  
   // Initialize DB with KV binding
   initDB(locals.runtime);
   
@@ -52,6 +70,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
+
 
 
 

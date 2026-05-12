@@ -1,3 +1,6 @@
+
+
+
 /**
  * KV-based storage adapter for Cloudflare Workers
  * Stores data in Cloudflare KV (Key-Value storage)
@@ -72,25 +75,42 @@ export class KVStorage {
 
   async getBookings(): Promise<Booking[]> {
     try {
+      console.log('[KVStorage] 🔍 Reading bookings from KV...');
       const data = await this.kv.get('bookings', 'json');
       if (!data) {
-        console.log('[KVStorage] No bookings found, returning empty array');
+        console.log('[KVStorage] ❌ No bookings found in KV, returning empty array');
         return [];
       }
-      console.log('[KVStorage] Loaded', (data as Booking[]).length, 'bookings from KV');
-      return data as Booking[];
+      const bookings = data as Booking[];
+      console.log(`[KVStorage] ✅ Loaded ${bookings.length} bookings from KV`);
+      
+      // Log first 3 booking IDs for debugging
+      if (bookings.length > 0) {
+        const sampleIds = bookings.slice(0, 3).map(b => b.id);
+        console.log('[KVStorage] Sample booking IDs:', sampleIds);
+      }
+      
+      return bookings;
     } catch (error) {
-      console.error('[KVStorage] Error loading bookings:', error);
+      console.error('[KVStorage] ❌ Error loading bookings:', error);
       return [];
     }
   }
 
   async saveBookings(bookings: Booking[]): Promise<void> {
+    console.log(`[KVStorage] 💾 Saving ${bookings.length} bookings to KV...`);
+    
+    // Log first 3 booking IDs for debugging
+    if (bookings.length > 0) {
+      const sampleIds = bookings.slice(0, 3).map(b => b.id);
+      console.log('[KVStorage] Sample booking IDs being saved:', sampleIds);
+    }
+    
     try {
       await this.kv.put('bookings', JSON.stringify(bookings));
-      console.log('[KVStorage] Saved', bookings.length, 'bookings to KV');
+      console.log(`[KVStorage] ✅ Successfully saved ${bookings.length} bookings to KV`);
     } catch (error) {
-      console.error('[KVStorage] Error saving bookings:', error);
+      console.error('[KVStorage] ❌ Error saving bookings:', error);
       throw error;
     }
   }
@@ -168,3 +188,6 @@ export class KVStorage {
     }
   }
 }
+
+
+

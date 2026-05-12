@@ -12,7 +12,7 @@ let diagnostics = {
 
 try {
   // Check if KV is available
-  if (Astro.locals.runtime?.env?.BOOKINGS_KV) {
+  if (Astro.locals.runtime?.env?.booking_kv) {
     diagnostics.kvAvailable = true;
     
     // Initialize DB

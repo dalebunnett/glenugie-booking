@@ -2,6 +2,20 @@
 import MainLayout from '../../layouts/main.astro';
 import AdminLoginWrapper from '../../components/admin/AdminLoginWrapper';
 import { Toaster } from '../../components/ui/sonner';
+
+// Prevent caching of admin page
+Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
+
+// Force cache bust with version parameter
+const url = new URL(Astro.request.url);
+const currentVersion = '1778533910';
+const urlVersion = url.searchParams.get('v');
+
+if (urlVersion !== currentVersion) {
+  return Astro.redirect(`/app/admin?v=${currentVersion}`);
+}
 ---
 
 <MainLayout pageClass="">

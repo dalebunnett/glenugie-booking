@@ -8,6 +8,16 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
 
   console.log('[middleware] 🔍 Checking path:', pathname);
   
+  // Add no-cache headers for admin pages
+  if (pathname.includes('/admin')) {
+    console.log('[middleware] 🚫 Adding no-cache headers for admin page');
+    const response = await next();
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    return response;
+  }
+  
   // Allow init-staging endpoint without auth (for staging setup)
   if (pathname.includes('/api/admin/init-staging')) {
     console.log('[middleware] ⏭️ Skipping auth for init-staging');
@@ -52,6 +62,7 @@ export const onRequest: MiddlewareHandler = async (ctx, next) => {
 
   return next();
 };
+
 
 
 

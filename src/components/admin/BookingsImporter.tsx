@@ -1,3 +1,5 @@
+
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -232,7 +234,7 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
           const phone = getValue(['phone', 'telephone', 'mobile', 'contact number']);
 
           // Skip rows with no customer information (likely empty rows)
-          if (!customerName && !email && !phone) {
+          if (!customerName && !email && !phone && !petName1) {
             console.log(`Skipping empty row ${i}`);
             continue;
           }
@@ -347,8 +349,8 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
             triesEscape,
             escapeDetails: triesEscape ? escapeInfo : '',
             additionalNotes: getValue(['customer note', 'notes', 'comments']),
-            accommodationType: accommodationType.toLowerCase(),
-            specificSuite: specificSuite.toLowerCase(),
+            accommodationType,
+            specificSuite,
             checkIn,
             checkOut,
             numberOfNights,
@@ -443,65 +445,6 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
         failed: 0,
         errors: ['Failed to import: ' + errorMessage]
       });
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
-  const handleImport = async () => {
-    if (!selectedFile && !jsonText) {
-      toast.error('Please select a file or paste JSON data');
-      return;
-    }
-
-    setIsImporting(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      let bookings;
-
-      if (jsonText) {
-        // Parse JSON text
-        bookings = JSON.parse(jsonText);
-      } else if (selectedFile) {
-        // Read file content
-        const text = await selectedFile.text();
-        if (selectedFile.name.endsWith('.json')) {
-          bookings = JSON.parse(text);
-        } else {
-          // Parse CSV
-          bookings = parseCSV(text);
-        }
-      }
-
-      // Validate format
-      if (!Array.isArray(bookings)) {
-        throw new Error('Data must be an array of bookings');
-      }
-
-      // Send to API
-      const response = await adminPost('/api/admin/bookings/import', { bookings, dryRun });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to import bookings');
-      }
-
-      const result = await response.json();
-      setResult(result);
-
-      if (!dryRun && result.imported > 0) {
-        toast.success(`Successfully imported ${result.imported} bookings`);
-        onImportComplete?.();
-      } else if (dryRun) {
-        toast.info('Validation complete. Review results below.');
-      }
-    } catch (err) {
-      console.error('Import error:', err);
-      const message = err instanceof Error ? err.message : 'Failed to import bookings';
-      setError(message);
-      toast.error(message);
     } finally {
       setIsImporting(false);
     }
@@ -610,6 +553,9 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
     </div>
   );
 }
+
+
+
 
 
 

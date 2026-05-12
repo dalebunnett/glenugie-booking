@@ -1,3 +1,10 @@
+
+
+
+
+
+
+// Admin Dashboard Component - Updated with Debug KV button
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -22,6 +29,8 @@ export default function AdminDashboard() {
   const [lastFetchTime, setLastFetchTime] = useState(0);
   const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set(['bookings']));
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [stats, setStats] = useState({
     total: 0,
     confirmed: 0,
@@ -77,29 +86,91 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteAllBookings = async () => {
-    if (!confirm('⚠️ WARNING: This will permanently delete ALL bookings!\n\nAre you absolutely sure?')) {
+    console.log('[AdminDashboard] Delete All clicked, showing dialog');
+    setShowDeleteConfirm(true);
+    console.log('[AdminDashboard] showDeleteConfirm set to:', true);
+  };
+
+  const confirmDeleteAll = async () => {
+    console.log('[AdminDashboard] Confirm delete, text entered:', deleteConfirmText);
+    if (deleteConfirmText !== 'DELETE') {
+      toast.error('Please type "DELETE" to confirm');
       return;
     }
 
-    if (!confirm('This action CANNOT be undone. Type "DELETE" to confirm.')) {
+    setShowDeleteConfirm(false);
+    setDeleteConfirmText('');
+
+    try {
+      toast.info('Deleting all bookings...');
+      const response = await adminDelete('/api/admin/bookings/delete-all');
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+      
+      const result = await response.json();
+      
+      // Check KV directly after deletion
+      const debugResponse = await adminGet('/api/admin/debug-kv-bookings');
+      if (debugResponse.ok) {
+        const debugResult = await debugResponse.json();
+        console.log('[After Delete] KV contains:', debugResult.bookingsCount, 'bookings');
+        toast.success(`✅ ${result.message} | KV now has: ${debugResult.bookingsCount} bookings`);
+      } else {
+        toast.success(`✅ ${result.message}`);
+      }
+      
+      // Reload bookings to show empty list
+      await loadBookings();
+    } catch (error) {
+      console.error('Error deleting bookings:', error);
+      toast.error('Failed to delete bookings: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  };
+
+  const handleLoadTestData = async () => {
+    if (!confirm('Load test bookings from data/bookings.json into KV storage?')) {
       return;
     }
 
     try {
-      const response = await adminDelete('/api/admin/bookings/delete-all');
+      toast.info('Loading test data...');
+      const response = await adminPost('/api/admin/load-test-data');
       
       if (!response.ok) {
-        throw new Error('Failed to delete bookings');
+        const errorText = await response.text();
+        throw new Error(errorText);
       }
-
-      const result = await response.json();
-      toast.success(`Successfully deleted ${result.deletedCount} bookings`);
       
-      // Reload bookings
+      const result = await response.json();
+      toast.success(`✅ Loaded ${result.count} test bookings`);
+      
+      // Reload bookings to show the new data
       await loadBookings();
     } catch (error) {
-      console.error('Error deleting bookings:', error);
-      toast.error('Failed to delete bookings');
+      console.error('Error loading test data:', error);
+      toast.error('Failed to load test data: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  };
+
+  const handleDebugKV = async () => {
+    try {
+      toast.info('Checking KV storage...');
+      const response = await adminGet('/api/admin/debug-kv-bookings');
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+      
+      const result = await response.json();
+      toast.success(`KV Storage: ${result.bookingsCount} bookings found`);
+      console.log('[Debug KV]', result);
+    } catch (error) {
+      console.error('Error debugging KV:', error);
+      toast.error('Failed to debug KV: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -124,6 +195,16 @@ export default function AdminDashboard() {
       console.error('[AdminDashboard] Error loading bookings:', error);
       toast.error('Failed to load bookings');
     }
+  };
+
+  const loadRates = async () => {
+    // Rates are loaded by the RatesManager component
+    console.log('[AdminDashboard] Rates will be loaded by RatesManager component');
+  };
+
+  const loadBookingRules = async () => {
+    // Booking rules are loaded by the BookingRulesManager component
+    console.log('[AdminDashboard] Booking rules will be loaded by BookingRulesManager component');
   };
 
   const calculateStats = (bookingsData: Booking[]) => {
@@ -191,9 +272,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadBookings();
-  }, []);
+    loadRates();
+    loadBookingRules();
 
-  useEffect(() => {
+    // DISABLED: Auto-initialization was causing bookings to be reloaded on every login
+    // This prevented the delete-all function from working properly
+    /*
     const initializeData = async () => {
       try {
         // Wait a bit for token to be set in localStorage after login
@@ -219,25 +303,45 @@ export default function AdminDashboard() {
     // Small delay to ensure token is set after login
     const timer = setTimeout(initializeData, 100);
     return () => clearTimeout(timer);
-  }, []); // Empty dependency array - run once on mount
+    */
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Debug indicator */}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: '10px',
+          right: '10px',
+          backgroundColor: 'red',
+          color: 'white',
+          padding: '10px',
+          zIndex: 99999,
+          fontSize: '20px',
+          fontWeight: 'bold'
+        }}>
+          DIALOG STATE: TRUE
+        </div>
+      )}
+      
       {/* Header */}
       <div className="bg-primary text-primary-foreground py-8">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-              <p className="opacity-90">Manage bookings and view calendar</p>
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+                <p className="opacity-90">Manage bookings and view calendar</p>
+              </div>
             </div>
-            <div className="flex gap-3 items-center">
+            <div className="flex flex-wrap gap-2 items-center">
               <Button 
                 variant="secondary" 
                 size="sm"
                 onClick={handleInitializeData}
               >
-                Initialize Data
+                📥 Initialize Data
               </Button>
               <Button 
                 variant="secondary" 
@@ -245,7 +349,7 @@ export default function AdminDashboard() {
                 onClick={handleLoadFromGitHub}
                 disabled={isLoadingFromGitHub}
               >
-                {isLoadingFromGitHub ? 'Loading...' : 'Load Data from GitHub'}
+                {isLoadingFromGitHub ? 'Loading...' : '📂 Load from GitHub'}
               </Button>
               <Button 
                 variant="secondary" 
@@ -253,17 +357,23 @@ export default function AdminDashboard() {
                 onClick={() => loadBookings()}
                 disabled={isLoadingBookings}
               >
-                {isLoadingBookings ? 'Refreshing...' : 'Refresh Data'}
+                {isLoadingBookings ? 'Refreshing...' : '🔄 Refresh'}
               </Button>
               <Button 
                 variant="destructive" 
                 size="sm"
                 onClick={handleDeleteAllBookings}
               >
-                Delete All Bookings
+                🗑️ Delete All
               </Button>
-              <Button variant="secondary" onClick={handleLogout}>
-                Logout
+              <Button onClick={handleLoadTestData} variant="outline" size="sm">
+                📦 Load Test Data
+              </Button>
+              <Button onClick={handleDebugKV} variant="outline" size="sm">
+                🔍 Debug KV
+              </Button>
+              <Button onClick={handleLogout} variant="outline" size="sm">
+                🚪 Logout
               </Button>
             </div>
           </div>
@@ -416,9 +526,99 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+          onClick={(e) => {
+            // Close if clicking the backdrop
+            if (e.target === e.currentTarget) {
+              setShowDeleteConfirm(false);
+              setDeleteConfirmText('');
+            }
+          }}
+        >
+          <div 
+            className="rounded-lg shadow-2xl max-w-md w-full p-6 space-y-4"
+            style={{ backgroundColor: 'white', color: 'black' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-2xl font-bold" style={{ color: '#dc2626' }}>⚠️ Delete All Bookings</h2>
+            <p style={{ color: '#374151' }}>
+              This will permanently delete <strong>ALL {stats.total} bookings</strong> from the system.
+            </p>
+            <p className="text-sm font-semibold" style={{ color: '#dc2626' }}>
+              This action CANNOT be undone!
+            </p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium block" style={{ color: '#111827' }}>
+                Type <code style={{ backgroundColor: '#f3f4f6', padding: '4px 8px', borderRadius: '4px', color: '#dc2626' }}>DELETE</code> to confirm:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '6px',
+                  backgroundColor: 'white',
+                  color: 'black',
+                  fontSize: '16px'
+                }}
+                placeholder="Type DELETE here"
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  console.log('[AdminDashboard] Cancel clicked');
+                  setShowDeleteConfirm(false);
+                  setDeleteConfirmText('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDeleteAll}
+                disabled={deleteConfirmText !== 'DELETE'}
+              >
+                Delete All Bookings
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

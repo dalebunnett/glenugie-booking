@@ -3,7 +3,7 @@ import bookingsData from '../../../../data/bookings.json';
 
 export const POST: APIRoute = async ({ locals }) => {
   try {
-    const kv = locals?.runtime?.env?.BOOKINGS_KV;
+    const kv = locals?.runtime?.env?.booking_kv;
     
     if (!kv) {
       return new Response(JSON.stringify({ 

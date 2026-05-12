@@ -2,6 +2,7 @@
 
 
 
+
 /**
  * Admin API fetch utility
  * Automatically includes authentication token in all admin API requests
@@ -61,6 +62,7 @@ export async function adminFetch(
     ...fetchOptions,
     headers,
     credentials: 'include',
+    cache: 'no-store', // Prevent browser caching
   });
   
   console.log(`[adminFetch] Response: ${response.status}`);
@@ -113,6 +115,7 @@ export async function adminPut(
 export async function adminDelete(endpoint: string): Promise<Response> {
   return adminFetch(endpoint, { method: 'DELETE' });
 }
+
 
 
 

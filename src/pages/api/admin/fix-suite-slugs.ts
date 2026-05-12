@@ -29,7 +29,6 @@ const SUITE_NAME_TO_SLUG: Record<string, string> = {
   'Hairy Potter Suite': 'hairy-potter-suite',
   'Chalet Cat Suite': 'chalet-cat-suite',
   'Cleocatara Suite': 'cleocatara-suite',
-  'Meowtel Suite': 'meowtel-suite',
   
   // Also handle variations without "Suite"
   'Sniffany': 'sniffany-suite',
@@ -54,7 +53,7 @@ const SUITE_NAME_TO_SLUG: Record<string, string> = {
   'Hairy Potter': 'hairy-potter-suite',
   'Chalet Cat': 'chalet-cat-suite',
   'Cleocatara': 'cleocatara-suite',
-  'Meowtel': 'meowtel-suite'
+  
 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -100,10 +99,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Save updated bookings
     if (fixedCount > 0) {
       await db.bookings.getAll(); // Get storage instance
-      const storage = (db as any).storageInstance || locals.runtime.env.BOOKINGS_KV;
+      const storage = (db as any).storageInstance || locals.runtime.env.booking_kv;
       
       // Direct save to KV
-      const kvStorage = locals.runtime.env.BOOKINGS_KV;
+      const kvStorage = locals.runtime.env.booking_kv;
       await kvStorage.put('bookings', JSON.stringify(fixedBookings));
       
       console.log(`[Fix Suite Slugs] Fixed ${fixedCount} bookings`);
@@ -132,4 +131,5 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
 

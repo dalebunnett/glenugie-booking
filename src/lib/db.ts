@@ -206,16 +206,17 @@ export const initDB = (runtime?: any) => {
   console.log('[DB] initDB called');
   console.log('[DB] Runtime provided:', !!runtime);
   console.log('[DB] Runtime.env:', !!runtime?.env);
-  console.log('[DB] Runtime.env.BOOKINGS_KV:', !!runtime?.env?.BOOKINGS_KV);
+  console.log('[DB] Runtime.env.booking_kv:', !!runtime?.env?.booking_kv);
   
   storageInstance = initializeStorage(runtime);
-  console.log('[DB] Initialized with runtime, KV available:', !!runtime?.env?.BOOKINGS_KV);
+  console.log('[DB] Initialized with runtime, KV available:', !!runtime?.env?.booking_kv);
   console.log('[DB] Storage instance created:', !!storageInstance);
   
   return db;
 };
 
 console.log('[DB] Database module loaded');
+
 
 
 

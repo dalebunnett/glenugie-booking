@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
-    const kv = locals?.runtime?.env?.BOOKINGS_KV;
+    const kv = locals?.runtime?.env?.booking_kv;
     
     if (!kv) {
       return new Response(JSON.stringify({ 

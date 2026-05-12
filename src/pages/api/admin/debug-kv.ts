@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 export const GET: APIRoute = async ({ locals }) => {
   console.log('[debug-kv] Checking KV configuration...');
   
-  const kv = locals?.runtime?.env?.BOOKINGS_KV;
+  const kv = locals?.runtime?.env?.booking_kv;
   
   const debug = {
     hasLocals: !!locals,
@@ -62,3 +62,4 @@ export const GET: APIRoute = async ({ locals }) => {
     });
   }
 };
+
