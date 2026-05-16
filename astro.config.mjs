@@ -3,7 +3,6 @@
 
 
 
-
 import {defineConfig} from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
@@ -101,15 +100,16 @@ export default defineConfig({
     build: {
       rollupOptions: {
         output: {
-          // Force new filenames on every build
-          entryFileNames: `assets/[name].[hash].${Date.now()}.js`,
-          chunkFileNames: `assets/[name].[hash].${Date.now()}.js`,
-          assetFileNames: `assets/[name].[hash].${Date.now()}.[ext]`
+          // Use hash-based filenames without timestamps
+          entryFileNames: `assets/[name].[hash].js`,
+          chunkFileNames: `assets/[name].[hash].js`,
+          assetFileNames: `assets/[name].[hash].[ext]`
         }
       }
     }
   },
 });
+
 
 
 

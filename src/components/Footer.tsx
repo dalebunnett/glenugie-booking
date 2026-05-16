@@ -50,7 +50,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href={`${baseUrl}/about`} className="text-muted-foreground hover:text-primary">
+                <a href={`${baseUrl}/about-us`} className="text-muted-foreground hover:text-primary">
                   About Us
                 </a>
               </li>
@@ -146,6 +146,7 @@ export default function Footer() {
     </footer>
   );
 }
+
 
 
 

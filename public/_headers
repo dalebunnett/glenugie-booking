@@ -1,0 +1,11 @@
+# Cache busting for CSS and JS assets
+/glenugie-booking/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Don't cache HTML pages
+/glenugie-booking/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+# API routes should never be cached
+/glenugie-booking/api/*
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0

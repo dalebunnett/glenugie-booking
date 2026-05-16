@@ -8,7 +8,7 @@ export default function Navigation() {
 
   const navItems = [
     { href: `${baseUrl}/`, label: 'Home' },
-    { href: `${baseUrl}/about`, label: 'About' },
+    { href: `${baseUrl}/about-us`, label: 'About' },
     { href: `${baseUrl}/accommodations`, label: 'Kennels and Suites' },
     { href: `${baseUrl}/booking`, label: 'Book Now' },
     { href: `${baseUrl}/contact`, label: 'Contact' }
@@ -95,6 +95,7 @@ export default function Navigation() {
     </nav>
   );
 }
+
 
 
 

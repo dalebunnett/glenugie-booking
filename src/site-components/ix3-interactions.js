@@ -3,20 +3,20 @@ export const IX3Context = React.createContext({
   registerIX3: null,
 });
 async function loadAndCreateIX3Engine() {
-  await import("./devlink-gsap");
-  const { createIX3Engine } = await import("./devlink-ix3");
+  await import("./webflow_modules/devlink-gsap");
+  const { createIX3Engine } = await import("./webflow_modules/devlink-ix3");
   return createIX3Engine();
 }
 export const IX3Provider = ({ children }) => {
   const engineRef = React.useRef(null);
   const queueRef = React.useRef([]);
   const initStartedRef = React.useRef(false);
-  React.useEffect(() => {
+  const destroyedRef = React.useRef(false);
+  const ensureEngine = React.useCallback(() => {
     if (initStartedRef.current) return;
     initStartedRef.current = true;
-    let destroyed = false;
     loadAndCreateIX3Engine().then((engine) => {
-      if (destroyed) {
+      if (destroyedRef.current) {
         engine.destroy();
         return;
       }
@@ -26,18 +26,25 @@ export const IX3Provider = ({ children }) => {
       }
       queueRef.current = [];
     });
+  }, []);
+  React.useEffect(() => {
+    destroyedRef.current = false;
     return () => {
-      destroyed = true;
+      destroyedRef.current = true;
       engineRef.current?.destroy();
     };
   }, []);
-  const registerIX3 = React.useCallback((data) => {
-    if (engineRef.current) {
-      engineRef.current.register(data.interactions, data.timelines);
-    } else {
-      queueRef.current.push(data);
-    }
-  }, []);
+  const registerIX3 = React.useCallback(
+    (data) => {
+      ensureEngine();
+      if (engineRef.current) {
+        engineRef.current.register(data.interactions, data.timelines);
+      } else {
+        queueRef.current.push(data);
+      }
+    },
+    [ensureEngine]
+  );
   return React.createElement(
     IX3Context.Provider,
     { value: { registerIX3 } },

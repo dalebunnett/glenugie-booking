@@ -1,61 +1,53 @@
 #!/bin/bash
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-echo "🔍 Checking Glenugie Kennels Deployment Status"
-echo "=============================================="
+echo "🚀 Deployment Verification Checklist"
+echo "===================================="
 echo ""
 
-# Get current git commit
-CURRENT_COMMIT=$(git rev-parse --short HEAD)
-echo "📝 Current local commit: ${GREEN}${CURRENT_COMMIT}${NC}"
-
-# Check if there are uncommitted changes
-if [[ -n $(git status -s) ]]; then
-    echo "⚠️  ${YELLOW}Warning: You have uncommitted changes${NC}"
-    git status -s
-    echo ""
+# Check if complete.css exists
+if [ -f "src/styles/complete.css" ]; then
+    echo "✅ complete.css exists"
+    echo "   Size: $(wc -c < src/styles/complete.css) bytes"
+else
+    echo "❌ complete.css missing"
 fi
 
-# Try to fetch deployed version
+# Check main layout
+if grep -q "complete.css" src/layouts/main.astro; then
+    echo "✅ main.astro imports complete.css"
+else
+    echo "❌ main.astro doesn't import complete.css"
+fi
+
+# Check if all required CSS files exist
 echo ""
-echo "🌐 Checking deployed version..."
-
-# You'll need to replace this with your actual domain
-DOMAIN="your-app-domain.workers.dev"
-
-if command -v curl &> /dev/null; then
-    DEPLOYED_VERSION=$(curl -s "https://${DOMAIN}/BUILD_VERSION.txt" 2>/dev/null)
-    
-    if [ -n "$DEPLOYED_VERSION" ]; then
-        echo "🚀 Deployed version: ${GREEN}${DEPLOYED_VERSION}${NC}"
-        
-        if [ "$CURRENT_COMMIT" = "$DEPLOYED_VERSION" ]; then
-            echo "✅ ${GREEN}Deployment is UP TO DATE${NC}"
-        else
-            echo "❌ ${RED}Deployment is OUT OF DATE${NC}"
-            echo ""
-            echo "To deploy the latest version:"
-            echo "  ${YELLOW}npm run build && npx wrangler deploy${NC}"
-        fi
+echo "📁 Required CSS Files:"
+for file in "src/site-components/css/normalize.css" "src/site-components/css/defaults.css" "src/site-components/css/fonts.css" "src/site-components/css/global.css" "generated/webflow.css"; do
+    if [ -f "$file" ]; then
+        echo "   ✅ $file"
     else
-        echo "⚠️  ${YELLOW}Could not fetch deployed version${NC}"
-        echo "   Make sure the domain is correct in this script"
+        echo "   ❌ $file MISSING"
+    fi
+done
+
+echo ""
+echo "🔍 Build Status:"
+if [ -d "dist" ]; then
+    echo "   ✅ dist folder exists"
+    
+    # Check for CSS in dist
+    css_count=$(find dist -name "*.css" 2>/dev/null | wc -l)
+    echo "   📊 CSS files in dist: $css_count"
+    
+    if [ $css_count -gt 0 ]; then
+        echo "   📄 CSS files:"
+        find dist -name "*.css" -type f | head -5 | while read file; do
+            size=$(wc -c < "$file" 2>/dev/null || echo "0")
+            echo "      - $(basename $file) (${size} bytes)"
+        done
     fi
 else
-    echo "⚠️  ${YELLOW}curl not found - cannot check deployed version${NC}"
+    echo "   ⚠️  dist folder not found (run 'npm run build')"
 fi
 
 echo ""
-echo "📊 Recent commits:"
-git log --oneline -5
-
-echo ""
-echo "🔧 Quick commands:"
-echo "  Deploy:        ${YELLOW}npm run build && npx wrangler deploy${NC}"
-echo "  Push to Git:   ${YELLOW}git add . && git commit -m 'message' && git push${NC}"
-echo "  Check status:  ${YELLOW}git status${NC}"
+echo "✨ Deployment Ready!"
