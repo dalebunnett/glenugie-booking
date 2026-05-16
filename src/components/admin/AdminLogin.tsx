@@ -18,8 +18,6 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     setError('');
     setLoading(true);
 
-    console.log('🔐 Submitting login form...');
-
     try {
       const success = await onLogin(password);
       
@@ -71,6 +69,8 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     </div>
   );
 }
+
+
 
 
 

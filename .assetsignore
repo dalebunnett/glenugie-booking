@@ -1,1 +1,2 @@
+# Only ignore the worker file, NOT CSS or other assets
 _worker.js

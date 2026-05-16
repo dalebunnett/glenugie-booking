@@ -1,0 +1,154 @@
+
+
+---
+import MainLayout from '../../layouts/main.astro';
+import { baseUrl } from '../../lib/base-url';
+---
+
+<MainLayout title="Fix Lapdog Land Slug - Admin">
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+      <h1 class="text-3xl font-bold mb-6">Fix Lapdog Land Slug</h1>
+      
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <h2 class="font-semibold text-blue-900 mb-2">What does this do?</h2>
+        <p class="text-blue-800 text-sm">
+          This will update all existing bookings that have the old slug <code class="bg-blue-100 px-1 rounded">lapdog-land</code> 
+          to the new correct slug <code class="bg-blue-100 px-1 rounded">lapdog-land-suite</code>.
+        </p>
+        <p class="text-blue-800 text-sm mt-2">
+          This is needed because the kennels page uses <code class="bg-blue-100 px-1 rounded">lapdog-land-suite</code> 
+          but old bookings were created with <code class="bg-blue-100 px-1 rounded">lapdog-land</code>.
+        </p>
+      </div>
+
+      <div class="flex gap-3">
+        <button 
+          id="checkButton"
+          class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Check Current State
+        </button>
+        
+        <button 
+          id="fixButton"
+          class="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+        >
+          Fix Lapdog Land Bookings
+        </button>
+      </div>
+
+      <div id="result" class="mt-6 hidden">
+        <div class="border rounded-lg p-4">
+          <h3 class="font-semibold mb-2">Result:</h3>
+          <pre id="resultContent" class="bg-gray-50 p-4 rounded text-sm overflow-auto max-h-96"></pre>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t">
+        <a href={`${baseUrl}/admin`} class="text-primary hover:underline">
+          ← Back to Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script define:vars={{ baseUrl }}>
+    const fixButton = document.getElementById('fixButton');
+    const checkButton = document.getElementById('checkButton');
+    const resultDiv = document.getElementById('result');
+    const resultContent = document.getElementById('resultContent');
+
+    checkButton?.addEventListener('click', async () => {
+      checkButton.disabled = true;
+      checkButton.textContent = 'Checking...';
+      resultDiv?.classList.add('hidden');
+
+      try {
+        const response = await fetch(`${baseUrl}/api/debug/lapdog-bookings`, {
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+        
+        if (resultContent) {
+          resultContent.textContent = JSON.stringify(data, null, 2);
+        }
+        resultDiv?.classList.remove('hidden');
+
+        checkButton.textContent = '✓ Checked';
+        checkButton.classList.remove('bg-blue-600');
+        checkButton.classList.add('bg-green-600');
+      } catch (error) {
+        console.error('Error:', error);
+        if (resultContent) {
+          resultContent.textContent = 'Error: ' + error.message;
+        }
+        resultDiv?.classList.remove('hidden');
+        checkButton.textContent = '✗ Error';
+        checkButton.classList.remove('bg-blue-600');
+        checkButton.classList.add('bg-red-600');
+      } finally {
+        setTimeout(() => {
+          checkButton.disabled = false;
+        }, 2000);
+      }
+    });
+
+    fixButton?.addEventListener('click', async () => {
+      fixButton.disabled = true;
+      fixButton.textContent = 'Fixing...';
+      resultDiv?.classList.add('hidden');
+
+      try {
+        const response = await fetch(`${baseUrl}/api/admin/fix-lapdog-slug`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_session') || ''}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (resultContent) {
+          resultContent.textContent = JSON.stringify(data, null, 2);
+        }
+        resultDiv?.classList.remove('hidden');
+
+        if (data.success) {
+          fixButton.textContent = '✓ Fixed!';
+          fixButton.classList.remove('bg-primary');
+          fixButton.classList.add('bg-green-600');
+          
+          if (data.fixedCount > 0) {
+            alert(`Successfully fixed ${data.fixedCount} bookings! The Lapdog Land availability calendar should now show all bookings.`);
+          } else {
+            alert('No bookings needed fixing. All Lapdog Land bookings already have the correct slug.');
+          }
+        } else {
+          fixButton.textContent = '✗ Error';
+          fixButton.classList.remove('bg-primary');
+          fixButton.classList.add('bg-red-600');
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        if (resultContent) {
+          resultContent.textContent = 'Error: ' + error.message;
+        }
+        resultDiv?.classList.remove('hidden');
+        fixButton.textContent = '✗ Error';
+        fixButton.classList.remove('bg-primary');
+        fixButton.classList.add('bg-red-600');
+        alert('Error fixing bookings: ' + error.message);
+      } finally {
+        setTimeout(() => {
+          fixButton.disabled = false;
+        }, 2000);
+      }
+    });
+  </script>
+</MainLayout>
+
+

@@ -9,7 +9,7 @@ const SUITE_NAME_TO_SLUG: Record<string, string> = {
   'Woofdorf Suite': 'woofdorf-suite',
   'Barkingham Palace Suite': 'barkingham-palace-suite',
   'Nasherville Suite': 'nasherville-suite',
-  'Lapdog land Suite': 'lapdog-land-suite',
+  'Lapdog Land Suite': 'lapdog-land-suite',
   'Huntington Manor Suite': 'huntington-manor-suite',
   'Pawduree Suite': 'pawduree-suite',
   'Furrari Suite': 'furrari-suite',
@@ -35,7 +35,7 @@ const SUITE_NAME_TO_SLUG: Record<string, string> = {
   'Woofdorf': 'woofdorf-suite',
   'Barkingham Palace': 'barkingham-palace-suite',
   'Nasherville': 'nasherville-suite',
-  'Lapdog land': 'lapdog-land-suite',
+  'Lapdog Land': 'lapdog-land-suite',
   'Huntington Manor': 'huntington-manor-suite',
   'Pawduree': 'pawduree-suite',
   'Furrari': 'furrari-suite',
@@ -131,5 +131,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 };
+
 
 

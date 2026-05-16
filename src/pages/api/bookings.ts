@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { db, initDB } from '../../lib/db';
 import { sendBookingConfirmation } from '../../lib/email';
+import { formatAccommodationDisplay } from '../../lib/booking-types';
 import type { Booking } from '../../lib/booking-types';
 import { allocateKennelNumber } from '../../lib/kennel-allocation';
 
@@ -226,7 +227,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           price_data: {
             currency: 'gbp',
             product_data: {
-              name: `Glenugie Kennels - ${data.accommodationType} ${data.specificSuite ? `(${data.specificSuite})` : ''}`,
+              name: `Glenugie Kennels - ${formatAccommodationDisplay({ accommodationType: data.accommodationType, specificSuite: data.specificSuite } as any)}`,
               description: `${data.numberOfNights} nights for ${data.pets.map((p: any) => p.name).join(', ')}`
             },
             unit_amount: Math.round(data.totalPrice * 100) // Convert to pence
@@ -288,4 +289,6 @@ export const GET: APIRoute = async ({ locals }) => {
     });
   }
 };
+
+
 

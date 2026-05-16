@@ -1,7 +1,3 @@
-
-
-
-
 /**
  * Storage adapter for Cloudflare Workers
  * Uses Cloudflare KV for persistent storage
@@ -81,11 +77,7 @@ let storageInstance: Storage | null = null;
 export const getStorage = (kv?: KVNamespace): Storage => {
   if (!kv) {
     console.error('[Storage] ❌ KV namespace is required but not provided');
-    console.error('[Storage] This usually means:');
-    console.error('[Storage] 1. The runtime binding is not configured in wrangler.jsonc');
-    console.error('[Storage] 2. locals.runtime is not being passed correctly');
-    console.error('[Storage] 3. The booking_kv binding is missing from Cloudflare');
-    throw new Error('[Storage] KV namespace (booking_kv) is required but not provided. Check your Cloudflare Workers bindings.');
+    throw new Error('[Storage] KV namespace (BOOKINGS_KV) is required but not provided. Check your Cloudflare Workers bindings.');
   }
   
   // Create new instance for each request (stateless)
@@ -104,21 +96,21 @@ export const initializeStorage = (runtime: any): Storage => {
   
   if (!runtime || !runtime.env) {
     console.error('[Storage] ❌ Runtime or runtime.env is missing');
-    console.error('[Storage] Make sure you are calling initDB(locals.runtime) in your API route');
-    throw new Error('[Storage] Runtime environment is required. Pass locals.runtime to initDB()');
+    console.error('[Storage] This means Cloudflare runtime is not available');
+    console.error('[Storage] Enable platformProxy in astro.config.mjs for local dev');
+    throw new Error('[Storage] Cloudflare runtime not available. Enable platformProxy in astro.config.mjs or deploy to Cloudflare Workers.');
   }
   
-  const kv = runtime.env.booking_kv;
+  // Try both BOOKINGS_KV (from wrangler.jsonc) and booking_kv (legacy)
+  const kv = runtime.env.BOOKINGS_KV || runtime.env.booking_kv;
   
   if (!kv) {
-    console.error('[Storage] ❌ booking_kv not found in runtime.env');
+    console.error('[Storage] ❌ BOOKINGS_KV not found in runtime.env');
     console.error('[Storage] Available env keys:', Object.keys(runtime.env || {}));
-    console.error('[Storage] Please ensure the KV namespace is bound in wrangler.jsonc');
-    throw new Error('[Storage] KV namespace booking_kv is not configured. Please check your Cloudflare Workers bindings in wrangler.jsonc');
+    throw new Error('[Storage] KV namespace BOOKINGS_KV is not bound. Check wrangler.jsonc and Cloudflare dashboard.');
   }
   
-  console.log('[Storage] ✅ booking_kv binding found');
-  console.log('[Storage] ✅ Initialized KV storage successfully');
+  console.log('[Storage] ✅ BOOKINGS_KV binding found');
   return getStorage(kv);
 };
 
@@ -135,7 +127,3 @@ export const deleteAllBookings = async (locals: any): Promise<number> => {
   
   return count;
 };
-
-
-
-

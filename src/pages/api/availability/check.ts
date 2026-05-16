@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getStorage } from '../../../lib/storage';
+import { initDB } from '../../../lib/db';
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
@@ -10,6 +10,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const specificSuite = url.searchParams.get('specificSuite');
     const excludeBookingId = url.searchParams.get('excludeBookingId');
 
+    console.log('[Availability Check] Params:', { checkIn, checkOut, accommodationType, specificSuite, excludeBookingId });
+
     if (!checkIn || !checkOut || !accommodationType) {
       return new Response(
         JSON.stringify({ error: 'Missing required parameters' }),
@@ -17,13 +19,17 @@ export const GET: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    const storage = getStorage(locals?.runtime?.env);
-    const allBookings = await storage.bookings.getAll();
+    const db = initDB(locals?.runtime);
+    console.log('[Availability Check] DB initialized');
+    
+    const allBookings = await db.bookings.getAll();
+    console.log('[Availability Check] Got bookings:', allBookings.length);
 
     // Filter active bookings (exclude cancelled and optionally the booking being edited)
     const activeBookings = allBookings.filter(
       (b) => b.status !== 'cancelled' && b.id !== excludeBookingId
     );
+    console.log('[Availability Check] Active bookings:', activeBookings.length);
 
     // Check for conflicts
     const checkInDate = new Date(checkIn);
@@ -47,6 +53,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
       }
     });
 
+    console.log('[Availability Check] Conflicts found:', conflicts.length);
+
     if (conflicts.length > 0) {
       return new Response(
         JSON.stringify({
@@ -66,10 +74,15 @@ export const GET: APIRoute = async ({ request, locals }) => {
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Availability check error:', error);
+    console.error('[Availability Check] Error:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to check availability' }),
+      JSON.stringify({ 
+        error: 'Failed to check availability',
+        details: error instanceof Error ? error.message : String(error)
+      }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 };
+
+

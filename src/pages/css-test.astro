@@ -1,0 +1,78 @@
+---
+import MainLayout from '../layouts/main.astro';
+import { baseUrl } from '../lib/base-url';
+---
+
+<MainLayout title="CSS Test Page">
+  <main class="container mx-auto px-4 py-16">
+    <h1 class="text-4xl font-bold mb-8 text-primary">CSS Test Page</h1>
+    
+    <div class="bg-card p-6 rounded-lg shadow-lg mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Diagnostic Information</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <strong>Base URL:</strong> <code class="bg-muted px-2 py-1 rounded">{baseUrl}</code>
+        </div>
+        
+        <div>
+          <strong>Current URL:</strong> <code class="bg-muted px-2 py-1 rounded">{Astro.url.pathname}</code>
+        </div>
+        
+        <div>
+          <strong>Expected CSS Path:</strong> 
+          <code class="bg-muted px-2 py-1 rounded">{baseUrl}/assets/about.Dfq5XQQe.1778916719414.css</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-secondary p-6 rounded-lg mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Style Tests</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-primary text-primary-foreground p-4 rounded">
+          Primary Color Box
+        </div>
+        
+        <div class="bg-secondary text-secondary-foreground p-4 rounded">
+          Secondary Color Box
+        </div>
+        
+        <div class="bg-accent text-accent-foreground p-4 rounded">
+          Accent Color Box
+        </div>
+        
+        <div class="bg-muted text-muted-foreground p-4 rounded">
+          Muted Color Box
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-card p-6 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">Font Tests</h2>
+      
+      <p class="font-heading text-3xl mb-4" style="font-family: var(--heading-font);">
+        Heading Font (Great Vibes)
+      </p>
+      
+      <p class="font-body text-lg mb-4" style="font-family: var(--body-font);">
+        Body Font (Fira Sans) - This should be in Fira Sans
+      </p>
+      
+      <button class="font-button bg-primary text-primary-foreground px-4 py-2 rounded">
+        Button Font Test
+      </button>
+    </div>
+
+    <div class="mt-8 p-6 bg-yellow-100 border-l-4 border-yellow-500">
+      <h3 class="font-bold mb-2">Instructions:</h3>
+      <ol class="list-decimal list-inside space-y-2">
+        <li>Check if the colors are displaying correctly</li>
+        <li>Check if the fonts are loading (Great Vibes for headings, Fira Sans for body)</li>
+        <li>Open browser DevTools and check the Network tab for CSS file requests</li>
+        <li>Check the Console for any errors</li>
+        <li>View page source to see if CSS link tags are present in the HTML</li>
+      </ol>
+    </div>
+  </main>
+</MainLayout>

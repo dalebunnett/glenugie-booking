@@ -8,6 +8,8 @@ import { Button } from '../ui/button';
 import type { Booking } from '../../lib/booking-types';
 import { LUXURY_SUITES, CATTERY_SUITES } from '../../lib/booking-types';
 import { format, isSameDay, isWithinInterval, parseISO } from 'date-fns';
+import { baseUrl } from '../../lib/base-url';
+import { formatAccommodationDisplay } from '../../lib/booking-types';
 
 interface BookingsCalendarProps {
   bookings: Booking[];
@@ -67,7 +69,7 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
     if (!selectedDate) return [];
 
     const bookedAccommodations = todayBookings.reduce((acc, booking) => {
-      const key = booking.specificSuite || booking.accommodationType;
+      const key = formatAccommodationDisplay(booking);
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -191,7 +193,7 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
                   </div>
                   <div className="space-y-1 text-xs">
                     <p className="truncate">
-                      <strong>Suite:</strong> {booking.specificSuite || booking.accommodationType}
+                      <strong>Suite:</strong> {formatAccommodationDisplay(booking)}
                     </p>
                     <p>
                       <strong>Dates:</strong> {format(parseISO(booking.checkIn), 'MMM d')} - {format(parseISO(booking.checkOut), 'MMM d')}
@@ -313,6 +315,9 @@ export default function BookingsCalendar({ bookings, onSelectBooking }: Bookings
     </div>
   );
 }
+
+
+
 
 
 

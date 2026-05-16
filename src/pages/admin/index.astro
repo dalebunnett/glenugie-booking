@@ -1,26 +1,39 @@
 ---
 import MainLayout from '../../layouts/main.astro';
 import AdminLoginWrapper from '../../components/admin/AdminLoginWrapper';
-import { Toaster } from '../../components/ui/sonner';
+import { baseUrl } from '../../lib/base-url';
 
-// Prevent caching of admin page
-Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+// Prevent caching
+Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
 Astro.response.headers.set('Pragma', 'no-cache');
 Astro.response.headers.set('Expires', '0');
-
-// Force cache bust with version parameter
-const url = new URL(Astro.request.url);
-const currentVersion = '1778533910';
-const urlVersion = url.searchParams.get('v');
-
-if (urlVersion !== currentVersion) {
-  return Astro.redirect(`/app/admin?v=${currentVersion}`);
-}
 ---
 
-<MainLayout pageClass="">
-  <main class="min-h-screen">
-    <AdminLoginWrapper client:only="react" />
-    <Toaster client:only="react" />
+<MainLayout 
+  pageClass=""
+  title="Admin Dashboard - Glenugie Kennels"
+  description="Admin dashboard for managing bookings, rates, and availability"
+>
+  <main class="min-h-screen bg-background py-8">
+    <div class="container mx-auto px-4">
+      <div class="max-w-7xl mx-auto">
+        <div class="mb-8">
+          <h1 class="text-4xl font-bold mb-2" style="font-family: 'Great Vibes', cursive; color: #83C8E8;">
+            Admin Dashboard
+          </h1>
+          <p class="text-muted-foreground">
+            Manage bookings, rates, and availability for Glenugie Kennels
+          </p>
+        </div>
+        
+        <AdminLoginWrapper client:only="react" />
+      </div>
+    </div>
   </main>
 </MainLayout>
+
+<style>
+  main {
+    min-height: calc(100vh - 200px);
+  }
+</style>

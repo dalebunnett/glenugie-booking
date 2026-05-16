@@ -1,4 +1,6 @@
 
+
+
 {
   "name": "astro",
   "type": "module",
@@ -6,7 +8,7 @@
   "scripts": {
     "predev": "npx kill-port 3000 || true",
     "dev": "astro dev",
-    "build": "astro build && cp .assetsignore dist/.assetsignore",
+    "build": "astro build && cp .assetsignore dist/.assetsignore && cp -f dist/_worker.js/assets/*.css dist/glenugie-booking/assets/ 2>/dev/null || true && node fix-routes.js",
     "preview": "astro build && wrangler dev",
     "astro": "astro",
     "cf-typegen": "wrangler types"
@@ -76,4 +78,6 @@
     "wrangler": "4.26.1"
   }
 }
+
+
 

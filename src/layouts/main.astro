@@ -1,5 +1,8 @@
 
 
+
+
+
 ---
 import '../../generated/fonts.css';
 import '../site-components/global.css';
@@ -9,13 +12,13 @@ import Footer from '../components/Footer';
 import { baseUrl } from '../lib/base-url';
 
 const { 
-  pageClass = '',
-  title = 'Glenugie Kennels - Premium Pet Boarding in Peterhead, Aberdeenshire',
-  description = 'Luxury dog and cat boarding with themed suites, premium care, and spa services. Located in Peterhead, Aberdeenshire. Book your pet\'s dream holiday today!',
-  keywords = 'dog kennels Peterhead, cat boarding Aberdeenshire, luxury pet boarding, dog hotel Scotland, cattery Aberdeen, pet boarding near me, dog kennels near Aberdeen',
-  ogImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg',
-  canonical,
-  schema
+pageClass = '',
+title = 'Glenugie Kennels - Premium Pet Boarding in Peterhead, Aberdeenshire',
+description = 'Luxury dog and cat boarding with themed suites, premium care, and spa services. Located in Peterhead, Aberdeenshire. Book your pet\'s dream holiday today!',
+keywords = 'dog kennels Peterhead, cat boarding Aberdeenshire, luxury pet boarding, dog hotel Scotland, cattery Aberdeen, pet boarding near me, dog kennels near Aberdeen',
+ogImage = 'https://cdn.prod.website-files.com/69ea97152f20066bc07c2195/69f5d3c693d50ca27dfe5a52_PHOTO-2026-05-02-11-29-06.jpg',
+canonical,
+schema
 } = Astro.props;
 
 const siteUrl = 'https://glenugiekennels.co.uk';
@@ -23,101 +26,107 @@ const canonicalURL = canonical || `${siteUrl}${Astro.url.pathname}`;
 
 // Default LocalBusiness schema
 const defaultSchema = {
-  "@context": "https://schema.org",
-  "@type": "PetStore",
-  "name": "Glenugie Kennels",
-  "description": "Premium dog and cat boarding with luxury themed suites in Peterhead, Aberdeenshire",
-  "image": ogImage,
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Glenugie",
-    "addressLocality": "Peterhead",
-    "addressRegion": "Aberdeenshire",
-    "postalCode": "AB42 3EQ",
-    "addressCountry": "GB"
-  },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": "57.5089",
-    "longitude": "-1.7845"
-  },
-  "url": siteUrl,
-  "telephone": "+44-1779-841393",
-  "email": "info@glenugiekennels.co.uk",
-  "priceRange": "££",
-  "openingHours": "Mo-Su 14:00-17:00",
-  "areaServed": [
-    "Peterhead",
-    "Aberdeen",
-    "Fraserburgh",
-    "Ellon",
-    "Aberdeenshire",
-    "Scotland"
-  ],
-  "hasMap": "https://maps.google.com/?cid=8993054838066790595"
+"@context": "https://schema.org",
+"@type": "PetStore",
+"name": "Glenugie Kennels",
+"description": "Premium dog and cat boarding with luxury themed suites in Peterhead, Aberdeenshire",
+"image": ogImage,
+"address": {
+"@type": "PostalAddress",
+"streetAddress": "Glenugie",
+"addressLocality": "Peterhead",
+"addressRegion": "Aberdeenshire",
+"postalCode": "AB42 3EQ",
+"addressCountry": "GB"
+},
+"geo": {
+"@type": "GeoCoordinates",
+"latitude": "57.5089",
+"longitude": "-1.7845"
+},
+"url": siteUrl,
+"telephone": "+44-1779-841393",
+"email": "info@glenugiekennels.co.uk",
+"priceRange": "££",
+"openingHours": "Mo-Su 14:00-17:00",
+"areaServed": [
+"Peterhead",
+"Aberdeen",
+"Fraserburgh",
+"Ellon",
+"Aberdeenshire",
+"Scotland"
+],
+"hasMap": "https://maps.google.com/?cid=8993054838066790595"
 };
 
 const finalSchema = schema || defaultSchema;
 ---
 
 <html lang="en" class={pageClass}>
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="alternate icon" type="image/png" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
+<head>
+<meta charset="utf-8" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="alternate icon" type="image/png" href="/favicon.ico" />
+<meta name="viewport" content="width=device-width" />
+<meta name="generator" content={Astro.generator} />
 
-		<!-- Primary Meta Tags -->
-		<title>{title}</title>
-		<meta name="title" content={title} />
-		<meta name="description" content={description} />
-		<meta name="keywords" content={keywords} />
-		<link rel="canonical" href={canonicalURL} />
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+<meta name="keywords" content={keywords} />
+<link rel="canonical" href={canonicalURL} />
 
-		<!-- Open Graph / Facebook -->
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonicalURL} />
-		<meta property="og:title" content={title} />
-		<meta property="og:description" content={description} />
-		<meta property="og:image" content={ogImage} />
-		<meta property="og:site_name" content="Glenugie Kennels" />
-		<meta property="og:locale" content="en_GB" />
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:site_name" content="Glenugie Kennels" />
+<meta property="og:locale" content="en_GB" />
 
-		<!-- Twitter -->
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:url" content={canonicalURL} />
-		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={description} />
-		<meta name="twitter:image" content={ogImage} />
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
 
-		<!-- Additional SEO -->
-		<meta name="robots" content="index, follow" />
-		<meta name="googlebot" content="index, follow" />
-		<meta name="author" content="Glenugie Kennels" />
+<!-- Additional SEO -->
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+<meta name="author" content="Glenugie Kennels" />
 
-		<!-- Local Business Schema -->
-		<script type="application/ld+json" set:html={JSON.stringify(finalSchema)} />
-	</head>
-	<!-- Dark mode class injection point - will be replaced with `dark` class based on your site palette -->
-	<body class="__DARK_MODE_CLASS__ flex flex-col min-h-screen">
-		<Navigation client:load />
-		<slot />
-		<Footer client:load />
-	</body>
+<!-- Stylesheets -->
+<!-- Removed hardcoded link - Astro handles CSS injection automatically -->
+
+<!-- Local Business Schema -->
+<script type="application/ld+json" set:html={JSON.stringify(finalSchema)} />
+</head>
+<!-- Dark mode class injection point - will be replaced with `dark` class based on your site palette -->
+<body class="__DARK_MODE_CLASS__ flex flex-col min-h-screen">
+<Navigation client:load />
+<slot />
+<Footer client:load />
+</body>
 </html>
 
 <style is:global>
-  /* Page-specific overrides */
-  html.splash main { 
-    display: flex !important; 
-  }
-  
-  html.splash ol,
-  html.splash ul { 
-    padding-left: 0 !important; 
-    margin: 0 !important; 
-  }
+/* Page-specific overrides */
+html.splash main { 
+display: flex !important; 
+}
+
+html.splash ol,
+html.splash ul { 
+padding-left: 0 !important; 
+margin: 0 !important; 
+}
 </style>
+
+
+
 
 

@@ -1,5 +1,14 @@
+
+
+
+
 ---
-// Simple standalone admin page - no imports, no dependencies
+// Prevent caching
+Astro.response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
+
+import { baseUrl } from '../lib/base-url';
 ---
 
 <!DOCTYPE html>
@@ -21,7 +30,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -75,7 +84,7 @@
             transition: all 0.3s ease;
             color: white;
         }
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
@@ -105,8 +114,8 @@
             padding: 20px;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
-            max-height: 400px;
+            font-size: 13px;
+            max-height: 500px;
             overflow-y: auto;
             margin-top: 20px;
         }
@@ -123,6 +132,9 @@
         .log-info {
             color: #74c0fc;
         }
+        .log-warning {
+            color: #ffd43b;
+        }
         input[type="password"] {
             width: 100%;
             padding: 12px;
@@ -137,12 +149,26 @@
             background: #f8f9fa;
             border-radius: 8px;
         }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔧 Direct Admin Access</h1>
-        <p class="subtitle">Bypass cached JavaScript - Direct API access</p>
+        <p class="subtitle">Standalone admin panel - bypasses all cached code</p>
+
+        <div class="alert alert-warning">
+            ⚠️ <strong>Note:</strong> This is a direct API interface. Changes take effect immediately.
+        </div>
 
         <div class="auth-section" id="authSection">
             <h3>Admin Authentication</h3>
@@ -177,9 +203,8 @@
         </div>
     </div>
 
-    <script>
+    <script define:vars={{ baseUrl }}>
         let sessionToken = localStorage.getItem('admin_session') || '';
-        const baseUrl = '/app';
 
         function log(message, type = 'info') {
             const logDiv = document.getElementById('log');
@@ -197,7 +222,10 @@
         }
 
         function updateStatus(field, value) {
-            document.getElementById(field).textContent = value;
+            const element = document.getElementById(field);
+            if (element) {
+                element.textContent = value;
+            }
         }
 
         async function login() {
@@ -219,7 +247,8 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Login failed');
+                    const errorText = await response.text();
+                    throw new Error(`Login failed: ${errorText}`);
                 }
 
                 const data = await response.json();
@@ -252,7 +281,7 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
@@ -263,7 +292,8 @@
                 log(`✅ KV Storage contains ${count} bookings`, 'success');
                 
                 if (data.bookings && data.bookings.length > 0) {
-                    log(`First booking: ${data.bookings[0].customerName} - ${data.bookings[0].specificSuite || data.bookings[0].accommodationType}`, 'info');
+                    log(`Sample booking: ${data.bookings[0].customerName} - ${data.bookings[0].specificSuite || data.bookings[0].accommodationType}`, 'info');
+                    log(`Check-in: ${data.bookings[0].checkIn}, Check-out: ${data.bookings[0].checkOut}`, 'info');
                 }
             } catch (error) {
                 log(`❌ Failed to check KV: ${error.message}`, 'error');
@@ -272,7 +302,7 @@
         }
 
         async function loadFromGitHub() {
-            if (!confirm('Load all bookings from GitHub into KV storage?')) {
+            if (!confirm('This will load all bookings from GitHub data file into KV storage. Continue?')) {
                 return;
             }
 
@@ -296,6 +326,7 @@
 
                 const data = await response.json();
                 log(`✅ ${data.message}`, 'success');
+                log(`Loaded ${data.count || 0} bookings`, 'success');
                 updateStatus('lastAction', 'Loaded from GitHub');
                 
                 await checkKV();
@@ -306,14 +337,14 @@
         }
 
         async function deleteAll() {
-            const confirmation = prompt('Type DELETE to confirm deletion of ALL bookings:');
+            const confirmation = prompt('⚠️ This will DELETE ALL BOOKINGS from KV storage.\n\nType DELETE to confirm:');
             if (confirmation !== 'DELETE') {
-                log('Deletion cancelled', 'info');
+                log('Deletion cancelled', 'warning');
                 return;
             }
 
             try {
-                log('Deleting all bookings...', 'info');
+                log('Deleting all bookings...', 'warning');
                 updateStatus('lastAction', 'Deleting all...');
                 
                 const response = await fetch(`${baseUrl}/api/admin/bookings/delete-all`, {
@@ -331,6 +362,7 @@
 
                 const data = await response.json();
                 log(`✅ ${data.message}`, 'success');
+                log(`Deleted ${data.deletedCount || 0} bookings`, 'success');
                 updateStatus('lastAction', 'All deleted');
                 updateStatus('bookingCount', '0');
                 
@@ -341,13 +373,22 @@
             }
         }
 
+        // Auto-login if session exists
         if (sessionToken) {
-            log('Found existing session token', 'info');
+            log('Found existing session token, attempting auto-login...', 'info');
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'block';
             updateStatus('authStatus', 'Logged in (cached)');
             checkKV();
         }
+
+        // Log page load
+        log('Direct admin panel loaded', 'success');
+        log('Version: Standalone (no React dependencies)', 'info');
     </script>
 </body>
 </html>
+
+
+
+

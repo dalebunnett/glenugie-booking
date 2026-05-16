@@ -1,6 +1,9 @@
 
 
 
+
+
+
 export type PetType = 'dog' | 'cat';
 
 export type DogSize = 'small' | 'medium' | 'large';
@@ -94,12 +97,12 @@ export const LUXURY_SUITES: { value: string; label: string }[] = [
   { value: 'woofdorf', label: 'Woofdorf' },
   { value: 'barkingham-palace', label: 'Barkingham Palace' },
   { value: 'nasherville', label: 'Nasherville' },
-  { value: 'lapdog-land', label: 'Lapdog Land Suite' },
-  { value: 'huntington-manor', label: 'Huntington Manor Suite' },
+  { value: 'lapdog-land-suite', label: 'Lapdog Land Suite' },
+  { value: 'huntington-manor-suite', label: 'Huntington Manor Suite' },
   { value: 'pawduree', label: 'Pawduree' },
   { value: 'furrari', label: 'Furrari' },
   { value: 'tail-away', label: 'Tail Away' },
-  { value: 'fairy-dogmother', label: 'The Fairy Dogmother' },
+  { value: 'the-fairy-dogmother', label: 'The Fairy Dogmother' },
 ];
 
 export const CATTERY_SUITES: { value: string; label: string }[] = [
@@ -126,6 +129,40 @@ export const PRICING = {
   CAT_SHARING_EXTRA: 7.50,
   MAX_PETS: 3
 };
+
+/**
+ * Format accommodation display for a booking
+ * Returns the specific suite name if available, otherwise formats the accommodation type
+ */
+export function formatAccommodationDisplay(booking: Booking): string {
+  if (booking.specificSuite) {
+    // Find the suite label from LUXURY_SUITES or CATTERY_SUITES
+    const luxurySuite = LUXURY_SUITES.find(s => s.value === booking.specificSuite);
+    if (luxurySuite) return luxurySuite.label;
+    
+    const catterySuite = CATTERY_SUITES.find(s => s.value === booking.specificSuite);
+    if (catterySuite) return catterySuite.label;
+    
+    // Fallback: format the slug nicely
+    return booking.specificSuite.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  }
+  
+  // Format accommodation type
+  switch (booking.accommodationType) {
+    case 'luxury-suite':
+      return 'Luxury Dog Suite';
+    case 'cattery':
+      return 'Cattery Suite';
+    case 'ruffs-retreat':
+      return "Ruff's Retreat";
+    case 'village':
+      return 'The Village';
+    default:
+      return booking.accommodationType;
+  }
+}
 
 
 

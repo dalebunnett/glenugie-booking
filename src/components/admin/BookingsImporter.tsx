@@ -1,5 +1,6 @@
 
 
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -121,8 +122,8 @@ function mapAccommodationSlug(accommodation: string): string {
   if (name.includes('woofdorf')) return 'woofdorf';
   if (name.includes('barkingham')) return 'barkingham-palace';
   if (name.includes('nasherville')) return 'nasherville';
-  if (name.includes('lapdog')) return 'lapdog-land';
-  if (name.includes('huntington')) return 'huntington-manor';
+  if (name.includes('lapdog')) return 'lapdog-land-suite';
+  if (name.includes('huntington')) return 'huntington-manor-suite';
   if (name.includes('pawduree')) return 'pawduree';
   if (name.includes('furrari')) return 'furrari';
   if (name.includes('tail away')) return 'tail-away';
@@ -553,6 +554,7 @@ export default function BookingsImporter({ onImportComplete }: { onImportComplet
     </div>
   );
 }
+
 
 
 

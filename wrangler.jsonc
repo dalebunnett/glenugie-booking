@@ -72,11 +72,11 @@
 	 */
 	"routes": [
 		{
-			"pattern": "glenugiekennels.co.uk/app/*",
+			"pattern": "glenugiekennels.co.uk/glenugie-booking/*",
 			"zone_name": "glenugiekennels.co.uk"
 		},
 		{
-			"pattern": "www.glenugiekennels.co.uk/app/*",
+			"pattern": "www.glenugiekennels.co.uk/glenugie-booking/*",
 			"zone_name": "glenugiekennels.co.uk"
 		}
 	],

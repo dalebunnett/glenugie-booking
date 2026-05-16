@@ -3,6 +3,7 @@
 
 
 
+
 import {defineConfig} from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
@@ -50,7 +51,7 @@ function injectDevScript(options = {}) {
 
 // https://astro.build/config
 export default defineConfig({
-  base: '/app',
+  base: '/glenugie-booking',
   output: 'server',
   devToolbar: {
     enabled: false,
@@ -62,12 +63,9 @@ export default defineConfig({
   },
   adapter: cloudflare({
     platformProxy: {
-      enabled: false,
-    },
-    routes: {
-      extend: {
-        exclude: [{ pattern: '/_astro/*' }]
-      }
+      enabled: true,
+      configPath: 'wrangler.jsonc',
+      persist: true
     },
     mode: 'directory'
   }),
@@ -112,6 +110,9 @@ export default defineConfig({
     }
   },
 });
+
+
+
 
 
 

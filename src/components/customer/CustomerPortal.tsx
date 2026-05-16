@@ -5,6 +5,7 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { baseUrl } from '../../lib/base-url';
+import { formatAccommodationDisplay } from '../../lib/booking-types';
 import type { Booking } from '../../lib/booking-types';
 import EditProfileDialog from './EditProfileDialog';
 import EditBookingDialog from './EditBookingDialog';
@@ -164,16 +165,6 @@ export default function CustomerPortal() {
       month: 'short',
       year: 'numeric'
     });
-  };
-
-  const getAccommodationName = (type: string) => {
-    const names: Record<string, string> = {
-      'luxury-suite': 'Luxury Suite',
-      'cattery': 'Cattery Suite',
-      'ruffs-retreat': "Ruff's Retreat",
-      'village': 'The Village'
-    };
-    return names[type] || type;
   };
 
   if (loading && !session) {
@@ -358,7 +349,7 @@ export default function CustomerPortal() {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-xl">
-                          {getAccommodationName(booking.accommodationType)}
+                          {formatAccommodationDisplay(booking)}
                         </CardTitle>
                         <CardDescription>
                           Booking ID: {booking.id}
@@ -565,6 +556,8 @@ export default function CustomerPortal() {
     </div>
   );
 }
+
+
 
 
 

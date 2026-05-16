@@ -1,0 +1,154 @@
+---
+import { baseUrl } from '../../lib/base-url';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Debug</title>
+  <link rel="stylesheet" href="/glenugie-booking/assets/global.css">
+  <style>
+    body {
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .debug-box {
+      border: 2px solid #333;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background: #f5f5f5;
+    }
+    .success { border-color: green; background: #e8f5e9; }
+    .error { border-color: red; background: #ffebee; }
+    pre {
+      background: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Admin Debug Page</h1>
+  
+  <div class="debug-box success">
+    <h2>✅ Page Loaded</h2>
+    <p>This page is rendering correctly.</p>
+  </div>
+
+  <div class="debug-box">
+    <h2>📍 Environment Info</h2>
+    <pre id="envInfo">Loading...</pre>
+  </div>
+
+  <div class="debug-box">
+    <h2>🔐 Login Test</h2>
+    <form id="loginForm" style="margin: 10px 0;">
+      <input 
+        type="password" 
+        id="password" 
+        placeholder="Enter password (Peterhead2026!)" 
+        style="padding: 8px; width: 300px; margin-right: 10px;"
+      >
+      <button 
+        type="submit" 
+        style="padding: 8px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;"
+      >
+        Test Login
+      </button>
+    </form>
+    <div id="loginResult"></div>
+  </div>
+
+  <div class="debug-box">
+    <h2>🔗 Navigation</h2>
+    <ul>
+      <li><a href="/admin">← Back to Admin</a></li>
+      <li><a href="/glenugie-booking/admin">Admin (with base path)</a></li>
+      <li><a href="/admin-test">Simple Test Page</a></li>
+    </ul>
+  </div>
+
+  <div class="debug-box">
+    <h2>📦 React Component Test</h2>
+    <div id="reactTest">
+      <p>Testing if React can render...</p>
+      <div id="reactMount"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Display environment info
+    const envInfo = {
+      currentURL: window.location.href,
+      pathname: window.location.pathname,
+      baseUrl: '{baseUrl}',
+      localStorage: {
+        admin_session: localStorage.getItem('admin_session') ? 'Present (hidden)' : 'Not set'
+      }
+    };
+    document.getElementById('envInfo').textContent = JSON.stringify(envInfo, null, 2);
+
+    // Test login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const resultDiv = document.getElementById('loginResult');
+      
+      resultDiv.innerHTML = '<p style="color: blue;">⏳ Testing login...</p>';
+      
+      try {
+        const url = `{baseUrl}/api/admin/auth`;
+        console.log('Testing login at:', url);
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div style="color: green;">
+              <p>✅ Login successful!</p>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+              <p><a href="/admin">Go to Admin Dashboard</a></p>
+            </div>
+          `;
+          if (data.token) {
+            localStorage.setItem('admin_session', data.token);
+          }
+        } else {
+          resultDiv.innerHTML = `
+            <div style="color: red;">
+              <p>❌ Login failed (${response.status})</p>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div style="color: red;">
+            <p>❌ Error: ${error.message}</p>
+            <pre>${error.stack}</pre>
+          </div>
+        `;
+      }
+    });
+
+    // Test React rendering
+    try {
+      const reactDiv = document.getElementById('reactMount');
+      reactDiv.innerHTML = '<p style="color: green;">✅ JavaScript is working</p>';
+    } catch (error) {
+      console.error('React test error:', error);
+    }
+  </script>
+</body>
+</html>

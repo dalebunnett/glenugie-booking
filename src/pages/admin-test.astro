@@ -1,0 +1,108 @@
+---
+// Simple test page to check if admin login loads
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .test-box {
+      border: 2px solid #333;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+    .success { border-color: green; background: #e8f5e9; }
+    .error { border-color: red; background: #ffebee; }
+  </style>
+</head>
+<body>
+  <h1>Admin Page Test</h1>
+  
+  <div class="test-box success">
+    <h2>✅ Page Loads</h2>
+    <p>If you can see this, the admin page route is working.</p>
+  </div>
+
+  <div class="test-box">
+    <h2>🔐 Admin Login Test</h2>
+    <p>Password: <strong>Peterhead2026!</strong></p>
+    <form id="loginForm">
+      <input type="password" id="password" placeholder="Enter password" style="padding: 8px; width: 100%; margin: 10px 0;">
+      <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Login
+      </button>
+    </form>
+    <div id="result" style="margin-top: 10px;"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>📍 Current URL</h2>
+    <p id="currentUrl"></p>
+  </div>
+
+  <div class="test-box">
+    <h2>🔗 Links</h2>
+    <ul>
+      <li><a href="/admin">Go to /admin</a></li>
+      <li><a href="/glenugie-booking/admin">Go to /glenugie-booking/admin</a></li>
+    </ul>
+  </div>
+
+  <script>
+    // Display current URL
+    document.getElementById('currentUrl').textContent = window.location.href;
+
+    // Test login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const resultDiv = document.getElementById('result');
+      
+      resultDiv.innerHTML = '<p>⏳ Testing login...</p>';
+      
+      try {
+        // Try both possible base URLs
+        const urls = [
+          '/api/admin/auth',
+          '/glenugie-booking/api/admin/auth'
+        ];
+        
+        for (const url of urls) {
+          resultDiv.innerHTML += `<p>Trying: ${url}</p>`;
+          
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ password })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            resultDiv.innerHTML += `<p style="color: green;">✅ Success with ${url}!</p>`;
+            resultDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            return;
+          } else {
+            resultDiv.innerHTML += `<p style="color: orange;">⚠️ Failed with ${url}: ${response.status}</p>`;
+          }
+        }
+        
+        resultDiv.innerHTML += '<p style="color: red;">❌ All login attempts failed</p>';
+      } catch (error) {
+        resultDiv.innerHTML += `<p style="color: red;">❌ Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

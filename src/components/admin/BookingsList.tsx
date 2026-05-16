@@ -12,6 +12,7 @@ import { Textarea } from '../ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import type { Booking } from '../../lib/booking-types';
 import { baseUrl } from '../../lib/base-url';
+import { formatAccommodationDisplay } from '../../lib/booking-types';
 import { adminDelete, adminPut } from '../../lib/admin-fetch';
 
 interface BookingsListProps {
@@ -25,6 +26,7 @@ const ITEMS_PER_PAGE = 20;
 export default function BookingsList({ bookings, onRefresh, selectedBookingId }: BookingsListProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('all');
+  const [accommodationFilter, setAccommodationFilter] = React.useState('all');
   const [sortBy, setSortBy] = React.useState<'date' | 'customer' | 'status'>('date');
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc');
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
@@ -35,6 +37,8 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const selectedRowRef = useRef<HTMLTableRowElement>(null);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
+  const [selectedBookingIds, setSelectedBookingIds] = useState<Set<string>>(new Set());
+  const [isDeletingSelected, setIsDeletingSelected] = useState(false);
 
   // Handle selectedBookingId from calendar
   useEffect(() => {
@@ -66,6 +70,15 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
       filtered = filtered.filter(b => b.status === statusFilter);
     }
     
+    if (accommodationFilter !== 'all') {
+      filtered = filtered.filter(b => {
+        if (accommodationFilter === 'luxury-suite') {
+          return b.accommodationType === 'luxury-suite' || b.specificSuite;
+        }
+        return b.accommodationType === accommodationFilter;
+      });
+    }
+    
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(b => 
@@ -77,7 +90,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
     }
     
     return filtered;
-  }, [bookings, statusFilter, searchTerm]);
+  }, [bookings, statusFilter, accommodationFilter, searchTerm]);
 
   // Pagination
   const totalPages = Math.ceil(filteredBookings.length / ITEMS_PER_PAGE);
@@ -91,7 +104,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
   // Reset to page 1 when filters change
   useMemo(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, accommodationFilter]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -99,6 +112,11 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
 
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleAccommodationChange = (value: string) => {
+    setAccommodationFilter(value);
     setCurrentPage(1);
   };
 
@@ -136,7 +154,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
       booking.emergencyContactName || '',
       booking.emergencyContactNumber || '',
       booking.pets.map(p => `${p.name} (${p.breed})`).join('; '),
-      booking.specificSuite || booking.accommodationType,
+      formatAccommodationDisplay(booking),
       (booking.kennelNumber && (booking.accommodationType === 'village' || booking.accommodationType === 'ruffs-retreat')) 
         ? `#${booking.kennelNumber}` 
         : '',
@@ -293,6 +311,65 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
     }
   };
 
+  const toggleSelectBooking = (bookingId: string) => {
+    const newSelected = new Set(selectedBookingIds);
+    if (newSelected.has(bookingId)) {
+      newSelected.delete(bookingId);
+    } else {
+      newSelected.add(bookingId);
+    }
+    setSelectedBookingIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedBookingIds.size === displayedBookings.length) {
+      setSelectedBookingIds(new Set());
+    } else {
+      setSelectedBookingIds(new Set(displayedBookings.map(b => b.id)));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedBookingIds.size === 0) return;
+    
+    console.log('[Frontend] Starting delete for selected bookings:', Array.from(selectedBookingIds));
+    setIsDeletingSelected(true);
+
+    try {
+      const deletePromises = Array.from(selectedBookingIds).map(async (bookingId) => {
+        const url = `${baseUrl}/api/admin/bookings/${bookingId}`;
+        const response = await fetch(url, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_session') || ''}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(`Failed to delete booking ${bookingId}: ${errorData.error}`);
+        }
+
+        return response.json();
+      });
+
+      await Promise.all(deletePromises);
+      console.log('[Frontend] All selected bookings deleted successfully');
+      
+      // Clear selection
+      setSelectedBookingIds(new Set());
+      
+      // Refresh bookings list
+      onRefresh();
+    } catch (error) {
+      console.error('[Frontend] Error deleting selected bookings:', error);
+      alert('Failed to delete some bookings: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsDeletingSelected(false);
+    }
+  };
+
   const getStatusBadge = (status: Booking['status']) => {
     const variants = {
       pending: 'secondary',
@@ -330,11 +407,24 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Bookings</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={accommodationFilter} onValueChange={handleAccommodationChange}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Accommodations</SelectItem>
+              <SelectItem value="luxury-suite">Luxury Dog Suites</SelectItem>
+              <SelectItem value="cattery">Cattery Suites</SelectItem>
+              <SelectItem value="ruffs-retreat">Ruff's Retreat</SelectItem>
+              <SelectItem value="village">The Village</SelectItem>
             </SelectContent>
           </Select>
           
@@ -347,6 +437,42 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
         </div>
         
         <div className="flex gap-2 w-full md:w-auto">
+          {selectedBookingIds.size > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="destructive" 
+                  className="flex-1 md:flex-none"
+                  disabled={isDeletingSelected}
+                >
+                  {isDeletingSelected ? 'Deleting...' : `Delete Selected (${selectedBookingIds.size})`}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Selected Bookings?</AlertDialogTitle>
+                  <AlertDialogDescription className="space-y-2">
+                    <p className="font-semibold text-destructive">
+                      This will permanently delete {selectedBookingIds.size} selected booking{selectedBookingIds.size > 1 ? 's' : ''}.
+                    </p>
+                    <p>
+                      This action cannot be undone.
+                    </p>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteSelected}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Yes, Delete {selectedBookingIds.size} Booking{selectedBookingIds.size > 1 ? 's' : ''}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          
           <Button onClick={exportToCSV} variant="outline" className="flex-1 md:flex-none">
             Export to CSV
           </Button>
@@ -395,6 +521,15 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <input
+                  type="checkbox"
+                  checked={displayedBookings.length > 0 && selectedBookingIds.size === displayedBookings.length}
+                  onChange={toggleSelectAll}
+                  className="w-4 h-4 cursor-pointer"
+                  aria-label="Select all bookings"
+                />
+              </TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Pet(s)</TableHead>
               <TableHead>Accommodation</TableHead>
@@ -410,7 +545,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
           <TableBody>
             {displayedBookings.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                   No bookings found
                 </TableCell>
               </TableRow>
@@ -422,6 +557,15 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
                   className={booking.id === selectedBookingId ? 'bg-primary/10 animate-pulse' : ''}
                 >
                   <TableCell>
+                    <input
+                      type="checkbox"
+                      checked={selectedBookingIds.has(booking.id)}
+                      onChange={() => toggleSelectBooking(booking.id)}
+                      className="w-4 h-4 cursor-pointer"
+                      aria-label={`Select booking for ${booking.customerName}`}
+                    />
+                  </TableCell>
+                  <TableCell>
                     <div>
                       <p className="font-medium">{booking.customerName}</p>
                       <p className="text-xs text-muted-foreground">{booking.customerEmail}</p>
@@ -431,7 +575,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
                     {booking.pets.map(p => p.name).join(', ')}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {booking.specificSuite || booking.accommodationType}
+                    {formatAccommodationDisplay(booking)}
                     {booking.kennelNumber && (booking.accommodationType === 'village' || booking.accommodationType === 'ruffs-retreat') && (
                       <span className="font-semibold"> #{booking.kennelNumber}</span>
                     )}
@@ -490,7 +634,7 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
                                       <p><strong>Check-in:</strong> {format(new Date(selectedBooking.checkIn), 'PPP')}</p>
                                       <p><strong>Check-out:</strong> {format(new Date(selectedBooking.checkOut), 'PPP')}</p>
                                       <p><strong>Nights:</strong> {selectedBooking.numberOfNights}</p>
-                                      <p><strong>Accommodation:</strong> {selectedBooking.specificSuite || selectedBooking.accommodationType}
+                                      <p><strong>Accommodation:</strong> {formatAccommodationDisplay(selectedBooking)}
                                         {selectedBooking.kennelNumber && (selectedBooking.accommodationType === 'village' || selectedBooking.accommodationType === 'ruffs-retreat') && (
                                           <span className="font-semibold"> #{selectedBooking.kennelNumber}</span>
                                         )}
@@ -861,41 +1005,3 @@ export default function BookingsList({ bookings, onRefresh, selectedBookingId }:
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

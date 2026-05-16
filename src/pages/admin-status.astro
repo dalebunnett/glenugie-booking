@@ -1,0 +1,222 @@
+---
+// Simple status page to check what's deployed
+const buildVersion = await Astro.glob('../../../public/BUILD_VERSION.txt').catch(() => null);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Status Check</title>
+  <style>
+    body {
+      font-family: 'Fira Sans', Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .status-box {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status-box h2 {
+      margin-top: 0;
+      color: #333;
+      font-size: 1.3em;
+    }
+    .success { border-left: 4px solid #4caf50; }
+    .warning { border-left: 4px solid #ff9800; }
+    .error { border-left: 4px solid #f44336; }
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .link-box {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .link-box a {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .link-box a:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Admin Status Check</h1>
+  
+  <div class="status-box success">
+    <h2>✅ Page Loaded Successfully</h2>
+    <p>This diagnostic page is working correctly.</p>
+  </div>
+
+  <div class="status-box">
+    <h2>📍 Current Environment</h2>
+    <pre id="envInfo">Loading...</pre>
+  </div>
+
+  <div class="status-box">
+    <h2>🔐 Admin Login Test</h2>
+    <p>Password: <strong>Peterhead2026!</strong></p>
+    <form id="loginForm" style="margin: 15px 0;">
+      <input 
+        type="password" 
+        id="password" 
+        placeholder="Enter admin password" 
+        style="padding: 10px; width: 300px; border: 1px solid #ddd; border-radius: 4px;"
+      >
+      <button type="submit">Test Login</button>
+    </form>
+    <div id="loginResult"></div>
+  </div>
+
+  <div class="status-box">
+    <h2>🧪 Component Check</h2>
+    <button onclick="testReactComponent()">Test React Component Loading</button>
+    <div id="componentResult" style="margin-top: 10px;"></div>
+  </div>
+
+  <div class="status-box">
+    <h2>🔗 Admin Pages</h2>
+    <div class="link-box">
+      <a href="/glenugie-booking/admin">Main Admin Page</a>
+      <a href="/glenugie-booking/admin/debug">Debug Page</a>
+      <a href="/glenugie-booking/admin-test">Simple Test</a>
+    </div>
+  </div>
+
+  <script>
+    // Display environment info
+    const envInfo = {
+      url: window.location.href,
+      pathname: window.location.pathname,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent.substring(0, 100) + '...',
+      localStorage: {
+        admin_session: localStorage.getItem('admin_session') ? '✓ Present' : '✗ Not set'
+      }
+    };
+    document.getElementById('envInfo').textContent = JSON.stringify(envInfo, null, 2);
+
+    // Test login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const resultDiv = document.getElementById('loginResult');
+      
+      resultDiv.innerHTML = '<p style="color: #007bff;">⏳ Testing authentication...</p>';
+      
+      try {
+        const url = '/glenugie-booking/api/admin/auth';
+        console.log('Testing login at:', url);
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `
+            <div style="color: #4caf50; padding: 10px; background: #e8f5e9; border-radius: 4px; margin-top: 10px;">
+              <p><strong>✅ Login Successful!</strong></p>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+              <p style="margin-top: 10px;">
+                <a href="/glenugie-booking/admin" style="color: #007bff; font-weight: bold;">
+                  → Go to Admin Dashboard
+                </a>
+              </p>
+            </div>
+          `;
+          if (data.token) {
+            localStorage.setItem('admin_session', data.token);
+            console.log('Token stored in localStorage');
+          }
+        } else {
+          resultDiv.innerHTML = `
+            <div style="color: #f44336; padding: 10px; background: #ffebee; border-radius: 4px; margin-top: 10px;">
+              <p><strong>❌ Login Failed (${response.status})</strong></p>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div style="color: #f44336; padding: 10px; background: #ffebee; border-radius: 4px; margin-top: 10px;">
+            <p><strong>❌ Error:</strong> ${error.message}</p>
+            <pre>${error.stack || 'No stack trace available'}</pre>
+          </div>
+        `;
+      }
+    });
+
+    // Test React component
+    window.testReactComponent = async () => {
+      const resultDiv = document.getElementById('componentResult');
+      resultDiv.innerHTML = '<p style="color: #007bff;">⏳ Checking React component...</p>';
+      
+      try {
+        // Check if the admin page loads
+        const response = await fetch('/glenugie-booking/admin');
+        const html = await response.text();
+        
+        const hasReactRoot = html.includes('AdminLoginWrapper');
+        const hasClientDirective = html.includes('client:only');
+        
+        let status = '';
+        if (hasReactRoot && hasClientDirective) {
+          status = '<p style="color: #4caf50;">✅ React component is configured correctly</p>';
+        } else {
+          status = '<p style="color: #ff9800;">⚠️ React component may not be configured properly</p>';
+        }
+        
+        resultDiv.innerHTML = `
+          <div style="padding: 10px; background: #f5f5f5; border-radius: 4px; margin-top: 10px;">
+            ${status}
+            <details style="margin-top: 10px;">
+              <summary style="cursor: pointer; color: #007bff;">View page source (first 1000 chars)</summary>
+              <pre style="margin-top: 10px; max-height: 300px; overflow: auto;">${html.substring(0, 1000).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+            </details>
+          </div>
+        `;
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div style="color: #f44336; padding: 10px; background: #ffebee; border-radius: 4px; margin-top: 10px;">
+            <p><strong>❌ Error:</strong> ${error.message}</p>
+          </div>
+        `;
+      }
+    };
+  </script>
+</body>
+</html>
